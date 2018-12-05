@@ -14,7 +14,7 @@ from itertools import combinations
 
 @dataclass
 class Claim:
-    id: int
+    id_: int
     x: int; y: int
     w: int; h: int
     overlap: bool
@@ -29,10 +29,10 @@ claims = []
 with open('input', 'r') as fp:
     for line in fp:
         parts = line.split()
-        id = int(parts[0][1:])
+        id_ = int(parts[0][1:])
         loc = (int(n) for n in parts[2][:-1].split(','))
         size = (int(n) for n in parts[-1].split('x'))
-        claims.append(Claim(id, *loc, *size, False))
+        claims.append(Claim(id_, *loc, *size, False))
 
 # Collision detection.
 for claim1, claim2 in combinations(claims, 2):
