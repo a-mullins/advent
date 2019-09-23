@@ -1,5 +1,2 @@
 # Advent of Code
-My Advent of Code solutions.
-
-No peeking!
-
+My personal Advent of Code solutions.
