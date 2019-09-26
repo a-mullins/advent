@@ -88,5 +88,9 @@ if __name__ == '__main__':
             graph[lbl] = Node(lbl, graph, op=parts[1],
                               lchild=parts[0], rchild=parts[2])
 
-    node = graph['a']
-    print(f'{node.label} -> {node.val()}')
+    graph['b'] = Node('b', graph, value=graph['a'].val())
+    for node in graph.values():
+        if node._op:
+            node._value = None
+
+    print(graph["a"].val())
