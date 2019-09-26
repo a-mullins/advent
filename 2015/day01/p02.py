@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 from sys import stdin
 
-
 floor = 0
 pos = 0
 while True:
@@ -13,6 +12,4 @@ while True:
         floor -= 1
         if floor <= -1:
             break
-    else:
-        break
 print(f'position {pos}\tfloor {floor}')
