@@ -1,5 +1,7 @@
-#!/usr/bin/env
+#!/usr/bin/env python3
 import operator as opr
+
+from sys import stdin
 
 
 class Node:
@@ -47,3 +49,24 @@ class Node:
                 self._value = self._op[1](self.lchild.val(), self.rchild.val())
 
         return self._value
+
+
+if __name__ == '__main__':
+    wires = {}
+    lines = stdin.readlines()
+
+    print(f'lines: {lines}')
+    for line in lines:
+        print(f'line: {line}')
+        lhs, rhs = line.split('->')
+        lbl = rhs.strip()
+        parts = lhs.split()
+        print(f'rhs: {rhs}, lhs: {lhs}')
+
+        if len(parts) == 1:
+            if lhs[0].isdecimal():  # eg 123 -> x
+                wires[lbl] = Node(lbl, value=123)
+            else:                   # eg x -> a
+                wires[lbl] = Node(lbl, lchild=wires[parts[0]])
+
+    print(wires)
