@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 from hashlib import md5
-from sys import stdin
 
-secret = stdin.readline().strip()
+secret = input()
 
 n = 0
 while True:
