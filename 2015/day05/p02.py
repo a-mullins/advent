@@ -9,9 +9,4 @@ def is_nice(string):
     return bool(rule1 and rule2)
 
 
-acc = 0
-for line in stdin.readlines():
-    if is_nice(line):
-        acc += 1
-
-print(acc)
+print(sum((1 for line in stdin.readlines() if is_nice(line))))
