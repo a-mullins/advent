@@ -9,10 +9,13 @@ def table_hapiness(order: list, relations: dict):
     acc = 0
     for i in range(len(order)):
         cur_rels = relations[order[i]]
-        if i == 0:                     # if first elem
+
+        # if first elem...
+        if i == 0:
             prev_rel_val = cur_rels[order[-1]]
             next_rel_val = cur_rels[order[i+1]]
-        elif i+1 == len(order):  # if last elem
+        # if last elem...
+        elif i+1 == len(order):
             prev_rel_val = cur_rels[order[i-1]]
             next_rel_val = cur_rels[order[0]]
         else:
@@ -35,9 +38,7 @@ def parse_relations(lines):
             happiness_mod = int(parts[3])
         else:
             happiness_mod = -1 * int(parts[3])
-
         relations.setdefault(cur, {})[target] = happiness_mod
-
     return relations
 
 
