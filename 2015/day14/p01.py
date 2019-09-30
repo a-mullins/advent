@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# It feels like there might be an analytical solution to this particular
+# problem, but I will use an iterative/simulationist approach.
 from sys import stdin
 
 
@@ -13,12 +15,8 @@ class Reindeer:
         self.dist = 0
         self.timer = 0
 
-    def __str__(self):
-        return f"{self.name}\n"\
-               f"\t{self.speed} km/s for {self.fly_t} sec, "\
-               f"then resting for {self.rest_t} sec.\n"\
-               f"\t{'FLYING' if self.is_flying else 'NOT FLYING'}\n"\
-               f"\tCovered {self.dist} km so far."
+    def __repr__(self):
+        return f"Reindeer({self.name}, ...)"
 
     def update(self):  # call once every second
         self.timer += 1
@@ -34,14 +32,14 @@ class Reindeer:
 
 
 if __name__ == '__main__':
-    deer = []
+    runners = []
     for line in stdin:
         parts = line.split()
-        deer.append(Reindeer(parts[0], int(parts[3]),
-                             int(parts[6]), int(parts[13])))
+        deer = Reindeer(parts[0], int(parts[3]), int(parts[6]), int(parts[13]))
+        runners.append(deer)
 
     for _ in range(2503):
-        for d in deer:
-            d.update()
+        for deer in runners:
+            deer.update()
 
-    print(max((d.dist for d in deer)))
+    print(max((d.dist for d in runners)))
