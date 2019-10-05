@@ -1,17 +1,23 @@
 #!/usr/bin/env python3
-"""Naive approach. Uses four GiB, still doesn't complete."""
+"""
+Uses a greedy approach that just tries a single 'branch' of
+replacement options, blindly following whichever replacement creates
+the shortest string.
+
+Occasionally throws exceptions when it follows a dead end and runs out
+of options.
+"""
 import re
 from sys import stdin
 
 
-def visit_node(molecules: list, replacements: list) -> list:
+def visit_node(molecule: str, replacements: list) -> list:
     results = set()
-    for molecule in molecules:
-        for target, replacement in replacements:
-            for m in re.finditer(target, molecule):
-                results.add(molecule[:m.start()] +
-                            replacement +
-                            molecule[m.end():])
+    for target, replacement in replacements:
+        for m in re.finditer(target, molecule):
+            results.add(molecule[:m.start()] +
+                        replacement +
+                        molecule[m.end():])
     return results
 
 
@@ -20,7 +26,7 @@ if __name__ == '__main__':
     for line in stdin:
         if '=>' in line:
             parts = line.split()
-            replacements.append((parts[0], parts[-1]))
+            replacements.append((parts[-1], parts[0]))
         elif line != '':
             medicine_molecule = line.strip()
 
@@ -30,11 +36,20 @@ if __name__ == '__main__':
         print(f'{target:3} => {repla}')
     print()
 
-    s = set()
-    s.add('e')
     num_steps = 0
-    while medicine_molecule not in s:
-        s = visit_node(s, replacements)
+    graph_tips = [medicine_molecule]
+    #print(graph_tips)
+    # TODO: a more robust algorithm that can backtrack and try different
+    #       branches when it runs out of options.
+    while 'e' not in graph_tips:
+        options = visit_node(graph_tips[0], replacements)
+        options = list(options)
+        options.sort(key=len)
+        try:
+            graph_tips.insert(0, options[0])
+        except IndexError as e:
+            print(f'!! options: {options}\n\n')
+            print(f'!! graph_tips: {graph_tips}\n\n')
+            raise e
         num_steps += 1
         print(num_steps)
-    # print(num_steps)
