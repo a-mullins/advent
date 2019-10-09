@@ -5,8 +5,12 @@ n = 29000000
 
 houses = array('L', (0 for _ in range(n+1)))
 for i in range(1, n+1):
-    for j in range(i, n+1, i):
-        houses[j] += i * 10
+    count = 0
+    j = i
+    while count <= 50 and j < n+1:
+        houses[j] += i * 11
+        count += 1
+        j += i
 
 for house, presents in enumerate(houses):
     if presents >= n:
