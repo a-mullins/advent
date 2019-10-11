@@ -1,6 +1,4 @@
-#!/usr/bin/env python
-import sys
-from functools import reduce
+#!/usr/bin/env python3
+from sys import stdin
 
-with open(sys.argv[1], 'r') as fp:
-    print(reduce(lambda x, y: x + int(y), fp, 0))
+print(sum(int(x) for x in stdin))
