@@ -1,7 +1,207 @@
 #!/usr/bin/env python3
 """Game objects for Advent of Code 2015, day 22."""
+from dataclasses import dataclass, field
+from typing import List
 
 
+# ---------------------------------------------------------------------
+# SPELLS & EFFECTS
+# ---------------------------------------------------------------------
+
+# --[ Base Classes ]---------------------------------------------------
+@dataclass
+class Spell:
+    """Spell base class.
+
+    Spell is a base class from which other more specific spells
+    should inherit.
+
+    The actual spell effect should be implemented in the on_cast()
+    hook method, whether that is damaging a target directly or adding
+    a helpful Effect to the caster.
+
+    Note that the Spell object is _NOT_ responsible for deducting mana
+    from its caster. That is handled by Creature.cast()
+
+    attributes:
+    name -- spell name.
+    cost --  how much mana this spell costs to cast.
+
+    """
+    name: str = 'NOP'
+    cost: int = 1
+
+    def on_cast(self, caster, target):
+        """Hook called when this spell is cast by a Creature."""
+        pass
+
+
+@dataclass
+class Effect:
+    """Effect base class. Represents ongoing effects
+
+    Other, more concrete Effects should inherit from this class.
+
+    The Effects in question could be buffs that last a certain number
+    of turns and then dissipate, or damage-over-time-spells that hurt
+    a target every turn.
+
+    An Effect modifies the game world through its hooks, which all
+    begin with 'on_'. See their docstrings for more information.
+
+    name: effect name
+    timer: how many turns are left before this effect is deleted
+    mag: the magnitude of the effect. damage done, hp healed, etc.
+
+    """
+    name: str = 'NOP'
+    timer: int = 1
+    mag: int = 0
+
+    def on_add(self, target):
+        """Hook called once when effect is added to a creature."""
+        pass
+
+    def on_process(self, target):
+        """Hook called every turn."""
+        pass
+
+    def on_del(self, target):
+        """Hook called once when effect's timer reaches 0 and it is
+        removed from a creature."""
+        pass
+
+
+# --[ Specific Spells ]------------------------------------------------
+@dataclass
+class MagicMissile(Spell):
+    """Magic Missile is damaging evocation spell.
+
+    It is a basic spell which instantly and unerringly harms its
+    target. The most common version costs 53 mana and does 4 damage.
+
+    Every good wizard should have a copy of Magic Missile in their
+    spellbook.
+
+    """
+    name: str = 'Magic Missile'
+    cost: int = 53
+    dmg: int = 4
+
+    def on_cast(self, caster, target):
+        target.hp -= self.dmg
+
+
+@dataclass
+class Drain(Spell):
+    """Drain damages your opponent while healing yourself.
+
+    Drain is typcially placed in the necromancy school, as it
+    unnaturally modifies its targets life-force.
+
+    The most common version does 2 damage and heals you for 2 hit
+    points.
+
+    """
+    name: str = 'Drain'
+    cost: int = 73
+    dmg: int = 2
+    healing: int = 2
+
+    def on_cast(self, caster, target):
+        self.subtract_mana(caster)
+        target.hp -= self.dmg
+        caster.hp += self.healing
+
+
+@dataclass
+class Shield(Spell):
+    """Shield increases the caster's armor for a number of turns.
+
+    Shield is from the abjuration school of magic, which focuses on
+    protection, warding, and alarms.
+
+    The most common version of Shield costs 113 mana, has a duration
+    of 6 turns, and increases dr by 7.
+
+    """
+    name: str = 'Shield'
+    cost: int = 113
+    dur: int = 6
+    mag: int = 7
+
+    @dataclass
+    class ShieldEffect(Effect):
+        name: str = 'Shield'
+
+        def on_add(self, target):
+            target.dr += self.mag
+
+        def on_del(self, target):
+            target.dr -= self.mag
+
+    def on_cast(self, caster, target):
+        target.add_effect(self.ShieldEffect(timer=self.timer, mag=self.mag))
+
+
+@dataclass
+class Poison(Spell):
+    """Poison slowly drains its target's hp over time.
+
+    Poison is usually placed in the Conjuration school of magic
+    as the caster creates a poison to inflict on their target, but
+    the exact classification is an occasional point of minor debate.
+
+    The common variant of poison costs 173 mana and lasts 6 turns, and
+    deals 3 damage to its target while active.
+
+    """
+    name: str = 'Poison'
+    cost: int = 173
+    dur: int = 6
+    mag: int = 3
+
+    @dataclass
+    class PoisonEffect(Effect):
+        name: str = 'Poison'
+
+        def on_process(self, target):
+            target.hp -= self.mag
+
+    def on_cast(self, caster, target):
+        target.add_effect(self.PoisonEffect(timer=self.dur, mag=self.mag))
+
+
+@dataclass
+class Recharge(Spell):
+    """Recharge increases its caster more mana over time.
+
+    Recharge hails from the abjuration school.
+
+    A typical example costs 229 mana, lasts 5 turns and gives its
+    target 101 new mana every turn while active.
+
+    """
+    name: str = 'Recharge'
+    cost: int = 239
+    dur: int = 5
+    mag: int = 101
+
+    @dataclass
+    class RechargeEffect(Effect):
+        name: str = 'Recharge'
+
+        def on_process(self, target):
+            target.mana += self.mag
+
+    def on_cast(self, caster, target):
+        target.add_effect(self.RechargeEffect(timer=self.timer, mag=self.mag))
+
+
+# ---------------------------------------------------------------------
+# CREATURE
+# ---------------------------------------------------------------------
+@dataclass
 class Creature:
     """Represents both Henry Case's player character (pc) and the boss.
 
@@ -15,43 +215,27 @@ class Creature:
     effects   -- list of ongoing effects that apply to this creature
 
     """
-    def __init__(self,
-                 name='MISSINGNO.', hp=50, dr=0, dmg=1,
-                 mana=0, spellbook=[], effects=[]):
-        self.name = name
-
-        self.hp = hp
-        self.dr = dr
-        self.dmg = dmg
-
-        self.mana = mana
-        self.spellbook = spellbook
-
-        self._effects = []
-
-    def __repr__(self):
-        return f'Creature(name=\'{self.name}\', '\
-               f'hp={self.hp}, dmg={self.hp}, '\
-               f'dr={self.dr}, mana={self.mana})'
-
-    def __str__(self):
-        return f'{self.name}\n'\
-               f'\t{self.hp} HP, {self.dr} DR,\n'\
-               f'\t{self.dmg} DMG, {self.mana} MANA'
+    name: str = 'MISSINGNO'
+    hp: int = 50
+    dr: int = 0
+    dmg: int = 1
+    mana: int = 0
+    spellbook: List[Spell] = field(default_factory=list)
+    effects: List[Effect] = field(default_factory=list)
 
     # --[ Effects ]----------------------------------------------------
     def add_effect(self, effect):
         effect.on_add(self)
-        self._effects.append(effect)
+        self.effects.append(effect)
 
     def del_effect(self, effect):
-        self._effects.remove(effect)
         effect.on_del(self)
+        self.effects.remove(effect)
 
     def process_ongoing_effects(self):
         expired = []
 
-        for eff in self._effects:
+        for eff in self.effects:
             eff.on_process(self)
             eff.timer -= 1
             if eff.timer <= 0:
@@ -73,141 +257,12 @@ class Creature:
 
 
 # ---------------------------------------------------------------------
-# SPELLS & EFFECTS
+# HELPFUL CONSTS
 # ---------------------------------------------------------------------
-
-# --[ Base Classes ]---------------------------------------------------
-class Spell:
-    def __init__(self, name='NOP', cost=1):
-        self.name = name
-        self.cost = cost
-
-    def __repr__(self):
-        return f"Spell(name='{self.name}')"
-
-    def on_cast(self, caster, target):
-        pass
-
-
-class Effect:
-    def __init__(self, name='NOP', timer=1):
-        self.name = name
-        self.timer = timer
-
-    def __repr__(self):
-        return f"Effect(name='{self.name}'"
-
-    def on_add(self, target):
-        pass
-
-    def on_process(self, target):
-        pass
-
-    def on_del(self, target):
-        pass
-
-
-# --[ Specific Spells ]------------------------------------------------
-class MagicMissile(Spell):
-    """Magic Missile costs 53 mana. It instantly does 4 damage."""
-    def __init__(self, name='Magic Missile', cost=53, dmg=4):
-        self.dmg = dmg
-        super().__init__(name=name, cost=cost)
-
-    def on_cast(self, caster, target):
-        target.hp -= self.dmg
-
-
-class Drain(Spell):
-    """Drain damages your opponent while healing yourself.
-
-    Drain costs 73 mana.
-    It instantly does 2 damage and heals you for 2 hit points.
-
-    """
-    def __init__(self, name='Drain', cost=73, dmg=2, healing=2):
-        self.dmg = dmg
-        self.healing = healing
-        super().__init__(name=name, cost=cost)
-
-    def on_cast(self, caster, target):
-        self.subtract_mana(caster)
-        target.hp -= self.dmg
-        caster.hp += self.healing
-
-
-class Shield(Spell):
-    """Shield increases the caster's armor for a number of turns.
-
-    Shield costs 113 mana. It starts an effect that lasts for 6
-    turns. While it is active, your armor is increased by 7.
-
-    """
-    class ShieldEffect(Effect):
-        def __init__(self, name='Shield', timer=6, mag=7):
-            self.mag = mag
-            super().__init__(name=name, timer=timer)
-
-        def on_add(self, target):
-            target.dr += self.mag
-
-        def on_del(self, target):
-            target.dr -= self.mag
-
-    def __init__(self, name='Shield', cost=113, dur=6, mag=7):
-        self.timer = dur
-        self.mag = mag
-        super().__init__(name=name, cost=cost)
-
-    def on_cast(self, caster, target):
-        target.add_effect(self.ShieldEffect(timer=self.timer, mag=self.mag))
-
-
-class Poison(Spell):
-    """Poison slowly drains its target's hp over time.
-
-    Poison costs 173 mana. It starts an effect that lasts for 6
-    turns. At the start of each turn while it is active, it deals 3
-    damage to the boss.
-
-    """
-    class PoisonEffect(Effect):
-        def __init__(self, name='Poison', timer=6, mag=3):
-            self.mag = mag
-            super().__init__(name=name, timer=timer)
-
-        def on_process(self, target):
-            target.hp -= self.mag
-
-    def __init__(self, name='Poison', cost=173, dur=6, mag=3):
-        self.dur = dur
-        self.mag = mag
-        super().__init__(name=name, cost=cost)
-
-    def on_cast(self, caster, target):
-        target.add_effect(self.PoisonEffect(timer=self.dur, mag=self.mag))
-
-
-class Recharge(Spell):
-    """Recharge increases its caster more mana over time.
-
-    Recharge costs 229 mana. It starts an effect that lasts for 5
-    turns. At the start of each turn while it is active, it gives you
-    101 new mana.
-
-    """
-    class RechargeEffect(Effect):
-        def __init__(self, name='Recharge', timer=5, mag=101):
-            self.mag = mag
-            super().__init__(name=name, timer=timer)
-
-        def on_process(self, target):
-            target.mana += self.mag
-
-    def __init__(self, name='Recharge', cost=229, dur=5, mag=101):
-        self.timer = dur
-        self.mag = mag
-        super().__init__(name=name, cost=cost)
-
-    def on_cast(self, caster, target):
-        target.add_effect(self.RechargeEffect(timer=self.timer, mag=self.mag))
+common_spells = (
+    MagicMissile(),
+    Drain(),
+    Shield(),
+    Poison(),
+    Recharge()
+)
