@@ -149,8 +149,8 @@ class Poison(Spell):
     """Poison slowly drains its target's hp over time.
 
     Poison is usually placed in the Conjuration school of magic
-    as the caster creates a poison to inflict on their target, but
-    the exact classification is an occasional point of minor debate.
+    because the caster conjures a poison to inflict on their target,
+    but the exact classification is an occasional point of debate.
 
     The common variant of poison costs 173 mana and lasts 6 turns, and
     deals 3 damage to its target while active.
