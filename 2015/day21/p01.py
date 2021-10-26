@@ -48,8 +48,6 @@ if __name__ == '__main__':
 
     winning_costs = []
     losing_costs = []
-    wins = 0
-    losses = 0
     for loadout in product(weps, armor, rings, rings):
         if loadout[-1] is not loadout[-2]:
             pc = Creature(name='PC',
@@ -57,11 +55,10 @@ if __name__ == '__main__':
                           dmg=sum(item.dmg for item in loadout),
                           dr=sum(item.dr for item in loadout))
             if who_wins(pc, boss) is pc:
-                wins += 1
                 winning_costs.append(sum(item.cost for item in loadout))
             else:
-                losses += 1
                 losing_costs.append(sum(item.cost for item in loadout))
-    print(f"PC won {wins} times and lost {losses} times.\n"
-          f"Cheapest winning loadout cost {min(winning_costs)} gp.\n"
+    print(f"PC won {len(winning_costs)} times and "
+          f"lost {len(losing_costs)} times.\n"
+          f"Least expensive winning loadout cost {min(winning_costs)} gp.\n"
           f"Most expensive losing loadout cost {max(losing_costs)} gp.")
