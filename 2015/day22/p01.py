@@ -201,7 +201,8 @@ class Creature:
 
     def cast(self, spell, target):
         if type(spell) is str:
-            spell = next(x for x in self.spellbook if x.sname == spell)
+            spell = next(x for x in self.spellbook if
+                         x.sname == spell or x.name.lower() == spell)
         if self.mana < spell.cost:
             raise Exception(f'not enough mana to cast {spell.name}')
         self.mana -= spell.cost
