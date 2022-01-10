@@ -89,7 +89,7 @@ class Shield(Spell):
     def on_cast(self, caster, target, output=None):
         if output:
             print(f'{caster.name} casts {self.name}, '
-                  f'increasing armor by {self.mag}',
+                  f'increasing armor by {self.mag}.',
                   file=output)
         target.add_effect(
             self.ShieldEffect('Shield', timer=self.dur, mag=self.mag))
