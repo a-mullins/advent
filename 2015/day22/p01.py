@@ -6,6 +6,17 @@ import sys
 
 
 @dataclass
+class Spell:
+    name: str
+    cost: int
+    mag:  int = 0
+    dur:  int = 0
+
+    def on_cast(self, caster, target, output=None):
+        pass
+
+
+@dataclass
 class Effect:
     name:  str
     timer: int
@@ -22,14 +33,118 @@ class Effect:
 
 
 @dataclass
-class Spell:
-    name: str
-    cost: int
-    mag:  int = 0
-    dur:  int = 0
+class MagicMissile(Spell):
+    name: str = 'Magic Missile'
+    cost: int = 53
+    mag:  int = 4
 
     def on_cast(self, caster, target, output=None):
-        pass
+        if output:
+            print(f'{caster.name} casts {self.name}, dealing {self.mag} '
+                  f'damage!', file=output)
+        target.hp -= self.mag
+
+
+@dataclass
+class Drain(Spell):
+    name: str = 'Drain'
+    cost: int = 73
+    mag:  int = 2
+
+    def on_cast(self, caster, target, output=None):
+        if output:
+            print(f'{caster.name} casts {self.name}, dealing {self.mag} '
+                  f'damage, and healing {self.mag} hit points.',
+                  file=output)
+        target.hp -= self.mag
+        caster.hp += self.mag
+
+
+@dataclass
+class Shield(Spell):
+    name: str = 'Shield'
+    cost: int = 113
+    mag:  int = 7
+    dur:  int = 6
+
+    class ShieldEffect(Effect):
+        def on_add(self, target, output=None):
+            if output:
+                print(f'A magical shield springs up around {target.name}, '
+                      f'faintly glowing with golden light.', file=output)
+            target.armor += self.mag
+
+        def on_process(self, target, output=None):
+            if output:
+                print(f"{target.name}'s shield is still up; "
+                      f"its timer is now {self.timer}.",
+                      file=output)
+
+        def on_del(self, target, output=None):
+            if output:
+                print(f"{target.name}'s magical shield dissipates.",
+                      file=output)
+            target.armor -= self.mag
+
+    def on_cast(self, caster, target, output=None):
+        if output:
+            print(f'{caster.name} casts {self.name}, '
+                  f'increasing armor by {self.mag}',
+                  file=output)
+        target.add_effect(
+            self.ShieldEffect('Shield', timer=self.dur, mag=self.mag))
+
+
+@dataclass
+class Poison(Spell):
+    name: str = 'Poison'
+    cost: int = 173
+    mag:  int = 3
+    dur:  int = 6
+
+    class PoisonEffect(Effect):
+        def on_process(self, target, output=None):
+            if output:
+                print(f'{self.name} deals {self.mag} damage to {target.name}; '
+                      f'its timer is now {self.timer}.',
+                      file=output)
+            target.hp -= self.mag
+
+    def on_cast(self, caster, target, output=None):
+        if output:
+            print(f'{caster.name} casts {self.name}.', file=output)
+        target.add_effect(
+            self.PoisonEffect('Poison', timer=self.dur, mag=self.mag))
+
+
+@dataclass
+class Recharge(Spell):
+    name: str = 'Recharge'
+    cost: int = 229
+    mag:  int = 101
+    dur:  int = 5
+
+    class RechargeEffect(Effect):
+        def on_process(self, target, output=None):
+            if output:
+                print(f'{self.name} provides {self.mag} mana '
+                      f'to {target.name}; its timer is now {self.timer}.',
+                      file=output)
+            target.mana += self.mag
+
+    def on_cast(self, caster, target, output=None):
+        if output:
+            print(f'{caster.name} casts {self.name}.', file=output)
+        target.add_effect(
+            self.RechargeEffect('Recharge', timer=self.dur, mag=self.mag))
+
+
+all_spells = (MagicMissile, Drain, Shield, Poison, Recharge)
+
+
+#
+# END Effects & Spells -------------------------------------------------------
+#
 
 
 @dataclass
@@ -81,113 +196,6 @@ class Creature:
             raise Exception(f'not enough mana to cast {spell.name}')
         self.mana -= spell.cost
         spell.on_cast(caster=self, target=target, output=self._output)
-
-
-@dataclass
-class MagicMissile(Spell):
-    name: str = 'Magic Missile'
-    cost: int = 53
-    mag:  int = 4
-
-    def on_cast(self, caster, target, output=None):
-        if output:
-            print(f'{caster.name} casts {self.name}, dealing {self.mag} '
-                  f'damage!', file=output)
-        target.hp -= self.mag
-
-
-@dataclass
-class Drain(Spell):
-    name: str = 'Drain'
-    cost: int = 73
-    mag:  int = 2
-
-    def on_cast(self, caster, target, output=None):
-        if output:
-            print(f'{caster.name} casts {self.name}, dealing {self.mag} '
-                  f'damage, and healing {self.mag} hit points.',
-                  file=output)
-        target.hp -= self.mag
-        caster.hp += self.mag
-
-
-@dataclass
-class Poison(Spell):
-    name: str = 'Poison'
-    cost: int = 173
-    mag:  int = 3
-    dur:  int = 6
-
-    class PoisonEffect(Effect):
-        def on_process(self, target, output=None):
-            if output:
-                print(f'{self.name} deals {self.mag} damage to {target.name}; '
-                      f'its timer is now {self.timer}.',
-                      file=output)
-            target.hp -= self.mag
-
-    def on_cast(self, caster, target, output=None):
-        if output:
-            print(f'{caster.name} casts {self.name}.', file=output)
-        target.add_effect(
-            self.PoisonEffect('Poison', timer=self.dur, mag=self.mag))
-
-
-@dataclass
-class Recharge(Spell):
-    name: str = 'Recharge'
-    cost: int = 229
-    mag:  int = 101
-    dur:  int = 5
-
-    class RechargeEffect(Effect):
-        def on_process(self, target, output=None):
-            if output:
-                print(f'{self.name} provides {self.mag} mana '
-                      f'to {target.name}; its timer is now {self.timer}.',
-                      file=output)
-            target.mana += self.mag
-
-    def on_cast(self, caster, target, output=None):
-        if output:
-            print(f'{caster.name} casts {self.name}.', file=output)
-        target.add_effect(
-            self.RechargeEffect('Recharge', timer=self.dur, mag=self.mag))
-
-
-@dataclass
-class Shield(Spell):
-    name: str = 'Shield'
-    cost: int = 113
-    mag:  int = 7
-    dur:  int = 6
-
-    class ShieldEffect(Effect):
-        def on_add(self, target, output=None):
-            if output:
-                print(f'A magical shield springs up around {target.name}, '
-                      f'faintly glowing with golden light.', file=output)
-            target.armor += self.mag
-
-        def on_process(self, target, output=None):
-            if output:
-                print(f"{target.name}'s shield is still up; "
-                      f"its timer is now {self.timer}.",
-                      file=output)
-
-        def on_del(self, target, output=None):
-            if output:
-                print(f"{target.name}'s magical shield dissipates.",
-                      file=output)
-            target.armor -= self.mag
-
-    def on_cast(self, caster, target, output=None):
-        if output:
-            print(f'{caster.name} casts {self.name}, '
-                  f'increasing armor by {self.mag}',
-                  file=output)
-        target.add_effect(
-            self.ShieldEffect('Shield', timer=self.dur, mag=self.mag))
 
 
 def check_winner(c1: Creature, c2: Creature) -> str:
