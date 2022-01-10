@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from collections import namedtuple
 from dataclasses import dataclass, field
 from io import TextIOBase
 from typing import List, Optional
@@ -8,6 +9,7 @@ import sys
 @dataclass
 class Spell:
     name: str
+    sname: str
     cost: int
     mag:  int = 0
     dur:  int = 0
@@ -34,9 +36,10 @@ class Effect:
 
 @dataclass
 class MagicMissile(Spell):
-    name: str = 'Magic Missile'
-    cost: int = 53
-    mag:  int = 4
+    name:  str = 'Magic Missile'
+    sname: str = field(default='mm', repr=False)
+    cost:  int = 53
+    mag:   int = 4
 
     def on_cast(self, caster, target, output=None):
         if output:
@@ -47,9 +50,10 @@ class MagicMissile(Spell):
 
 @dataclass
 class Drain(Spell):
-    name: str = 'Drain'
-    cost: int = 73
-    mag:  int = 2
+    name:  str = 'Drain'
+    sname: str = field(default='drain', repr=False)
+    cost:  int = 73
+    mag:   int = 2
 
     def on_cast(self, caster, target, output=None):
         if output:
@@ -62,10 +66,11 @@ class Drain(Spell):
 
 @dataclass
 class Shield(Spell):
-    name: str = 'Shield'
-    cost: int = 113
-    mag:  int = 7
-    dur:  int = 6
+    name:  str = 'Shield'
+    sname: str = field(default='shield', repr=False)
+    cost:  int = 113
+    mag:   int = 7
+    dur:   int = 6
 
     class ShieldEffect(Effect):
         def on_add(self, target, output=None):
@@ -97,10 +102,11 @@ class Shield(Spell):
 
 @dataclass
 class Poison(Spell):
-    name: str = 'Poison'
-    cost: int = 173
-    mag:  int = 3
-    dur:  int = 6
+    name:  str = 'Poison'
+    sname: str = field(default='poison', repr=False)
+    cost:  int = 173
+    mag:   int = 3
+    dur:   int = 6
 
     class PoisonEffect(Effect):
         def on_process(self, target, output=None):
@@ -119,10 +125,11 @@ class Poison(Spell):
 
 @dataclass
 class Recharge(Spell):
-    name: str = 'Recharge'
-    cost: int = 229
-    mag:  int = 101
-    dur:  int = 5
+    name:  str = 'Recharge'
+    sname: str = field(default='recharge', repr=False)
+    cost:  int = 229
+    mag:   int = 101
+    dur:   int = 5
 
     class RechargeEffect(Effect):
         def on_process(self, target, output=None):
@@ -155,6 +162,7 @@ class Creature:
     dmg:        int = 1
     mana:       int = 500
     mana_spent: int = 0
+    spellbook:  List[Spell] = field(default_factory=list, repr=False)
     _effects:   List[Effect] = field(default_factory=list, repr=False)
     _output:    Optional[TextIOBase] = field(default=None, repr=False)
 
@@ -192,10 +200,21 @@ class Creature:
         target.hp -= damage
 
     def cast(self, spell, target):
+        if type(spell) is str:
+            spell = next(x for x in self.spellbook if x.sname == spell)
         if self.mana < spell.cost:
             raise Exception(f'not enough mana to cast {spell.name}')
         self.mana -= spell.cost
+        self.mana_spent += spell.cost
         spell.on_cast(caster=self, target=target, output=self._output)
+
+
+# what does a game state need?
+# current turn #
+# references to player and boss objects
+# no functions, so use a named tuple.
+# TODO: remove comment
+GameState = namedtuple('GameState', 'turn pc boss')
 
 
 def check_winner(c1: Creature, c2: Creature) -> str:
@@ -211,50 +230,49 @@ def check_winner(c1: Creature, c2: Creature) -> str:
 
 
 if __name__ == '__main__':
-    pc = Creature(name='Player', hp=10, mana=250, _output=sys.stdout)
+    pc = Creature(name='Player', hp=10, mana=250,
+                  spellbook=[spell() for spell in all_spells],
+                  _output=sys.stdout)
     boss = Creature(name='Boss', hp=14, dmg=8, _output=sys.stdout)
-    turn = 0
-    recharge = Recharge()
-    shield = Shield()
-    drain = Drain()
-    poison = Poison()
-    mm = MagicMissile()
+    gs = GameState(0, pc, boss)
+    pc, boss = None, None
 
-    while pc.hp > 0 and boss.hp > 0:
+    while gs.pc.hp > 0 and gs.boss.hp > 0:
         print('--' +
-              (' Boss ' if turn % 2 else ' Player ') +
+              (' Boss ' if gs.turn % 2 else ' Player ') +
               'turn --')
-        print(f'- Player has {pc.hp} hit points, '
-              f'{pc.armor} armor, '
-              f'{pc.mana} mana\n'
-              f'- Boss has {boss.hp} hit points')
+        print(f'- Player has {gs.pc.hp} hit points, '
+              f'{gs.pc.armor} armor, '
+              f'{gs.pc.mana} mana remaing,\n'
+              f'  and has spent {gs.pc.mana_spent} mana.\n'
+              f'- Boss has {gs.boss.hp} hit points')
 
-        pc.process_effects()
-        boss.process_effects()
+        gs.pc.process_effects()
+        gs.boss.process_effects()
 
-        winner = check_winner(pc, boss)
+        winner = check_winner(gs.pc, gs.boss)
         if winner:
             print(f'{winner} wins!')
             break
 
-        if turn % 2:
-            boss.attack(pc)
+        if gs.turn % 2:
+            gs.boss.attack(gs.pc)
         else:
-            if turn == 0:
-                pc.cast(recharge, pc)
-            elif turn == 2:
-                pc.cast(shield, pc)
-            elif turn == 4:
-                pc.cast(drain, boss)
-            elif turn == 6:
-                pc.cast(poison, boss)
+            if gs.turn == 0:
+                gs.pc.cast('recharge', gs.pc)
+            elif gs.turn == 2:
+                gs.pc.cast('shield', gs.pc)
+            elif gs.turn == 4:
+                gs.pc.cast('drain', gs.boss)
+            elif gs.turn == 6:
+                gs.pc.cast('poison', gs.boss)
             else:
-                pc.cast(mm, boss)
+                gs.pc.cast('mm', gs.boss)
 
-        winner = check_winner(pc, boss)
+        winner = check_winner(gs.pc, gs.boss)
         if winner:
             print(f'{winner} wins!')
             break
 
         print()
-        turn += 1
+        gs = GameState(gs.turn + 1, gs.pc, gs.boss)
