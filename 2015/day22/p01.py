@@ -3,7 +3,9 @@ from collections import namedtuple
 from dataclasses import dataclass, field
 from io import TextIOBase
 from typing import List, Optional
-import sys
+from copy import deepcopy
+# TODO: remove
+# import sys
 
 
 @dataclass
@@ -156,6 +158,7 @@ all_spells = (MagicMissile, Drain, Shield, Poison, Recharge)
 
 @dataclass
 class Creature:
+    # TODO: remove _output field, or find more elegant solution.
     name:       str = 'MISSINGNO.'
     hp:         int = 50
     armor:      int = 0
@@ -231,14 +234,16 @@ def check_winner(c1: Creature, c2: Creature) -> str:
 
 
 if __name__ == '__main__':
-    pc = Creature(name='Player', hp=10, mana=250,
-                  spellbook=[spell() for spell in all_spells],
-                  _output=sys.stdout)
-    boss = Creature(name='Boss', hp=14, dmg=8, _output=sys.stdout)
-    gs = GameState(0, pc, boss)
-    pc, boss = None, None
-
-    while gs.pc.hp > 0 and gs.boss.hp > 0:
+    # initial game state
+    to_visit = [GameState(
+        0,
+        Creature(name='Player', hp=10, mana=250,
+                 spellbook=[spell() for spell in all_spells]),
+        Creature(name='Boss', hp=14, dmg=8)
+    )]
+    while to_visit:
+        gs = to_visit.pop()
+        #  gs.pc.hp > 0 and gs.boss.hp > 0
         print('--' +
               (' Boss ' if gs.turn % 2 else ' Player ') +
               'turn --')
@@ -276,4 +281,4 @@ if __name__ == '__main__':
             break
 
         print()
-        gs = GameState(gs.turn + 1, gs.pc, gs.boss)
+        to_visit.insert(0, deepcopy(GameState(gs.turn + 1, gs.pc, gs.boss)))
