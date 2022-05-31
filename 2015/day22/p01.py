@@ -217,7 +217,8 @@ class Creature:
 # current turn #
 # references to player and boss objects
 # no functions, so use a named tuple.
-# TODO: remove comment
+# TODO: could used namedlist from PyPI. Can't use namedtuple because
+#       mutablility is useful.
 GameState = namedtuple('GameState', 'turn pc boss')
 
 
@@ -237,48 +238,46 @@ if __name__ == '__main__':
     # initial game state
     to_visit = [GameState(
         0,
-        Creature(name='Player', hp=10, mana=250,
+        Creature(name='Player', hp=50, mana=500,
                  spellbook=[spell() for spell in all_spells]),
-        Creature(name='Boss', hp=14, dmg=8)
+        Creature(name='Boss', hp=71, dmg=10)
+        # Creature(name='Player', hp=10, mana=250,
+        #          spellbook=[spell() for spell in all_spells]),
+        # Creature(name='Boss', hp=13, dmg=8)
     )]
-    while to_visit:
-        gs = to_visit.pop()
-        #  gs.pc.hp > 0 and gs.boss.hp > 0
-        print('--' +
-              (' Boss ' if gs.turn % 2 else ' Player ') +
-              'turn --')
-        print(f'- Player has {gs.pc.hp} hit points, '
-              f'{gs.pc.armor} armor, '
-              f'{gs.pc.mana} mana remaing,\n'
-              f'  and has spent {gs.pc.mana_spent} mana.\n'
-              f'- Boss has {gs.boss.hp} hit points')
 
+    while to_visit:
+        # print(len(to_visit))
+        gs = to_visit.pop()
         gs.pc.process_effects()
         gs.boss.process_effects()
 
         winner = check_winner(gs.pc, gs.boss)
         if winner:
-            print(f'{winner} wins!')
-            break
+            if winner == "Player":
+                print(f'w {gs.pc.mana_spent}')
 
         if gs.turn % 2:
             gs.boss.attack(gs.pc)
-        else:
-            if gs.turn == 0:
-                gs.pc.cast('recharge', gs.pc)
-            elif gs.turn == 2:
-                gs.pc.cast('shield', gs.pc)
-            elif gs.turn == 4:
-                gs.pc.cast('drain', gs.boss)
-            elif gs.turn == 6:
-                gs.pc.cast('poison', gs.boss)
+            winner = check_winner(gs.pc, gs.boss)
+            if winner:
+                if winner == "Player":
+                    print(f'w {gs.pc.mana_spent}')
             else:
-                gs.pc.cast('mm', gs.boss)
-
-        winner = check_winner(gs.pc, gs.boss)
-        if winner:
-            print(f'{winner} wins!')
-            break
-
-        print()
-        to_visit.insert(0, deepcopy(GameState(gs.turn + 1, gs.pc, gs.boss)))
+                to_visit.insert(0,
+                                GameState(gs.turn + 1, gs.pc, gs.boss))
+        else:
+            spells_available = [spell for spell in gs.pc.spellbook if
+                                spell.cost <= gs.pc.mana]
+            for spell in spells_available:
+                # note the pre-emptive turn increment.
+                next_gs = GameState(gs.turn + 1,
+                                    deepcopy(gs.pc), deepcopy(gs.boss))
+                if spell.sname in ['shield', 'recharge']:
+                    next_gs.pc.cast(spell, next_gs.pc)
+                else:
+                    next_gs.pc.cast(spell, next_gs.boss)
+                if check_winner(gs.pc, gs.boss) == "Player":
+                    print(f'w {gs.pc.mana_spent}')
+                else:
+                    to_visit.insert(0, next_gs)
