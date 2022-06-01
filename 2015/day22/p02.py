@@ -213,12 +213,8 @@ class Creature:
         spell.on_cast(caster=self, target=target, output=self._output)
 
 
-# what does a game state need?
-# current turn #
-# references to player and boss objects
-# no functions, so use a named tuple.
-# TODO: could used namedlist from PyPI. Can't use namedtuple because
-#       mutablility is useful.
+# TODO: could used namedlist from PyPI?
+#       namedtuple immutablility causes some inelegance.
 GameState = namedtuple('GameState', 'turn pc boss')
 
 
@@ -235,6 +231,14 @@ def check_winner(c1: Creature, c2: Creature) -> str:
 
 
 if __name__ == '__main__':
+    # searching for a solution involves exploring the problem space
+    # with a breadth-first search (BFS) as though it were a tree,
+    # generating and pruning nodes as we go. A tree per se is never
+    # built, but the list of leaf nodes to explore is tracked in the
+    # list `to_visit`.
+    #
+    # TODO: is there a better name for this kind of techinque?
+
     # initial game state
     to_visit = [GameState(
         0,
@@ -292,5 +296,4 @@ if __name__ == '__main__':
                     print(f'w {next_gs.pc.mana_spent}', flush=True)
                 elif next_gs.pc.mana_spent < cur_winning_mana:
                     to_visit.insert(0, next_gs)
-
     #  END WHILE
