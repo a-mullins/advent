@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from collections import namedtuple
+from sys import stdin
 
 if __name__ == '__main__':
     Instr = namedtuple('Instruction', 'opc opr1 opr2', defaults=(None, None))
@@ -7,9 +8,8 @@ if __name__ == '__main__':
     registers = {'a': 1, 'b': 0}
     text = []
 
-    with open('input', 'rt') as fp:
-        for line in fp:
-            text.append(Instr(*(part.strip(',') for part in line.split())))
+    for line in stdin:
+        text.append(Instr(*(part.strip(',') for part in line.split())))
 
     while pc < len(text):
         instr = text[pc]
