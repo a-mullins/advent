@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from collections import namedtuple
 from itertools import product
+from sys import stdin
 
 
 Creature = namedtuple('Creature', ['name', 'hp', 'dmg', 'dr'],
@@ -35,8 +36,7 @@ def parse_shop_inv(inv):
 
 
 if __name__ == '__main__':
-    with open('input', 'rt') as fp:
-        inp = [int(line.split()[-1]) for line in fp]
+    inp = [int(line.split()[-1]) for line in stdin]
     boss = Creature('Boss', *inp)
 
     with open('shop_inv', 'rt') as fp:
