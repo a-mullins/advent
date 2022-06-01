@@ -4,8 +4,8 @@ from dataclasses import dataclass, field
 from io import TextIOBase
 from typing import List, Optional
 from copy import deepcopy
-# TODO: remove
-# import sys
+from itertools import chain
+# TODO: Cleanup pass
 
 
 @dataclass
@@ -243,11 +243,11 @@ if __name__ == '__main__':
         Creature(name='Boss', hp=71, dmg=10)
         # Creature(name='Player', hp=10, mana=250,
         #          spellbook=[spell() for spell in all_spells]),
-        # Creature(name='Boss', hp=13, dmg=8)
+        # Creature(name='Boss', hp=14, dmg=8)
     )]
 
+    cur_winning_mana = 2**63 - 1
     while to_visit:
-        # print(len(to_visit))
         gs = to_visit.pop()
         gs.pc.process_effects()
         gs.boss.process_effects()
@@ -255,20 +255,26 @@ if __name__ == '__main__':
         winner = check_winner(gs.pc, gs.boss)
         if winner:
             if winner == "Player":
-                print(f'w {gs.pc.mana_spent}')
+                if gs.pc.mana_spent < cur_winning_mana:
+                    cur_winning_mana = gs.pc.mana_spent
+                print(f'w {gs.pc.mana_spent}', flush=True)
+            continue
 
         if gs.turn % 2:
             gs.boss.attack(gs.pc)
             winner = check_winner(gs.pc, gs.boss)
             if winner:
                 if winner == "Player":
-                    print(f'w {gs.pc.mana_spent}')
+                    if gs.pc.mana_spent < cur_winning_mana:
+                        cur_winning_mana = gs.pc.mana_spent
+                    print(f'w {gs.pc.mana_spent}', flush=True)
             else:
                 to_visit.insert(0,
                                 GameState(gs.turn + 1, gs.pc, gs.boss))
         else:
-            spells_available = [spell for spell in gs.pc.spellbook if
-                                spell.cost <= gs.pc.mana]
+            spells_available = [spell for spell in gs.pc.spellbook
+                                if spell.cost <= gs.pc.mana and
+                                   spell.name not in (x.name for x in chain(gs.pc._effects, gs.boss._effects))]  # noqa: E127, E501
             for spell in spells_available:
                 # note the pre-emptive turn increment.
                 next_gs = GameState(gs.turn + 1,
@@ -277,7 +283,12 @@ if __name__ == '__main__':
                     next_gs.pc.cast(spell, next_gs.pc)
                 else:
                     next_gs.pc.cast(spell, next_gs.boss)
-                if check_winner(gs.pc, gs.boss) == "Player":
-                    print(f'w {gs.pc.mana_spent}')
-                else:
+
+                if check_winner(next_gs.pc, next_gs.boss) == "Player":
+                    if next_gs.pc.mana_spent < cur_winning_mana:
+                        cur_winning_mana = next_gs.pc.mana_spent
+                    print(f'w {next_gs.pc.mana_spent}', flush=True)
+                elif next_gs.pc.mana_spent < cur_winning_mana:
                     to_visit.insert(0, next_gs)
+
+    #  END WHILE
