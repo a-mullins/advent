@@ -7,7 +7,6 @@ var input = fs.readFileSync(0, 'ascii').trim(); // 0 is stdin.
 var password = "";
 var index = 0;
 
-//while( password.length < 8 ) {
 while( password.length < 8 ) {
     let next = crypto.createHash('md5').update(input + String(index))
                      .digest('hex');
@@ -15,6 +14,5 @@ while( password.length < 8 ) {
         password += next[5];
         console.log(input+String(index), next, password);
     }
-    //console.log(input + String(index), next);
     index++;
 }
