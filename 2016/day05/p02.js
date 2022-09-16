@@ -8,7 +8,6 @@ var password = Array(8).fill(null);
 var num_found = 0;
 var index = 0;
 
-//while( password.length < 8 ) {
 while( num_found < 8 ) {
     let next = crypto.createHash('md5').update(input + String(index))
                      .digest('hex');
@@ -19,6 +18,5 @@ while( num_found < 8 ) {
                     password.map( c => c ? c : '_' ).join(''));
         num_found++;
     }
-    //console.log(input + String(index), next);
     index++;
 }
