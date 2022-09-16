@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+"use strict";
+
 var fs = require("fs");
 var input = fs.readFileSync(0, 'ascii'); // 0 is stdin.
 input = input.split(', ');
