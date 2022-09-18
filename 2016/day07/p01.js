@@ -35,15 +35,14 @@ function hasAbba(s) {
 
 
 let lines = fs.readFileSync(0, 'ascii').split('\n').filter(s => s.length > 0);
-//let lines = fs.readFileSync('/Users/alm/Code/advent/2016/day07/test', 'ascii').split('\n').filter(s => s.length > 0);
 let addys = lines.map( splitAddy );
 
 let count = 0;
 for( let addy of addys ) {
-    if( addy.hypernet.filter( hasAbba ).length > 0 ) {
+    if( addy.hypernet.some( hasAbba ) ) {
         continue;
     }
-    if( addy.normal.filter( hasAbba ).length > 0 ) {
+    if( addy.normal.some( hasAbba ) ) {
         count++;
     }
 }
