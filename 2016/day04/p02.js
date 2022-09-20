@@ -21,7 +21,7 @@ for( let line of input ) {
     let sector = Number(/\d+/.exec(line));
     let words = line.split('-');
     words.pop(); // don't need the last elem.
-    
+
     words = words.map( word => shiftStr(word, sector) ).join(' ');
     if( words.includes('north') )
         console.log(line, words, sector);
