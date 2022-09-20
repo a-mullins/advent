@@ -16,7 +16,7 @@ input.forEach( elem => {
     if( elem[0] == "R" ) { turnR(); }
 
     let dist = Number(elem.substr(1));
-    
+
     switch( facing ) {
     case 0:
         y += dist; break;
