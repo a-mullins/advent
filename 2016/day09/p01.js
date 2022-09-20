@@ -17,7 +17,7 @@ for(let i = 0; i < input.length; ) {
         i += Number(len);
     } else {
         output += input[i];
-        i++
+        i++;
     }
 }
 
