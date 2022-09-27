@@ -20,7 +20,7 @@ class Node {
 }
 exports.Node = Node;
 
-function bfs(root, predicate) {
+function bfs(root, predicate, postPredHook) {
     if(!(root instanceof Node)) { throw new TypeError('root is not a Node');}
     let q = [root];
     let explored = [root];
@@ -30,6 +30,7 @@ function bfs(root, predicate) {
         if( predicate(cur) ) {
             return cur;
         } else {
+            if(postPredHook) {postPredHook(cur);}
             for(let child of cur.edges) {
                 if(!explored.includes(child)) {
                     explored.unshift(child);
@@ -65,6 +66,6 @@ function dfs(root, predicate) {
 exports.dfs = dfs;
 
 // A test tree.
-// var n0 = new Node(0, [new Node(2), new Node(4)]);
-// n0.edges[0].edges.push(new Node(3), new Node(5));
-// n0.edges[1].edges.push(new Node(11), new Node(13));
+var n0 = new Node(0, [new Node(2), new Node(4)]);
+n0.edges[0].edges.push(new Node(3), new Node(5));
+n0.edges[1].edges.push(new Node(11), new Node(13));
