@@ -1,12 +1,11 @@
 #!/usr/bin/env node
 
 class Node {
-    constructor(data, edges) {
-        this.data = (data == undefined ? null : data);
-        this.edges = [];
-        if(edges) {
-            edges.forEach(edge => this.edges.push(edge));
-        }
+    constructor(data=null, edges=[], parent=null) {
+        this.data = data;
+        this.edges = edges;
+        this.parent = parent;
+        // `parent` not necessary for searching, only for depth counting.
     }
 
     toString() {
@@ -20,17 +19,18 @@ class Node {
 }
 exports.Node = Node;
 
-function bfs(root, predicate, postPredHook) {
-    if(!(root instanceof Node)) { throw new TypeError('root is not a Node');}
+function bfs(root, predicate, afterPredHook) {
+    if(!(root instanceof Node)) {
+        throw new TypeError('arg root is not a Node');
+    }
     let q = [root];
     let explored = [root];
     while(q.length > 0) {
         let cur = q.pop();
-//        console.log('visiting %d', cur.data);
         if( predicate(cur) ) {
             return cur;
         } else {
-            if(postPredHook) {postPredHook(cur);}
+            if(afterPredHook instanceof Function) {afterPredHook(cur);}
             for(let child of cur.edges) {
                 if(!explored.includes(child)) {
                     explored.unshift(child);
@@ -43,16 +43,18 @@ function bfs(root, predicate, postPredHook) {
 }
 exports.bfs = bfs;
 
-function dfs(root, predicate) {
-    if(!(root instanceof Node)) { throw new TypeError('root is not a Node');}
+function dfs(root, predicate, afterPredHook) {
+    if(!(root instanceof Node)) {
+        throw new TypeError('arg root is not a Node');
+    }
     let stack = [root];
     let explored = [];
     while(stack.length > 0) {
         let cur = stack.pop();
-//        console.log('visiting %d', cur.data);
         if(predicate(cur)) {
             return cur;
         } else {
+            if(afterPredHook instanceof Function) {afterPredHook(cur);}
             if(!explored.includes(cur)) {
                 explored.push(cur);
                 for(let edge of cur.edges) {
