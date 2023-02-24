@@ -3,11 +3,13 @@
 const fs = require("fs");
 
 
-const input  = fs.readFileSync(0, 'utf8').split('\n').filter(line => line != ''),
-      left   = [1, 4, 7],
+const left   = [1, 4, 7],
       right  = [3, 6, 9],
       top    = [1, 2, 3],
       bottom = [7, 8, 9];
+
+const input = fs.
+      readFileSync(0, 'utf8').split('\n').filter(line => line != '');
 
 let code = "",
     cur = 5;
