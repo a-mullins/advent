@@ -4,7 +4,7 @@ const fs = require("fs");
 
 
 let facing = 0; // 0 = N, 1 = E, 2 = S, 3 = W;
-function turnL() {if(--facing < 0) {facing = 3}} 
+function turnL() {if(--facing < 0) {facing = 3}}
 function turnR() {if(++facing > 3) {facing = 0}}
 
 let input = fs.readFileSync(0, 'ascii').split(', '), // 0 is stdin.
