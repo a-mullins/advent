@@ -9,7 +9,7 @@ const left   = [1, 4, 7],
       bottom = [7, 8, 9];
 
 const input = fs.
-      readFileSync(0, 'utf8').split('\n').filter(line => line != '');
+      readFileSync(0, 'ascii').split('\n').filter(line => line != '');
 
 let code = "",
     cur = 5;

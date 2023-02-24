@@ -1,28 +1,27 @@
 #!/usr/bin/env node
 "use strict";
+const fs = require("fs");
+
 
 function shiftStr(str, amount) {
     let output = ""
-    for( let i = 0; i < str.length; i++ ) {
-        let chr = (str.charCodeAt(i)-97+amount) % 26 + 97;
-        output += String.fromCharCode( chr );
+    for(let i = 0; i < str.length; i++) {
+        let c = (str.charCodeAt(i)-97+amount) % 26 + 97;
+        output += String.fromCharCode(c);
     }
-    return output
+    return output;
 }
 
-var fs = require("fs");
-var input = fs.readFileSync(0, 'ascii'); // 0 is stdin.
-input = input.split('\n').filter( line => line != '' );
 
-var sum = 0;
-
-for( let line of input ) {
-    let map = {};
-    let sector = Number(/\d+/.exec(line));
+const input = fs.readFileSync(0, 'ascii')
+      .split('\n').filter(line => line != '');
+for(const line of input) {
+    const sector = Number(/\d+/.exec(line));
     let words = line.split('-');
     words.pop(); // don't need the last elem.
 
-    words = words.map( word => shiftStr(word, sector) ).join(' ');
-    if( words.includes('north') )
+    words = words.map(word => shiftStr(word, sector)).join(' ');
+    if(words.includes('north')) {
         console.log(line, words, sector);
+    }
 }
