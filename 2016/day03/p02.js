@@ -1,23 +1,23 @@
 #!/usr/bin/env node
 "use strict";
+const fs = require("fs");
 
-var fs = require("fs");
-var input = fs.readFileSync(0, 'ascii'); // 0 is stdin.
-input = input.split('\n').filter(line => line != '').map(line => {
-        return [Number(line.slice( 2,  5)),
-                Number(line.slice( 7, 10)),
-                Number(line.slice(12, 15))];});
+const input = fs.readFileSync(0, 'ascii')
+      .split('\n').filter(line => line != '')
+      .map(line => [Number(line.slice( 2,  5)),
+                    Number(line.slice( 7, 10)),
+                    Number(line.slice(12, 15))]);
 
-var tris = [];
+let num_tris = 0;
 for(let row = 0; row < input.length; row += 3) {
     for(let col = 0; col < 3; col++) {
-        let sides = [input[row  ][col],
-                     input[row+1][col],
-                     input[row+2][col]].sort( (a, b) => a-b );
-        if( sides[0] + sides[1] > sides[2] ) {
-            tris.push(sides);
+        const sides = [input[row  ][col],
+                       input[row+1][col],
+                       input[row+2][col]].sort((a, b) => a-b);
+        if(sides[0] + sides[1] > sides[2]) {
+            num_tris++;
         }
     }
 }
 
-console.log(tris.length);
+console.log(num_tris);
