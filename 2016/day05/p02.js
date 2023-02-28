@@ -3,10 +3,11 @@
 const fs = require("fs");
 const crypto = require("crypto");
 
-const input = fs.readFileSync(0, 'ascii').trim(),
-      password = Array(8).fill(null);
-let num_found = 0,
-    index = 0;
+
+const input = fs.readFileSync(0, 'ascii').trim();
+const password = Array(8).fill(null);
+let num_found = 0;
+let index = 0;
 while(num_found < 8) {
     let next = crypto.createHash('md5').update(input + String(index))
         .digest('hex');

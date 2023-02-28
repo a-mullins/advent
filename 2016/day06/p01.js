@@ -12,7 +12,7 @@ let min_message = "";
 
 for(let row = 0; row < codes.length; row++) {
     for(let col = 0; col < counts.length; col++) {
-        let letter = codes[row][col];
+        const letter = codes[row][col];
         counts[col].set(letter, counts[col].get(letter)+1 || 1);
     }
 }
@@ -26,5 +26,5 @@ for(const col of counts) {
     min_message += [...col].find(elem => elem[1] == min_count)[0];
 }
 
-console.log("Max-count Message: %s\nMin-count Message: %s",
-            max_message, min_message);
+console.log(`Max-count Message: ${max_message}\n`
+            + `Min-count Message: ${min_message}`);

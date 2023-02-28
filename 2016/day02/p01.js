@@ -3,16 +3,16 @@
 const fs = require("fs");
 
 
-const left   = [1, 4, 7],
-      right  = [3, 6, 9],
-      top    = [1, 2, 3],
-      bottom = [7, 8, 9];
+const left   = [1, 4, 7];
+const right  = [3, 6, 9];
+const top    = [1, 2, 3];
+const bottom = [7, 8, 9];
 
 const input = fs.
       readFileSync(0, 'ascii').split('\n').filter(line => line != '');
 
-let code = "",
-    cur = 5;
+let code = "";
+let cur = 5;
 
 for(const line of input) {
     for(const c of line) {

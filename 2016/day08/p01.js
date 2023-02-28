@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 "use strict";
+const fs = require('fs');
 
 
 class Display {
@@ -41,25 +42,24 @@ class Display {
     }
 }
 
-const disp = new Display(50, 6);
-const fs = require('fs');
-const lines = fs.readFileSync(0, 'ascii').split('\n').filter( l => l != '');
 
-for(let line of lines) {
+const disp = new Display(50, 6);
+const lines = fs.readFileSync(0, 'ascii').split('\n').filter(l => l != '');
+
+for(const line of lines) {
     if(line.includes('rect')) {
-        let [w, h] = line.match(/(\d+)x(\d+)/).slice(1,3).map(Number);
+        const [w, h] = line.match(/(\d+)x(\d+)/).slice(1,3).map(Number);
         disp.rect(w, h);
     }
     if(line.includes('rotate col')) {
-        let [col, amt] = line.match(/x=(\d+) by (\d+)/).slice(1,3).map(Number);
+        const [col, amt] = line.match(/x=(\d+) by (\d+)/).slice(1,3).map(Number);
         disp.rot_col(col, amt);
     }
     if(line.includes('rotate row')) {
-        let [row, amt] = line.match(/y=(\d+) by (\d+)/).slice(1,3).map(Number);
+        const [row, amt] = line.match(/y=(\d+) by (\d+)/).slice(1,3).map(Number);
         disp.rot_row(row, amt);
     }
 }
-console.log(disp.toString());
 
-console.log(
-    disp.grid.flat().reduce( (sum, c) => sum + (c == '#' ? 1 : 0), 0));
+console.log(disp.toString());
+console.log(disp.grid.flat().reduce((sum, c) => sum + (c == '#' ? 1 : 0), 0));

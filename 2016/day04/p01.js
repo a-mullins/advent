@@ -6,10 +6,10 @@ const fs = require("fs");
 const input = fs.readFileSync(0, 'ascii').split('\n').filter(line => line != '');
 let sum = 0;
 for(let line of input) {
-    const map = {},
-          their_checksum = line.slice(line.indexOf('[')+1, line.indexOf(']')),
-          sector = Number(/\d+/.exec(line));
-    let checksum = "";    
+    const map = {};
+    const their_checksum = line.slice(line.indexOf('[')+1, line.indexOf(']'));
+    const sector = Number(/\d+/.exec(line));
+    let checksum = "";
     for(const c of line) {
         if(c === '[') { break; }
         if(/[a-z]/.test(c)) {

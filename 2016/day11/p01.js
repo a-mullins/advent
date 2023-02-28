@@ -31,7 +31,7 @@ class State {
         this.floors = floors;
         this.sort();
     }
-    
+
     isValid() {
         let valid = true;
         for(let floor of this.floors) {
@@ -192,10 +192,10 @@ var win = tree.bfs(n0,
                        states = states.filter(cur=>
                            !seenStates.some(other=>other.eq(cur)));
                        seenStates = seenStates.concat(states);
-                       
+
                        let edges = states.map(state =>
                            new tree.Node(state, [], node));
-                       
+
                        node.edges = edges;
                        if( !(++node_c % 500) )
                            console.log(node_c);

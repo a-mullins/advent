@@ -10,9 +10,9 @@ const keypad = ["       ",
                 "  ABC  ",
                 "   D   ",
                 "       "];
-let row = 3,
-    col = 1,
-    code = "";
+let row = 3;
+let col = 1;
+let code = "";
 
 const input = fs
       .readFileSync(0, 'ascii').split('\n').filter( line => line != '' );
