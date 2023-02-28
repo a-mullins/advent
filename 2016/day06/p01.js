@@ -22,8 +22,8 @@ for(const col of counts) {
           .reduce((prev, cur) => cur > prev ? cur : prev);
     const min_count = [...col.values()]
           .reduce((prev, cur) => cur < prev ? cur : prev);
-    max_message += [...col].find(elem => elem[1] == max_count)[0];
-    min_message += [...col].find(elem => elem[1] == min_count)[0];
+    max_message += [...col].find(elem => elem[1] === max_count)[0];
+    min_message += [...col].find(elem => elem[1] === min_count)[0];
 }
 
 console.log(`Max-count Message: ${max_message}\n`

@@ -7,14 +7,14 @@ function splitAddy(s) {
     const parts = {supernet: [], hypernet: []}
     let start = 0;
     for(let i = 0; i < s.length; i++) {
-        if(i+1 == s.length && s[i] != ']') {
+        if(i+1 === s.length && s[i] != ']') {
             parts.supernet.push(s.slice(start, i+1));
         }
-        if(s[i] == '[') {
+        if(s[i] === '[') {
             parts.supernet.push(s.slice(start, i));
             start = i+1;
         }
-        if(s[i] == ']') {
+        if(s[i] === ']') {
             parts.hypernet.push(s.slice(start, i));
             start = i+1;
         }
@@ -24,7 +24,7 @@ function splitAddy(s) {
 
 
 function isAbba(s) {
-    return s[0] != s[1] && s[0] == s[3] && s[1] == s[2];
+    return s[0] != s[1] && s[0] === s[3] && s[1] === s[2];
 }
 
 
@@ -50,7 +50,7 @@ function supportsSsl(addy) {
         let matches = Array.from(supernet.matchAll(aba_pattern), x => x[1]);
         for(let m of matches) {aba_matches.push(m);}
     }
-    if(aba_matches.length == 0) {return false;}
+    if(aba_matches.length === 0) {return false;}
 
     const bab_patterns = aba_matches.map(m => m[1] + m[0] + m[1]);
     let bab_matched = false;

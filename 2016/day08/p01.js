@@ -62,4 +62,4 @@ for(const line of lines) {
 }
 
 console.log(disp.toString());
-console.log(disp.grid.flat().reduce((sum, c) => sum + (c == '#' ? 1 : 0), 0));
+console.log(disp.grid.flat().reduce((sum, c) => sum + (c === '#' ? 1 : 0), 0));

@@ -7,7 +7,7 @@ const input = fs.readFileSync(0, 'ascii').trim();
 
 let count = 0;
 for(let i = 0; i < input.length; /* nop */) {
-    if(input[i] == '(') {
+    if(input[i] === '(') {
         let [m, len, rep] = /(\d+)x(\d+)/.exec(input.slice(i+1));
         i += m.length + 2;
 
