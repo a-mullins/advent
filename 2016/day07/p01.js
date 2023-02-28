@@ -72,4 +72,4 @@ for(const addy of addys) {
     if(supportsSsl(addy)) {ssl_count++;}
 }
 
-console.log("TLS Support: %s\nSSL Support: %s", tls_count, ssl_count);
+console.log(`TLS Support: ${tls_count}\nSSL Support: ${ssl_count}`);
