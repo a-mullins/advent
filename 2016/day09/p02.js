@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // TODO multiprocess/threading candidate?
 "use strict";
-const fs = require('fs');
+const fs = require("fs");
 
 
 function decomp_len(s) {
