@@ -6,7 +6,7 @@ const util = require("../util");
 
 
 class State {
-    static ords = {'first': 0, 'second': 1, 'third': 2, 'fourth': 3};
+    static ords = {"first": 0, "second": 1, "third": 2, "fourth": 3};
     static elements = {
          "hydrogen":   "Hy" // 1
         ,"lithium":    "Li" // 3
@@ -124,14 +124,14 @@ class State {
         let s = "";
         for(let i=3; i >= 0; i--) {
             s += `F${i+1} `;
-            s += (this.elevator_on == i) ? 'E ' : '  ';
+            s += (this.elevator_on == i) ? "E " : "  ";
             let item_count = 0;
             for(const item of [...this.floors[i]].sort()) {
-                s += item + ' ';
+                s += item + " ";
                 item_count++;
             }
-            for(let j=14-item_count; j > 0; j--) {s += '___ ';}
-            s += '\n';
+            for(let j=14-item_count; j > 0; j--) {s += "___ ";}
+            s += "\n";
         }
         return s;
     }
@@ -152,16 +152,16 @@ class State {
     parseLine(line) {
         const parts = line
               .toLowerCase()
-              .replaceAll('.','')
-              .replaceAll(',', '')
-              .replaceAll('-',' ')
-              .split(' ');
+              .replaceAll(".","")
+              .replaceAll(",", "")
+              .replaceAll("-"," ")
+              .split(" ");
         const floor = State.ords[parts[parts.indexOf("floor") - 1]];
         const chipNums = [];
         const generatorNums = [];
         for(let i=0; i<parts.length; i++) {
-            if(parts[i] === 'microchip') {chipNums.push(i-2);}
-            if(parts[i] === 'generator') {generatorNums.push(i-1);}
+            if(parts[i] === "microchip") {chipNums.push(i-2);}
+            if(parts[i] === "generator") {generatorNums.push(i-1);}
         }
 
         for(const i of chipNums) {
@@ -276,7 +276,7 @@ function search(root) {
 
 function main() {
     const root = new util.TreeNode(new State());
-    for(const line of fs.readFileSync(0, "ascii").trim().split('\n')) {
+    for(const line of fs.readFileSync(0, "ascii").trim().split("\n")) {
         root.data.parseLine(line);
     }
 
