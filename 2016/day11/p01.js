@@ -1,210 +1,302 @@
 #!/usr/bin/env node
 "use strict";
+const fs = require("fs");
+const crypto = require("node:crypto");
+const util = require("../util");
 
-
-// some notes:
-// + there are four floors
-// + a chip cannot be on the same floor as as an RTG, except for its
-//   own matching RTG.
-// + All of the RTGs & microchips should be delivered to the fourth floor.
-// + There is an elevator to move between floors. It can carry two
-//   chips or two RTGs in any combo. It will only move if there is at
-//   least one item in in.
-// + The elevator stops on every floor to recharge. It stays on the
-//   floor long enough for any vulnerable components to be irradiated.
-// + So this means that the only 'moves' a player can make is to move
-//   one or two items up or down a single floor.
-
-// A particular state of the game includes:
-// the content of each of the floors
-// which floor the elevator is on
-// ideally, losing states are disallowed.
-
-
-let fs = require("fs");
-//let tree = require("./tree");
-let tree = require("/home/alm/Code/advent/2016/day11/tree");
 
 class State {
-    constructor(floors=[[],[],[],[]], cur_floor=0) {
-        this.cur_floor = cur_floor;
-        this.floors = floors;
-        this.sort();
+    static ords = {'first': 0, 'second': 1, 'third': 2, 'fourth': 3};
+    static elements = {
+         "hydrogen":   "Hy" // 1
+        ,"lithium":    "Li" // 3
+        ,"cobalt":     "Co" // 27
+        ,"ruthenium":  "Ru" // 44
+        ,"promethium": "Pm" // 61
+        ,"thulium":    "Tm" // 69 (nice)
+        ,"polonium":   "Po" // 84
+        ,"elerium":    "El" // 115
+        ,"dilithium":  "Di" // 2 * 3 = 6
+    };
+    elevator_on = 0;
+    floors = [];
+
+    constructor() {
+        for(const floor of [0, 1, 2, 3]) {this.floors[floor] = new Set();}
+    }
+
+    // Return a deep copy of this State object.
+    copy() {
+        const new_state = new State();
+        new_state.elevator_on = this.elevator_on;
+        for(let floor = 0; floor < 4; floor++) {
+            for(const elem of this.floors[floor]) {
+                new_state.floors[floor].add(elem);
+            }
+        }
+
+        return new_state;
+    }
+
+    eq(other) {
+        // short circuit as much as possible...
+        if(this.elevator_on !== other.elevator_on) {return false;}
+
+        // for sets this & B: this==B ⟺ this⊆B && B⊆this
+        for(let floor=0; floor<4; floor++) {
+            let set0 = this.floors[floor];
+            let set1 = other.floors[floor];
+
+            // Could do something like: [...s0].every(x => s1.has(x)),
+            // but let's avoid the overhead of building arrays & lambdas.
+            for(const elem of set0) {
+                if(!set1.has(elem)) {return false;}
+            }
+            for(const elem of set1) {
+                if(!set0.has(elem)) {return false;}
+            }
+        }
+        return true;
     }
 
     isValid() {
         let valid = true;
-        for(let floor of this.floors) {
+        for(const floor of this.floors) {
             // losing games are when there is a chip on a floor with a
             // generator, unless its matching generator is present.
-            for(let chip of floor.filter(obj => obj.type === 'chip')) {
-                let generators = floor.filter(obj => obj.type === 'generator');
-                let same_generator = generators.some(gen =>
-                    gen.element === chip.element);
-                //                  ↓↓ material implication ↓↓
-                valid = valid && (!(generators.length>0) || same_generator);
+            //
+            // chip strings have the form HyM or LiM.
+            // generator strings have the form HyG or LiG.
+            const chips = [];
+            const gens = [];
+            for(const item of floor) {
+                if(item[2] === "M") {chips.push(item.slice(0,2));}
+                if(item[2] === "G") {gens.push(item.slice(0,2));}
+            }
+            for(const chip of chips) {
+                const same_generator = gens.includes(chip);
+                valid &&= (!(gens.length>0) || same_generator);
+                //              ↑↑ material implication ↑↑
             }
         }
         return valid;
     }
 
     isWinning() {
-        return !this.floors.slice(0,3).some(floor=>floor.length);
-    }
-
-    clone() {
-        return new State(Array.from(this.floors, floor => [...floor]),
-                         this.cur_floor);
-    }
-
-    moveItem(item, from_floor, to_floor) {
-        let index = this.floors[from_floor].findIndex(x =>
-            (x.element == item.element && x.type == item.type));
-        if(index >= 0) {
-            this.floors[from_floor].splice(index, 1);
-            this.floors[to_floor].push(item);
+        // A winning state is when there are no items are on floors 1-3.
+        let count = 0;
+        for(let i=0; i<3; i++) {
+            count += this.floors[i].size;
         }
-        this.sort();
+        return count === 0;
     }
 
-    eq(other) {
-        // Two states are equivalent if the elevator is on the same floor, my empty floors are their empty floors, and every item I have they do as well.
-        return JSON.stringify(this) == JSON.stringify(other);
+    // Doesn't update elevator_on.
+    #addItem(item, floor) {
+        this.floors[floor].add(item);
     }
 
-    sort() {
-        for(let floor of this.floors) {
-            floor.sort((a, b) =>
-                a.element.codePointAt(0) - b.element.codePointAt(0) -
-                a.type.codePointAt(0) - b.type.codePointAt(0));
+    // Doesn't update elevator_on.
+    #delItem(item, floor) {
+        this.floors[floor].delete(item);
+    }
+
+    // Move one or two items to another floor.
+    // Elevator must be used to do so, so elevator_on will be updated.
+    // Returns a reference to the instance it was called on.
+    moveItems(items, toFloor) {
+        for(const item of items) {
+            this.#delItem(item, this.elevator_on);
+            this.#addItem(item, toFloor);
+        }
+        this.elevator_on = toFloor;
+        return this;
+    }
+
+    // Returns an array of all items that can be reached from the elevator.
+    // Convenience function.
+    reachableItems() {
+        return [...this.floors[this.elevator_on]];
+    }
+
+    // Graphical representation of game state.
+    repr() {
+        let s = "";
+        for(let i=3; i >= 0; i--) {
+            s += `F${i+1} `;
+            s += (this.elevator_on == i) ? 'E ' : '  ';
+            let item_count = 0;
+            for(const item of [...this.floors[i]].sort()) {
+                s += item + ' ';
+                item_count++;
+            }
+            for(let j=14-item_count; j > 0; j--) {s += '___ ';}
+            s += '\n';
+        }
+        return s;
+    }
+
+    // md5 hash based on game state.
+    digest() {
+        return crypto
+            .createHash("md5")
+            .update(JSON.stringify(this, (key, val) =>
+                val instanceof Set ? [...val].sort() : val))
+            .digest("hex");
+    }
+
+    toString() {
+        return this.digest();
+    }
+
+    parseLine(line) {
+        const parts = line
+              .toLowerCase()
+              .replaceAll('.','')
+              .replaceAll(',', '')
+              .replaceAll('-',' ')
+              .split(' ');
+        const floor = State.ords[parts[parts.indexOf("floor") - 1]];
+        const chipNums = [];
+        const generatorNums = [];
+        for(let i=0; i<parts.length; i++) {
+            if(parts[i] === 'microchip') {chipNums.push(i-2);}
+            if(parts[i] === 'generator') {generatorNums.push(i-1);}
+        }
+
+        for(const i of chipNums) {
+            this.#addItem(State.elements[parts[i]]+"M", floor);
+        }
+        for(const i of generatorNums) {
+            this.#addItem(State.elements[parts[i]]+"G", floor);
         }
     }
 }
 
-function combinations(ary) {
-    let combos = ary.map(elem => [elem]);
-    for(let i = 0; i < ary.length; i++) {
-        for(let j = i+1; j < ary.length; j++) {
-            combos.push( [ary[i], ary[j]] );
+
+// Given an array, return all 1- and 2-combos of the elements of the array.
+// ex: [a, b, c] -> [[a], [b], [c], [ab], [ac], [bc]]
+function combinations(xs) {
+    const combos = xs.map(elem => [elem]);
+    for(let i = 0; i < xs.length; i++) {
+        for(let j = i+1; j < xs.length; j++) {
+            combos.push([xs[i], xs[j]]);
         }
     }
     return combos;
 }
 
-function makeNextStates(state) {
-    let cur_floor = state.cur_floor;
-    let combos = combinations(state.floors[cur_floor]);
 
-    let target_floors = undefined;
-    if(cur_floor == 0) { target_floors = [1]; }
-    if(cur_floor == 3) { target_floors = [2]; }
-    if(cur_floor == 1) {
-        // Don't bother going down if the lower floors are empty.
-        if(!state.floors[0].length) { target_floors = [2]; }
-        else { target_floors = [0, 2]; }
-    }
-    if(cur_floor == 2) {
-        // Don't bother going down if the lower floors are empty.
-        if(!(state.floors[0].length || state.floors[1].length)) {
-            target_floors = [3];
-        } else { target_floors = [1, 3]; }
-    }
+// Return a list of every valid next game state that can be reached from the one
+// provided.
+//
+// nextStates :: State, number -> [State]
+function nextStates(state) {
+    const nextStates = [];
 
-    let states = [];
-    for(let target of target_floors) {
-        let singles = [];
-        let doubles = [];
-        for(let items of combos) {
-            let next_state = state.clone();
-            next_state.cur_floor = target;
-            items.forEach(item => next_state.moveItem(item, cur_floor,
-                                                     target));
-            if(next_state.isValid()) {
-                if(items.length === 1) {
-                    singles.push(next_state)
-                } else {
-                    doubles.push(next_state)
-                }
-            }
-        }
-        // TODO
-        // if going up, and there is a way to take two items, don't bother
-        // with singles. if going down and there is a way to take only one
-        // item, down bother with doubles.
-        if(target > cur_floor) { // going up
-            if(doubles.length > 0) {
-                states = states.concat(doubles);
-            } else {
-                states = states.concat(singles);
-            }
-        }
-        if(target < cur_floor) { // going down
-            if(singles.length > 0) {
-                states = states.concat(singles);
-            } else {
-                states = states.concat(doubles);
-            }
+    // For every combination of reachable items, move that combination to the
+    // floor above and floor below, then filter out the invalid states.
+    for(const combo of combinations(state.reachableItems())) {
+        let otherFloors;
+        if(state.elevator_on === 0) { otherFloors = [1]; }
+        if(state.elevator_on === 1) { otherFloors = [0, 2]; }
+        if(state.elevator_on === 2) { otherFloors = [1, 3]; }
+        if(state.elevator_on === 3) { otherFloors = [2]; }
+        for(const floor of otherFloors) {
+            let next = state.copy();
+            next.moveItems(combo, floor);
+
+            if(next.isValid()) {nextStates.push(next);}
         }
     }
-    return states;
+    return nextStates;
+}
+
+function weight(state) {
+    // In the context of A*, determine the heuristic weighting, aka h(n).
+    // Higher h(n) means a longer distance to the goal and less desirable.
+    //
+    // This heurstic (2*num_floor_items[floor] - 3) sometimes underestimates the
+    // cost to the goal by a few moves. This is fine since we want an admissable
+    // heuristic for A*, and _underestimating_ is admissable. Overestimating is
+    // bad.  It might be possible to get to the heurstic to match the number of
+    // moves more closely by having it take into account which floor the
+    // elevator is on but this isn't necessary atm.
+    let weight = 0;
+    let num_floor_items = state.floors.map(fl => fl.size);
+    for(let floor = 0; floor<3; floor++) {
+        let one_up_moves; // How many moves to put all items on the next floor.
+
+        if(num_floor_items[floor] === 0) {continue;}
+        if(num_floor_items[floor] === 1) {one_up_moves = 2;}
+        else {one_up_moves = 2*num_floor_items[floor] - 3;}
+
+        weight += one_up_moves;
+        num_floor_items[floor+1] += num_floor_items[floor];
+    }
+    return weight;
 }
 
 
-var state0   = new State();
-var ordinals = [["first", 0], ["second", 1], ["third", 2], ["fourth", 3]];
+var explored_nodes;
+function search(root) {
+    explored_nodes = 0;
 
-//for(let line of fs.readFileSync("/home/alm/Code/advent/2016/day11/test", "ascii").trim().split('\n')) {
-for(let line of fs.readFileSync(0, "ascii").trim().split('\n')) {
-    let parts = line.split(' ');
-    //could also just keep an index...
-    let floor = ordinals.find(a => a[0] === parts[1])[1];
-    while(parts.length > 0) {
-        let elem = parts.pop();
-        if(elem.includes('microchip')) {
-            let chip = {element: parts.pop().split('-')[0], type: 'chip'};
-            state0.floors[floor].push(chip);
+    const explored = [];
+    const frontier = new util.Pqueue();
+    frontier.push(root, 0);
+
+    while(!frontier.empty()) {
+        explored_nodes++;
+        // if(!(explored_nodes % 8000)) {
+        //     console.log(`\texplored ${explored_nodes} nodes so far, `
+        //                 + `${frontier.length()} in the frontier.\n`);
+        // }
+        
+        const cur_node = frontier.pop();
+        explored.push(cur_node.data);
+
+        if(cur_node.data.isWinning()) {
+            return cur_node;
         }
-        if(elem.includes('generator')) {
-            let generator = {element: parts.pop(), type: 'generator'};
-            state0.floors[floor].push(generator);
+
+        for(const state of nextStates(cur_node.data)) {
+            if(explored.find(elem => elem.eq(state))) {
+                continue;
+            }
+
+            const child = new util.TreeNode(state);
+            cur_node.addChild(child);
+            frontier.push(child, weight(state)+child.depth());
         }
     }
-} // END input processing
-
-var test = new State();
-test.floors = [
-    [],
-    [],
-    [{element: 'hydrogen', type: 'chip'}],
-    [{element: 'hydrogen', type: 'generator'}],
-];
-test.cur_floor = 2;
-
-var n0 = new tree.Node(state0);
-var seenStates = [state0];
-// var n0 = new tree.Node(test);
-// var seenStates = [test];
-var node_c = 0;
-var win = tree.bfs(n0,
-                   node => node.data.isWinning(),
-                   node => {
-                       let states = makeNextStates(node.data);
-                       states = states.filter(cur=>
-                           !seenStates.some(other=>other.eq(cur)));
-                       seenStates = seenStates.concat(states);
-
-                       let edges = states.map(state =>
-                           new tree.Node(state, [], node));
-
-                       node.edges = edges;
-                       if( !(++node_c % 500) )
-                           console.log(node_c);
-                   });
-
-var moves = 0;
-var cur = win;
-while(cur) {
-    moves++;
-    cur = cur.parent;
+    return null;
 }
-console.log(moves - 1);
+
+
+function main() {
+    const root = new util.TreeNode(new State());
+    for(const line of fs.readFileSync(0, "ascii").trim().split('\n')) {
+        root.data.parseLine(line);
+    }
+
+    let node = search(root);
+
+    console.log(`Found a solution in ${node.depth()} moves. `
+                + `Explored ${explored_nodes} nodes.`);
+    // let moves_left = node.depth();
+    // let stack = [];
+    // while(node !== null) {
+    //     stack.unshift(node);
+    //     node = node.parent;
+    // }
+    // for(const node of stack) {
+    //     console.log(node.data.repr());
+    //     moves_left--;
+    // }
+}
+
+
+if(require.main === module) {
+    main();
+}
