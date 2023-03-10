@@ -42,7 +42,7 @@ class State {
         // short circuit as much as possible...
         if(this.elevator_on !== other.elevator_on) {return false;}
 
-        // for sets this & B: this==B ⟺ this⊆B && B⊆this
+        // for sets A & B: A==B ⟺ A⊆B && B⊆B
         for(let floor=0; floor<4; floor++) {
             let set0 = this.floors[floor];
             let set1 = other.floors[floor];
