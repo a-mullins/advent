@@ -65,16 +65,29 @@ class State {
         // 2. elevators are on the same floor
         // 3. have the same number of generators and chips on each floor
         if(this.elevator_on !== other.elevator_on) {return false;}
-        
+
+        // this method of counting iteratively is uglier than, say, converting
+        // the sets to arrays & using .filter().length, but it is significantly
+        // (~3 times) faster to avoid allocating arrays and making func calls.
         for(let floor = 0; floor < 4; floor++) {
-            const this_num_gens =
-                [...this.floors[floor]].filter(tok => tok[2] === "G").length;
-            const this_num_chips =
-                  [...this.floors[floor]].filter(tok => tok[2] === "M").length;
-            const other_num_gens =
-                [...other.floors[floor]].filter(tok => tok[2] === "G").length;
-            const other_num_chips =
-                  [...other.floors[floor]].filter(tok => tok[2] === "M").length;
+            let this_num_gens = 0;
+            let this_num_chips = 0;
+            let other_num_gens = 0;
+            let other_num_chips = 0;
+            for(const item of this.floors[floor]) {
+                if(item[2] === "G") {
+                    this_num_gens++;
+                } else if(item[2] === "M") {
+                    this_num_chips++;
+                }
+            }
+            for(const item of other.floors[floor]) {
+                if(item[2] === "G") {
+                    other_num_gens++;
+                } else if(item[2] === "M") {
+                    other_num_chips++;
+                }
+            }
             if((this_num_gens !== other_num_gens)
                || (this_num_chips !== other_num_chips)) {
                 return false;
@@ -107,7 +120,7 @@ class State {
     }
 
     isWinning() {
-        // A winning state is when there are no items are on floors 1-3.
+        // A winning state is when there are no items on floors 1-3.
         let count = 0;
         for(let i=0; i<3; i++) {
             count += this.floors[i].size;
@@ -115,12 +128,12 @@ class State {
         return count === 0;
     }
 
-    // Doesn't update elevator_on.
+    // Internal. Doesn't update elevator_on.
     #addItem(item, floor) {
         this.floors[floor].add(item);
     }
 
-    // Doesn't update elevator_on.
+    // Internal. Doesn't update elevator_on.
     #delItem(item, floor) {
         this.floors[floor].delete(item);
     }
@@ -181,17 +194,17 @@ class State {
               .replaceAll("-"," ")
               .split(" ");
         const floor = State.ords[parts[parts.indexOf("floor") - 1]];
-        const chipNums = [];
-        const generatorNums = [];
+        const chipIdxs = [];
+        const generatorIdxs = [];
         for(let i=0; i<parts.length; i++) {
-            if(parts[i] === "microchip") {chipNums.push(i-2);}
-            if(parts[i] === "generator") {generatorNums.push(i-1);}
+            if(parts[i] === "microchip") {chipIdxs.push(i-2);}
+            if(parts[i] === "generator") {generatorIdxs.push(i-1);}
         }
 
-        for(const i of chipNums) {
+        for(const i of chipIdxs) {
             this.#addItem(State.elements[parts[i]]+"M", floor);
         }
-        for(const i of generatorNums) {
+        for(const i of generatorIdxs) {
             this.#addItem(State.elements[parts[i]]+"G", floor);
         }
     }
@@ -211,6 +224,7 @@ function combinations(xs) {
 }
 
 
+// TODO: move into class State as a method.
 // Return a list of every valid next game state that can be reached from the one
 // provided.
 //
@@ -235,6 +249,7 @@ function nextStates(state) {
     }
     return nextStates;
 }
+
 
 function weight(state) {
     // In the context of A*, determine the heuristic weighting, aka h(n).
