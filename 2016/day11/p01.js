@@ -330,7 +330,6 @@ function main() {
     if(node) {
         console.log(`Found a solution in ${node.depth()} moves. `
                     + `Explored ${explored_nodes} nodes.`);
-        let moves_left = node.depth();
         let stack = [];
         while(node !== null) {
             stack.unshift(node);
@@ -338,7 +337,6 @@ function main() {
         }
         for(const node of stack) {
             console.log(node.data.repr());
-            moves_left--;
         }
     } else {
         console.log("No solution.");
