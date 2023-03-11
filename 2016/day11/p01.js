@@ -243,7 +243,7 @@ function weight(state) {
     // This heurstic (2*num_floor_items[floor] - 3) sometimes underestimates the
     // cost to the goal by a few moves. This is fine since we want an admissable
     // heuristic for A*, and _underestimating_ is admissable. Overestimating is
-    // bad.  It might be possible to get to the heurstic to match the number of
+    // bad. It might be possible to get to the heurstic to match the number of
     // moves more closely by having it take into account which floor the
     // elevator is on but this isn't necessary atm.
     let weight = 0;
@@ -262,6 +262,8 @@ function weight(state) {
 }
 
 
+// A*.
+// TODO: cleanup & move to util.js, utilize hooks, &c.
 var explored_nodes;
 var pruned;
 function search(root) {
@@ -289,7 +291,6 @@ function search(root) {
 
         for(const state of nextStates(cur_node.data)) {
             if(explored.find(elem => elem.equiv(state))) {
-                //console.log("found equiv state.");
                 pruned++;
                 continue;
             }
@@ -312,21 +313,21 @@ function main() {
     let node = search(root);
 
     if(node) {
-    console.log(`Found a solution in ${node.depth()} moves. `
-                + `Explored ${explored_nodes} nodes.`);
+        console.log(`Found a solution in ${node.depth()} moves. `
+                    + `Explored ${explored_nodes} nodes.`);
+        let moves_left = node.depth();
+        let stack = [];
+        while(node !== null) {
+            stack.unshift(node);
+            node = node.parent;
+        }
+        for(const node of stack) {
+            console.log(node.data.repr());
+            moves_left--;
+        }
     } else {
         console.log("No solution.");
     }
-    // let moves_left = node.depth();
-    // let stack = [];
-    // while(node !== null) {
-    //     stack.unshift(node);
-    //     node = node.parent;
-    // }
-    // for(const node of stack) {
-    //     console.log(node.data.repr());
-    //     moves_left--;
-    // }
 }
 
 
