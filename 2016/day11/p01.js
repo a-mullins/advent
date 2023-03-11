@@ -286,6 +286,8 @@ function search(root) {
     pruned = 0;
 
     const explored = [];
+    // TODO: instead of a priority queue, build a graph whos weights correspond
+    //       to A* f(n).
     const frontier = new util.Pqueue();
     frontier.push(root, 0);
 
