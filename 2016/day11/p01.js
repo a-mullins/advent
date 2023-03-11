@@ -296,7 +296,7 @@ function search(root) {
                         + `${pruned} pruned, `
                         + `${frontier.length()} in the frontier.`);
         }
-        
+
         const cur_node = frontier.pop();
         explored.push(cur_node.data);
 
