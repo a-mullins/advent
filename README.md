@@ -24,3 +24,12 @@ My personal Advent of Code solutions.
   the path with the lowest weight? I've already implemented dfs & graph nodes.
 
 - day11: critical than h(n) be admissable!
+
+- day13: multi-dimensional array footgun:
+  
+  `new Array(this.maxY).fill(new Array(this.maxX).fill("_"));`
+
+  will create an array where every row is a shallow refence to the same object.
+  This must be done instead:
+
+  `Array.from(Array(this.maxY), () => new Array(this.maxX));`
