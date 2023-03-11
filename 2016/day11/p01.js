@@ -59,6 +59,30 @@ class State {
         return true;
     }
 
+    equiv(other) {
+        // states are equivalent if they are
+        // 1. valid (we will skip this check)
+        // 2. elevators are on the same floor
+        // 3. have the same number of generators and chips on each floor
+        if(this.elevator_on !== other.elevator_on) {return false;}
+        
+        for(let floor = 0; floor < 4; floor++) {
+            const this_num_gens =
+                [...this.floors[floor]].filter(tok => tok[2] === "G").length;
+            const this_num_chips =
+                  [...this.floors[floor]].filter(tok => tok[2] === "M").length;
+            const other_num_gens =
+                [...other.floors[floor]].filter(tok => tok[2] === "G").length;
+            const other_num_chips =
+                  [...other.floors[floor]].filter(tok => tok[2] === "M").length;
+            if((this_num_gens !== other_num_gens)
+               || (this_num_chips !== other_num_chips)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     isValid() {
         let valid = true;
         for(const floor of this.floors) {
@@ -239,8 +263,10 @@ function weight(state) {
 
 
 var explored_nodes;
+var pruned;
 function search(root) {
     explored_nodes = 0;
+    pruned = 0;
 
     const explored = [];
     const frontier = new util.Pqueue();
@@ -248,10 +274,11 @@ function search(root) {
 
     while(!frontier.empty()) {
         explored_nodes++;
-        // if(!(explored_nodes % 8000)) {
-        //     console.log(`\texplored ${explored_nodes} nodes so far, `
-        //                 + `${frontier.length()} in the frontier.\n`);
-        // }
+        if(!(explored_nodes % 8000)) {
+            console.log(`\texplored ${explored_nodes} nodes so far, `
+                        + `${pruned} pruned, `
+                        + `${frontier.length()} in the frontier.`);
+        }
         
         const cur_node = frontier.pop();
         explored.push(cur_node.data);
@@ -261,7 +288,9 @@ function search(root) {
         }
 
         for(const state of nextStates(cur_node.data)) {
-            if(explored.find(elem => elem.eq(state))) {
+            if(explored.find(elem => elem.equiv(state))) {
+                //console.log("found equiv state.");
+                pruned++;
                 continue;
             }
 
@@ -282,8 +311,12 @@ function main() {
 
     let node = search(root);
 
+    if(node) {
     console.log(`Found a solution in ${node.depth()} moves. `
                 + `Explored ${explored_nodes} nodes.`);
+    } else {
+        console.log("No solution.");
+    }
     // let moves_left = node.depth();
     // let stack = [];
     // while(node !== null) {
