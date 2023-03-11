@@ -1,9 +1,15 @@
 #!/usr/bin/env node
 const fs = require("fs");
 
+
 if(process.argv.includes("-D")) {var DEBUG = true;}
 
 r = {"a": 0, "b": 0, "c": 0, "d": 0};
+if(process.argv[1].includes("p02")) {
+    if(DEBUG) {console.log("Called as p02");}
+    r["c"] = 1;
+}
+
 text = fs.readFileSync(0, "ascii")
     .split("\n")
     .map(line => line.split(" "));
@@ -27,7 +33,7 @@ for(let ip = 0; 0 <= ip && ip < text.length; /*nop*/) {
         } else {
             r[instr[2]] = r[instr[1]];
             if(DEBUG) {
-                console.log(`\tcpy ${instr[1]} (${r[instr[1]]}) → ${instr[2]}`);
+                console.log(`\tcpy reg ${instr[1]} (${r[instr[1]]}) → ${instr[2]}`);
             }
         }
         ip++;
