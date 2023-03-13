@@ -16,7 +16,7 @@ class State {
         ,"thulium":    "Tm" // 69 (nice)
         ,"polonium":   "Po" // 84
         ,"elerium":    "El" // 115
-        ,"dilithium":  "Di" // 2 * 3 = 6
+        ,"dilithium":  "Dt" // 2 * 3 = 6
     };
     elevator_on = 0;
     floors = [];
