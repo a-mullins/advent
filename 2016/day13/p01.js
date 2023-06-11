@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 "use strict";
-const fs = require("fs");
 const util = require("../util");
 // TODO: rewrite without using TreeNode.
 
