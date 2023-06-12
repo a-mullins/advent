@@ -5,10 +5,10 @@ const process = require("process");
 
 if(process.argv.includes("-D")) {var DEBUG = true;}
 
-const r = {"a": 0, "b": 0, "c": 0, "d": 0};
+let r = {"a": 7, "b": 0, "c": 0, "d": 0};
 if(process.argv[1].includes("p02")) {
     if(DEBUG) {console.log("Called as p02");}
-    r["c"] = 1;
+    r["a"] = 12;
 }
 
 const text = fs.readFileSync(0, "ascii")
@@ -18,23 +18,23 @@ const text = fs.readFileSync(0, "ascii")
 
 // ip = instruction pointer, program counter, &c.
 for(let ip = 0; 0 <= ip && ip < text.length; /*nop*/) {
-    const instr = text[ip];
+    let instr = text[ip];
     if(DEBUG) {
         console.log(`ip = ${ip}; instr = ${instr.join(" ")};\n`
                     + ["a", "b", "c", "d"]
-                    .map(label => `r${label}: ${r[label]}`).join(", "));
+                    .map(label => `r${label}: ${r[label]}`).join(', '));
     }
 
     switch (instr[0]) {
     case "cpy":
         // second arg must be register name. if it's not, nop.
         if(!(instr[2] in r)) {
-            if(DEBUG) {console.log(`\tbad cpy dest, skipping.`);}
+            if(DEBUG) { console.log(`\tbad cpy dest, skipping.`); }
             ip++;
             break;
         }
 
-        if(isNaN(instr[1])) { // if src is NaN, it's a register label
+        if(isNaN(instr[1])) {
             r[instr[2]] = r[instr[1]];
             if(DEBUG) {
                 console.log(`\tcpy reg ${instr[1]}`
@@ -98,7 +98,7 @@ for(let ip = 0; 0 <= ip && ip < text.length; /*nop*/) {
                         + ` r${instr[1]} = ${r[instr[1]]}; `);
         }
         if(i < 0 || i >= text.length) {
-            if(DEBUG) { console.log("\ttgl index out of range, nop"); }
+            if(DEBUG) { console.log('\ttgl index out of range, nop'); }
             ip++;
             break;
         }
@@ -130,15 +130,13 @@ for(let ip = 0; 0 <= ip && ip < text.length; /*nop*/) {
         break;
 
     default:
-        console.log("ERR: Unrecognized opcode. Quitting.");
-        console.log(`ERR: ip: ${ip}; text[${ip}]: ${instr.join(" ")}`);
+        fs.writeSync(2, "ERR: Unrecognized opcode. Quitting.\n");
         process.exit(1);
     }
     if(DEBUG) {console.log("");}
 }
 
 if(DEBUG) {console.log("");}
-console.log("Program halts.");
-console.log(
-    ["a", "b", "c", "d"].map(label => `r${label}: ${r[label]}`).join(", ")
-);
+console.log("Program halts.\n\t"
+            + ["a", "b", "c", "d"]
+            .map(label => `r${label}: ${r[label]}`).join(', '));
