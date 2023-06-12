@@ -17,5 +17,5 @@ function decomp_len(s) {
 }
 
 
-let input = fs.readFileSync(0, 'ascii').trim();
+let input = fs.readFileSync(0, "ascii").trim();
 console.log(decomp_len(input));

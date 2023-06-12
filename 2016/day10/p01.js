@@ -6,13 +6,13 @@ const fs = require("fs");
 // lines have the form of either:
 // value N goes to bot B
 // bot B gives low to (bot|output) L and high to (bot|output) H
-const lines  = fs.readFileSync(0, "ascii").trim().split('\n');
+const lines  = fs.readFileSync(0, "ascii").trim().split("\n");
 const rules  = lines
       .filter(line => line.includes("gives"))
-      .map(rule => rule.split(' '));
+      .map(rule => rule.split(" "));
 const inputs = lines
       .filter(line => line.includes("goes"))
-      .map(inp => inp.split(' '));
+      .map(inp => inp.split(" "));
 const bots = [];
 const bins = [];
 

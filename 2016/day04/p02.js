@@ -13,15 +13,15 @@ function shiftStr(str, amount) {
 }
 
 
-const input = fs.readFileSync(0, 'ascii')
-      .split('\n').filter(line => line != '');
+const input = fs.readFileSync(0, "ascii")
+      .split("\n").filter(line => line != "");
 for(const line of input) {
     const sector = Number(/\d+/.exec(line));
-    let words = line.split('-');
+    let words = line.split("-");
     words.pop(); // don't need the last elem.
 
-    words = words.map(word => shiftStr(word, sector)).join(' ');
-    if(words.includes('north')) {
+    words = words.map(word => shiftStr(word, sector)).join(" ");
+    if(words.includes("north")) {
         console.log(line, words, sector);
     }
 }

@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 // Ugly and brute-force, but effective.
-'use strict';
-const fs = require('fs');
+"use strict";
+const fs = require("fs");
 
 
-const lines = fs.readFileSync(0, 'ascii').trim().split('\n');
+const lines = fs.readFileSync(0, "ascii").trim().split("\n");
 const discs = [];
 
 for(const line of lines) {
     let mod, start;
-    [mod, start] = line.split(' ').map(Number).filter(n => !Number.isNaN(n));
+    [mod, start] = line.split(" ").map(Number).filter(n => !Number.isNaN(n));
     discs.push({mod: mod, start: start});
 }
 

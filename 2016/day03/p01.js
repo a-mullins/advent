@@ -2,10 +2,10 @@
 "use strict";
 const fs = require("fs");
 
-const input = fs.readFileSync(0, 'ascii');
+const input = fs.readFileSync(0, "ascii");
 
 console.log(
-    input.split('\n')
+    input.split("\n")
         .map(line => [Number(line.slice( 2,  5)),
                       Number(line.slice( 7, 10)),
                       Number(line.slice(12, 15))]

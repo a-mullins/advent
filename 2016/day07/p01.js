@@ -7,14 +7,14 @@ function splitAddy(s) {
     const parts = {supernet: [], hypernet: []}
     let start = 0;
     for(let i = 0; i < s.length; i++) {
-        if(i+1 === s.length && s[i] != ']') {
+        if(i+1 === s.length && s[i] != "]") {
             parts.supernet.push(s.slice(start, i+1));
         }
-        if(s[i] === '[') {
+        if(s[i] === "[") {
             parts.supernet.push(s.slice(start, i));
             start = i+1;
         }
-        if(s[i] === ']') {
+        if(s[i] === "]") {
             parts.hypernet.push(s.slice(start, i));
             start = i+1;
         }
@@ -63,7 +63,7 @@ function supportsSsl(addy) {
 }
 
 
-const addys = fs.readFileSync(0, 'ascii').split('\n')
+const addys = fs.readFileSync(0, "ascii").split("\n")
       .filter(s => s.length > 0).map(splitAddy);
 let tls_count = 0;
 let ssl_count = 0;

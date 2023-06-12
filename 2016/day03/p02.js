@@ -2,8 +2,8 @@
 "use strict";
 const fs = require("fs");
 
-const input = fs.readFileSync(0, 'ascii')
-      .split('\n').filter(line => line != '')
+const input = fs.readFileSync(0, "ascii")
+      .split("\n").filter(line => line != "")
       .map(line => [Number(line.slice( 2,  5)),
                     Number(line.slice( 7, 10)),
                     Number(line.slice(12, 15))]);
