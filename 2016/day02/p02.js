@@ -15,7 +15,7 @@ let col = 1;
 let code = "";
 
 const input = fs
-      .readFileSync(0, 'ascii').split('\n').filter( line => line != '' );
+      .readFileSync(0, "ascii").split("\n").filter( line => line != "" );
 
 for(const line of input) {
     for(const c of line) {
@@ -25,7 +25,7 @@ for(const line of input) {
         if(c === "R") {++tmp_col;}
         if(c === "U") {--tmp_row;}
         if(c === "D") {++tmp_row;}
-        if(keypad[tmp_row][tmp_col] !== ' ') {
+        if(keypad[tmp_row][tmp_col] !== " ") {
             row = tmp_row;
             col = tmp_col;
         }

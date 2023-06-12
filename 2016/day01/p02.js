@@ -7,7 +7,7 @@ let facing = 0; // 0 = N, 1 = E, 2 = S, 3 = W;
 function turnL() {if(--facing < 0) {facing = 3}}
 function turnR() {if(++facing > 3) {facing = 0}}
 
-let input = fs.readFileSync(0, 'ascii').split(', ');
+let input = fs.readFileSync(0, "ascii").split(", ");
 let dup;
 let x = 0;
 let y = 0;

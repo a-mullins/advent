@@ -20,7 +20,7 @@ for(let ip = 0; 0 <= ip && ip < text.length; /*nop*/) {
     if(DEBUG) {
         console.log(`ip = ${ip}; instr = ${instr.join(" ")};\n`
                     + ["a", "b", "c", "d"]
-                    .map(label => `r${label}: ${r[label]}`).join(', '));
+                    .map(label => `r${label}: ${r[label]}`).join(", "));
     }
     switch (instr[0]) {
     case "cpy":
@@ -77,4 +77,4 @@ for(let ip = 0; 0 <= ip && ip < text.length; /*nop*/) {
 
 if(DEBUG) {console.log("");}
 console.log("Program terminated.\n\t" + 
-    ["a", "b", "c", "d"].map(label => `r${label}: ${r[label]}`).join(', '));
+    ["a", "b", "c", "d"].map(label => `r${label}: ${r[label]}`).join(", "));

@@ -6,17 +6,17 @@ const fs = require("fs");
 class Display {
     constructor(width, height) {
         this.grid = Array.from({length: height}, () =>
-            new Array(width).fill(' '));
+            new Array(width).fill(" "));
     }
 
     toString() {
-        return this.grid.reduce((prev, cur) => prev+cur.join('')+'\n', '');
+        return this.grid.reduce((prev, cur) => prev+cur.join("")+"\n", "");
     }
 
     rect(width, height) {
         for(let row=0; row<height; row++) {
             for(let col=0; col<width; col++) {
-                this.grid[row][col] = '#';
+                this.grid[row][col] = "#";
             }
         }
     }
@@ -44,22 +44,22 @@ class Display {
 
 
 const disp = new Display(50, 6);
-const lines = fs.readFileSync(0, 'ascii').split('\n').filter(l => l != '');
+const lines = fs.readFileSync(0, "ascii").split("\n").filter(l => l != "");
 
 for(const line of lines) {
-    if(line.includes('rect')) {
+    if(line.includes("rect")) {
         const [w, h] = line.match(/(\d+)x(\d+)/).slice(1,3).map(Number);
         disp.rect(w, h);
     }
-    if(line.includes('rotate col')) {
+    if(line.includes("rotate col")) {
         const [col, amt] = line.match(/x=(\d+) by (\d+)/).slice(1,3).map(Number);
         disp.rot_col(col, amt);
     }
-    if(line.includes('rotate row')) {
+    if(line.includes("rotate row")) {
         const [row, amt] = line.match(/y=(\d+) by (\d+)/).slice(1,3).map(Number);
         disp.rot_row(row, amt);
     }
 }
 
 console.log(disp.toString());
-console.log(disp.grid.flat().reduce((sum, c) => sum + (c === '#' ? 1 : 0), 0));
+console.log(disp.grid.flat().reduce((sum, c) => sum + (c === "#" ? 1 : 0), 0));
