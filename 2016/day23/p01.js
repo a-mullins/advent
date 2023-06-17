@@ -22,7 +22,7 @@ for(let ip = 0; 0 <= ip && ip < text.length; /*nop*/) {
     if(DEBUG) {
         console.log(`ip = ${ip}; instr = ${instr.join(" ")};\n`
                     + ["a", "b", "c", "d"]
-                    .map(label => `r${label}: ${r[label]}`).join(', '));
+                    .map(label => `r${label}: ${r[label]}`).join(", "));
     }
 
     switch (instr[0]) {
@@ -98,7 +98,7 @@ for(let ip = 0; 0 <= ip && ip < text.length; /*nop*/) {
                         + ` r${instr[1]} = ${r[instr[1]]}; `);
         }
         if(i < 0 || i >= text.length) {
-            if(DEBUG) { console.log('\ttgl index out of range, nop'); }
+            if(DEBUG) { console.log("\ttgl index out of range, nop"); }
             ip++;
             break;
         }
@@ -139,4 +139,4 @@ for(let ip = 0; 0 <= ip && ip < text.length; /*nop*/) {
 if(DEBUG) {console.log("");}
 console.log("Program halts.\n\t"
             + ["a", "b", "c", "d"]
-            .map(label => `r${label}: ${r[label]}`).join(', '));
+            .map(label => `r${label}: ${r[label]}`).join(", "));
