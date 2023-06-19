@@ -4,7 +4,8 @@ const crypto = require("crypto");
 const fs = require("fs");
 const util = require("../util");
 
-const seed = fs.readFileSync(0, "ascii").trim();
+const seed = "bwnlcvfs";
+//const seed = fs.readFileSync(0, "ascii").trim();
 const root = new util.TreeNode({label: seed, coord: {x: 0, y: 0}});
 
 
@@ -52,5 +53,7 @@ function makeChildren(node) {
 }
 
 
-const goal = util.bfs(root, isGoalNode, makeChildren);
-console.log(goal.data.label.slice(seed.length));
+const paths = Array.from(
+    util.buildTree(root, isGoalNode, makeChildren),
+    node => node.data.label);
+console.log(paths.reduce((acc, cur) => Math.max(cur.length, acc), 0) - seed.length);
