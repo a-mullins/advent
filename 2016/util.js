@@ -39,7 +39,7 @@ class TreeNode {
 exports.TreeNode = TreeNode;
 
 
-function bfs(root, predicate) {
+function bfs(root, predicate, postPredHook) {
     let q = [root];
     let explored = [];
     while(q.length > 0) {
@@ -48,6 +48,10 @@ function bfs(root, predicate) {
 
         if(predicate(cur)) {
             return cur;
+        }
+
+        if(typeof postPredHook === "function") {
+            postPredHook(cur);
         }
 
         for(const child of cur.children) {
@@ -87,6 +91,28 @@ function dfs(root, predicate) {
     return null;
 }
 exports.dfs = dfs;
+
+
+// root :: TreeNode
+// goalPred :: function(TreeNode) -> Boolean
+// makeChildren :: function(TreeNode) -> _
+function* buildTree(root, goalPred, makeChildren) {
+    let stack = [root];
+
+    while(stack.length > 0) {
+        let cur = stack.pop();
+
+        if(goalPred(cur)) {
+            yield cur;
+        } else {
+            makeChildren(cur);
+            for(const child of cur.children) {
+                stack.push(child);
+            }
+        }
+    }
+}
+exports.buildTree = buildTree;
 
 
 class Pqueue {
