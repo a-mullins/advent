@@ -35,7 +35,7 @@ function makeNextRooms(room) {
         nextRooms.push({label: room.label + "R",
                         coord: {x: room.coord.x + 1, y: room.coord.y}});
     }
-    
+
     return nextRooms;
 }
 
