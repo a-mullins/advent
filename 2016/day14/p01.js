@@ -14,7 +14,7 @@ function hasQuint(s, c)  {return s.includes(c.repeat(5));}
 
 
 function hash(idx) {
-    let s = crypto.createHash("md5").update(salt + String(idx)).digest("hex"); 
+    let s = crypto.createHash("md5").update(salt + String(idx)).digest("hex");
     if(process.argv[1].includes("p02")) {
         for(let i = 0; i < 2016; i++) {
             s = crypto.createHash("md5").update(s).digest("hex");
