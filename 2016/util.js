@@ -149,3 +149,76 @@ class Pqueue {
     }
 }
 exports.Pqueue = Pqueue;
+
+
+class Deque {
+    a;
+    size = 0;
+    maxSize;
+    front = 0;
+    back = 1;
+
+    constructor(size) {
+        this.maxSize = size;
+        this.a = new Uint32Array(this.maxSize);
+    }
+
+    isFull() {
+        return this.size === this.maxSize;
+    }
+
+    isEmpty() {
+        return this.size === 0;
+    }
+
+    length() {
+        return this.size;
+    }
+
+    push(elem) {
+        if(this.isFull()) {
+            throw new Error("full");
+        }
+
+        this.a[this.back] = elem;
+        this.back = (this.back+1) % this.maxSize;
+        return ++this.size;
+    }
+
+    unshift(elem) {
+        if(this.isFull()) {
+            throw new Error("full");
+        }
+
+        this.a[this.front] = elem;
+        if(--this.front < 0) { this.front += this.maxSize; }
+        return ++this.size;
+    }
+
+    pop() {
+        if(this.isEmpty()) {
+            return undefined;
+        }
+
+        this.size -= 1;
+        if(--this.back < 0) { this.back += this.maxSize; }
+
+        return this.a[this.back];
+    }
+
+    shift() {
+        if(this.isEmpty()) {
+            return undefined;
+        }
+
+        this.size -= 1;
+        this.front = (this.front+1) % this.maxSize;
+
+        return this.a[this.front];
+    }
+
+    //toString() {
+    //    return this.#a.slice(0, this.#back+1).toString();
+    //}
+}
+exports.Deque = Deque;
