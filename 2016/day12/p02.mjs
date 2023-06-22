@@ -14,9 +14,9 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
           .split("\n")
           .filter(line => line.length > 0)
           .map(line => line.split(" "));
-    
+
     const r = run(text, {c: 1}, DEBUG);
-    
+
     console.log(
         ["a", "b", "c", "d"].map(label => `r${label}: ${r[label]}`).join(", ")
     );
