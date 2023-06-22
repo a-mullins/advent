@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 "use strict";
 
- 
+
 function opt(text) {
     // mulAssign has the pattern:
     //   cpy b c
