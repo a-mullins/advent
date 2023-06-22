@@ -117,11 +117,11 @@ for(let ip = 0; ip < text.length; ip++) {
         // |      6 |         8 | 14%8=6 |          |      6 |      0 |
         // |      7 |         9 | 16%8=0 |          |      7 |      4 |
         const rotMap = [1, 1, 6, 2, 7, 3, 0, 4];
-        
+
         tmp = Array.from(output);
         output.length = 0; // clear array.
         pos0 = tmp.indexOf(instr.op0);
-        
+
         // How many times do we need to lshift?
         instr.op1 = rotMap[pos0];
 
