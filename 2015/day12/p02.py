@@ -15,6 +15,6 @@ def sum_less_red(elem):
     return 0
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     top = json.loads(input())
     print(sum_less_red(top))

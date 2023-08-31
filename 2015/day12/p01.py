@@ -2,4 +2,4 @@
 import re
 
 line = input()
-print(sum((int(s) for s in re.findall(r'-*\d+', line))))
+print(sum((int(s) for s in re.findall(r"-*\d+", line))))

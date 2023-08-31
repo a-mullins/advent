@@ -3,7 +3,7 @@ from sys import stdin
 
 
 def is_nice(s):
-    VOWELS = 'aeiou'
+    VOWELS = "aeiou"
     vowel_cnt = 0
     run_cnt = 0
     naughty_substring = False
@@ -12,7 +12,7 @@ def is_nice(s):
     if prev in VOWELS:
         vowel_cnt += 1
     for cur in s[1:]:
-        if prev + cur in ['ab', 'cd', 'pq', 'xy']:
+        if prev + cur in ["ab", "cd", "pq", "xy"]:
             naughty_substring = True
             break
         if cur in VOWELS:

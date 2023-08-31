@@ -6,10 +6,10 @@ pos = 0
 while True:
     c = stdin.read(1)
     pos += 1
-    if c == '(':
+    if c == "(":
         floor += 1
-    elif c == ')':
+    elif c == ")":
         floor -= 1
         if floor <= -1:
             break
-print(f'position {pos}\tfloor {floor}')
+print(f"position {pos}\tfloor {floor}")

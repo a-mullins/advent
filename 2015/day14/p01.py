@@ -31,7 +31,7 @@ class Reindeer:
                 self.is_flying = True
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     runners = []
     for line in stdin:
         parts = line.split()

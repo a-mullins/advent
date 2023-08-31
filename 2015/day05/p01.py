@@ -4,9 +4,9 @@ from sys import stdin
 
 
 def is_nice(s):
-    naughties = ('ab', 'cd', 'pq', 'xy')
-    rule1 = len(re.findall(r'[aeiou]', s)) >= 3
-    rule2 = re.search(r'(.)\1', s)
+    naughties = ("ab", "cd", "pq", "xy")
+    rule1 = len(re.findall(r"[aeiou]", s)) >= 3
+    rule2 = re.search(r"(.)\1", s)
     rule3 = not any((sub in s for sub in naughties))
     return bool(rule1 and rule2 and rule3)
 
