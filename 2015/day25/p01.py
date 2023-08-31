@@ -4,7 +4,7 @@ import sys
 
 def get_code(target_row, target_col):
     row, col = 1, 1
-    max_row, max_col = 1, 1
+    max_row = 1
     cur = 20151125
 
     while not (target_row == row and target_col == col):
