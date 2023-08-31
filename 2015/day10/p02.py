@@ -3,8 +3,8 @@ import re
 
 
 def look_and_say(seq):
-    output = ''
-    runs = [group[0] for group in re.findall(r'((\d)\2*)', seq)]
+    output = ""
+    runs = [group[0] for group in re.findall(r"((\d)\2*)", seq)]
 
     for run in runs:
         output += str(len(run)) + run[0]
@@ -12,7 +12,7 @@ def look_and_say(seq):
     return output
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     puzzle = input()
     for _ in range(50):
         puzzle = look_and_say(puzzle)

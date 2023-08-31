@@ -24,15 +24,19 @@ class Node:
     refence to object 'x', and rchild would be a reference to object
     'y'.
     """
-    OPERATORS = {'NOT': [1, lambda x: 65535 + 1 + ~x],
-                 'AND': [2, opr.and_],
-                 'OR': [2, opr.or_],
-                 'LSHIFT': [2, opr.lshift],
-                 'RSHIFT': [2, opr.rshift],
-                 'BUFFER': [1, lambda lchild_val: lchild_val]}
 
-    def __init__(self, label, graph, op=None,
-                 lchild=None, rchild=None, value=None):
+    OPERATORS = {
+        "NOT": [1, lambda x: 65535 + 1 + ~x],
+        "AND": [2, opr.and_],
+        "OR": [2, opr.or_],
+        "LSHIFT": [2, opr.lshift],
+        "RSHIFT": [2, opr.rshift],
+        "BUFFER": [1, lambda lchild_val: lchild_val],
+    }
+
+    def __init__(
+        self, label, graph, op=None, lchild=None, rchild=None, value=None
+    ):
         self.label = label
         self.graph = graph
         self.lchild = lchild
@@ -44,11 +48,12 @@ class Node:
             self._op = None
 
     def __str__(self):
-        output = f'Node({self.label}, op={self._op}, '\
-                 f'lchild={self.lchild}, '\
-                 f'rchild={self.rchild}, '\
-                 f'value={self._value})'
-        return output
+        return (
+            f"Node({self.label}, op={self._op}, "
+            f"lchild={self.lchild}, "
+            f"rchild={self.rchild}, "
+            f"value={self._value})"
+        )
 
     def val(self):
         if self._value is None:
@@ -68,25 +73,26 @@ class Node:
         return self._value
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     graph = {}
     lines = stdin.readlines()
 
     for line in lines:
-        lhs, rhs = line.split('->')
+        lhs, rhs = line.split("->")
         lbl = rhs.strip()
         parts = [int(s) if s.isdecimal() else s for s in lhs.split()]
 
         if len(parts) == 1:
             if lhs[0].isdecimal():  # eg 123 -> x
                 graph[lbl] = Node(lbl, graph, value=parts[0])
-            else:                   # eg x -> a
-                graph[lbl] = Node(lbl, graph, op='BUFFER', lchild=parts[0])
+            else:  # eg x -> a
+                graph[lbl] = Node(lbl, graph, op="BUFFER", lchild=parts[0])
         if len(parts) == 2:
             graph[lbl] = Node(lbl, graph, op=parts[0], lchild=parts[1])
         if len(parts) == 3:
-            graph[lbl] = Node(lbl, graph, op=parts[1],
-                              lchild=parts[0], rchild=parts[2])
+            graph[lbl] = Node(
+                lbl, graph, op=parts[1], lchild=parts[0], rchild=parts[2]
+            )
 
-    node = graph['a']
-    print(f'{node.label} -> {node.val()}')
+    node = graph["a"]
+    print(f"{node.label} -> {node.val()}")

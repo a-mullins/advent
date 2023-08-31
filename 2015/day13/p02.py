@@ -3,14 +3,14 @@ from p01 import parse_relations, table_hapiness
 from itertools import permutations
 from sys import stdin
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     rels = parse_relations(stdin.readlines())
-    rels['Me'] = {}
+    rels["Me"] = {}
     for key in rels.keys():
-        rels[key]['Me'] = 0
-        rels['Me'][key] = 0
+        rels[key]["Me"] = 0
+        rels["Me"][key] = 0
     people = rels.keys()
 
-    print(max(
-        (table_hapiness(permut, rels) for permut in permutations(people))
-    ))
+    print(
+        max((table_hapiness(permut, rels) for permut in permutations(people)))
+    )

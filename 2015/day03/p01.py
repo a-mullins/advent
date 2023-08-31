@@ -9,17 +9,17 @@ d[(0, 0)] = 1
 
 while True:
     c = stdin.read(1)
-    if c == '>':
+    if c == ">":
         x += 1
-    elif c == '<':
+    elif c == "<":
         x -= 1
-    elif c == '^':
+    elif c == "^":
         y += 1
-    elif c == 'v':
+    elif c == "v":
         y -= 1
     else:
         break
 
     d[(x, y)] = d.get((x, y), 0) + 1
 
-print(f'presents delivered to {len(d)} houses.')
+print(f"presents delivered to {len(d)} houses.")

@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 import sys
 
-# the easy thing to do is to simply generate forward...
 
 def get_code(target_row, target_col):
-    row, col         = 1, 1
+    row, col = 1, 1
     max_row, max_col = 1, 1
     cur = 20151125
 
@@ -21,9 +20,9 @@ def get_code(target_row, target_col):
     return cur
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parts = sys.stdin.readline().split()
-    row = int(parts[ parts.index('row')+1 ].strip(',.'))
-    col = int(parts[ parts.index('column')+1 ].strip(',.'))
+    row = int(parts[parts.index("row") + 1].strip(",."))
+    col = int(parts[parts.index("column") + 1].strip(",."))
 
     print(get_code(row, col))

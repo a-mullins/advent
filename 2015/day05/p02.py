@@ -4,8 +4,8 @@ import re
 
 
 def is_nice(string):
-    rule1 = re.search(r'(..).*\1', string)
-    rule2 = re.search(r'(.).\1', string)
+    rule1 = re.search(r"(..).*\1", string)
+    rule2 = re.search(r"(.).\1", string)
     return bool(rule1 and rule2)
 
 

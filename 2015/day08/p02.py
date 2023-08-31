@@ -3,7 +3,7 @@ from sys import stdin
 
 orig_chars = 0
 encoded_chars = 0
-table = str.maketrans({'"': r'\"', '\\': '\\\\'})
+table = str.maketrans({'"': r"\"", "\\": "\\\\"})
 
 for line in stdin:
     line = line.strip()
