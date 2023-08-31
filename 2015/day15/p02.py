@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 from sys import stdin
 from collections import namedtuple
-from functools import reduce
-from operator import mul
 
 Ingredient = namedtuple(
     "Properties",
