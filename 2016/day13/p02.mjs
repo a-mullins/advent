@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 "use strict";
-const util = require("../util");
+import { Pqueue, TreeNode } from "../util.mjs";
 // TODO: rewrite to avoid TreeNode.
 
 
@@ -35,8 +35,8 @@ function taxiDist(p1, p2) {
 
 function search(start, end) {
     const explored = [];
-    const frontier = new util.Pqueue();
-    frontier.push(new util.TreeNode(start), 0);
+    const frontier = new Pqueue();
+    frontier.push(new TreeNode(start), 0);
 
     while(!frontier.empty()) {
         const cur_node = frontier.pop();
@@ -53,7 +53,7 @@ function search(start, end) {
                 continue;
             }
 
-            const child = new util.TreeNode(open);
+            const child = new TreeNode(open);
             cur_node.addChild(child);
             frontier.push(child, cur_node.depth() + taxiDist(open, end));
         }

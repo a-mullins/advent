@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 "use strict";
-const fs = require("fs");
+import fs from "node:fs";
 
 
 function ring(n) {

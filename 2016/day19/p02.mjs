@@ -5,15 +5,14 @@
 //
 // Required implementing a Uint32Array based Deque, see ../util.js. Normal js Arrays were
 // incredibly slow.
-
 "use strict";
-const fs = require("fs");
-const util = require("../util");
+import fs from "node:fs";
+import { Deque } from "../util.mjs";
 
 
 let numElves = Number(fs.readFileSync(0, "ascii").trim());
-let left = new util.Deque(numElves);
-let right = new util.Deque(numElves);
+let left = new Deque(numElves);
+let right = new Deque(numElves);
 let split = Math.floor(numElves / 2) + 1;
 
 for(let i = 1; i < split; i++) {

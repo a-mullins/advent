@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 "use strict";
-const fs = require("fs");
-const crypto = require("node:crypto");
-const util = require("../util");
+import fs from "node:fs";
+import crypto from "node:crypto";
+import { fileURLToPath } from "url";
+import { Pqueue, TreeNode } from "../util.mjs";
+
 
 
 class State {
@@ -288,7 +290,7 @@ function search(root) {
     const explored = [];
     // TODO: instead of a priority queue, build a graph whos weights correspond
     //       to A* f(n).
-    const frontier = new util.Pqueue();
+    const frontier = new Pqueue();
     frontier.push(root, 0);
 
     while(!frontier.empty()) {
@@ -312,7 +314,7 @@ function search(root) {
                 continue;
             }
 
-            const child = new util.TreeNode(state);
+            const child = new TreeNode(state);
             cur_node.addChild(child);
             frontier.push(child, weight(state)+child.depth());
         }
@@ -322,7 +324,7 @@ function search(root) {
 
 
 function main() {
-    const root = new util.TreeNode(new State());
+    const root = new TreeNode(new State());
     for(const line of fs.readFileSync(0, "ascii").trim().split("\n")) {
         root.data.parseLine(line);
     }
@@ -330,8 +332,8 @@ function main() {
     let node = search(root);
 
     if(node) {
-        console.log(`Found a solution in ${node.depth()} moves. `
-                    + `Explored ${explored_nodes} nodes.`);
+        console.log(`I found a solution in ${node.depth()} moves and `
+                    + `explored ${explored_nodes} nodes.`);
         let stack = [];
         while(node !== null) {
             stack.unshift(node);
@@ -346,6 +348,6 @@ function main() {
 }
 
 
-if(require.main === module) {
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
     main();
 }

@@ -36,7 +36,6 @@ class TreeNode {
         return this.#depth;
     }
 }
-exports.TreeNode = TreeNode;
 
 
 function bfs(root, predicate, postPredHook) {
@@ -65,7 +64,6 @@ function bfs(root, predicate, postPredHook) {
     }
     return null;
 }
-exports.bfs = bfs;
 
 
 function dfs(root, predicate) {
@@ -90,7 +88,6 @@ function dfs(root, predicate) {
     }
     return null;
 }
-exports.dfs = dfs;
 
 
 // root :: TreeNode
@@ -112,7 +109,6 @@ function* buildTree(root, goalPred, makeChildren) {
         }
     }
 }
-exports.buildTree = buildTree;
 
 
 class Pqueue {
@@ -147,8 +143,11 @@ class Pqueue {
     length() {
         return this.array.length;
     }
+
+    includes(elem) {
+        return this.array.includes(elem);
+    }
 }
-exports.Pqueue = Pqueue;
 
 
 class Deque {
@@ -221,4 +220,6 @@ class Deque {
     //    return this.#a.slice(0, this.#back+1).toString();
     //}
 }
-exports.Deque = Deque;
+
+
+export { TreeNode, Pqueue, Deque, bfs, dfs, buildTree };
