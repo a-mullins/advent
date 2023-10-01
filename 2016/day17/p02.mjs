@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 "use strict";
-const crypto = require("crypto");
-const fs = require("fs");
-const util = require("../util");
+import fs from "node:fs";
+import crypto from "node:crypto";
+import { buildTree, TreeNode } from "../util.mjs";
 
-const seed = fs.readFileSync(0, "ascii").trim();
-const root = new util.TreeNode({label: seed, coord: {x: 0, y: 0}});
+const seed = "bwnlcvfs";
+//const seed = fs.readFileSync(0, "ascii").trim();
+const root = new TreeNode({label: seed, coord: {x: 0, y: 0}});
 
 
 // room :: {label: "", coord: {x: int, y: int}}
@@ -47,10 +48,12 @@ function isGoalNode(node) {
 
 function makeChildren(node) {
     for(const room of makeNextRooms(node.data)) {
-        node.addChild(new util.TreeNode(room));
+        node.addChild(new TreeNode(room));
     }
 }
 
 
-const goal = util.bfs(root, isGoalNode, makeChildren);
-console.log(goal.data.label.slice(seed.length));
+const paths = Array.from(
+    buildTree(root, isGoalNode, makeChildren),
+    node => node.data.label);
+console.log(paths.reduce((acc, cur) => Math.max(cur.length, acc), 0) - seed.length);

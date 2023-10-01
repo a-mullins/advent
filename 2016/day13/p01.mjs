@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 "use strict";
-const util = require("../util");
+import { Pqueue, TreeNode } from "../util.mjs";
 // TODO: rewrite without using TreeNode.
 
 
@@ -43,8 +43,8 @@ function taxiDist(p1, p2) {
 const fav = 1364;
 const goal = {x: 31, y: 39};
 const explored = [];
-const frontier = new util.Pqueue();
-frontier.push(new util.TreeNode({x:1, y:1}), 0);
+const frontier = new Pqueue();
+frontier.push(new TreeNode({x:1, y:1}), 0);
 
 while(!frontier.empty()) {
     const cur_node = frontier.pop();
@@ -62,7 +62,7 @@ while(!frontier.empty()) {
             continue;
         }
 
-        const child = new util.TreeNode(open);
+        const child = new TreeNode(open);
         cur_node.addChild(child);
         frontier.push(child, cur_node.depth() + taxiDist(open, goal));
     }
