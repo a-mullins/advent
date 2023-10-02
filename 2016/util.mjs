@@ -111,9 +111,9 @@ function* buildTree(root, goalPred, makeChildren) {
 }
 
 
+// TODO: implement as binary heap.
 class Pqueue {
-    // Could extend Array, but then we are stuck implementing a lot of
-    // methods that we don't need.
+    // Quick & dirt pqueue. Not effecient.
     array = [];
     dirty = true;
 
