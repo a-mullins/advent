@@ -12,4 +12,4 @@ if __name__ == "__main__":
     for n in range(1, len(containers) + 1):
         all_combos.extend(combinations(containers, n))
 
-    print(len(list(filter(lambda tup: sum(tup) == 150, all_combos))))
+    print(len([tup for tup in all_combos if sum(tup) == 150]))

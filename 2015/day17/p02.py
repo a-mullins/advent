@@ -12,8 +12,8 @@ if __name__ == "__main__":
     for n in range(1, len(containers) + 1):
         all_combos.extend(combinations(containers, n))
 
-    valids = tuple(filter(lambda x: sum(x) == 150, all_combos))
+    valids = [x for x in all_combos if sum(x) == 150]
     min_num = min((len(x) for x in valids))
     print(min_num)
 
-    print(len(list(filter(lambda x: len(x) == 4, valids))))
+    print(len([x for x in valids if len(x) == 4]))
