@@ -18,6 +18,7 @@ if __name__ == "__main__":
     for line in stdin:
         this_sue = {}
         match = True
+
         for elem in line.partition(":")[2].split(","):
             prop, val = elem.split(":")
             this_sue[prop.strip()] = int(val)

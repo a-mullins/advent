@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# It feels like there might be an analytical solution to this particular
-# problem, but I will use an iterative/simulationist approach.
+# I feel like there is an analytical solution to this particular
+# problem, but I will just simulate it.
 from sys import stdin
 
 
