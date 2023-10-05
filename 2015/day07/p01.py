@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
+# TODO: extract common elemnts of p01 & p02?
 import operator as opr
-
 from sys import stdin
 
 
 class Node:
     """A node in a graph.
 
-    In the context of Advent of Code, it can be thought of as a gate
-    and its output wire combined into one object. Note that some
-    'gates' are actually just constants or pass-thrus (eg buffers in
-    digital logic circuits).
+    For this puzzle it can be thought of as a gate and its output
+    line. Note that some gates are actually just constants or
+    pass-thrus (ie buffers in digital logic).
 
     Every node has a label, an operator, and between 0, 1, or 2
     children. Nodes also have a value which is derived from its children
@@ -21,7 +20,7 @@ class Node:
     Example:
     Parsing the line 'x AND y -> d' would create a Node
     instance with a label 'd' and operater AND. lchild would be a
-    refence to object 'x', and rchild would be a reference to object
+    refernce to object 'x', and rchild would be a reference to object
     'y'.
     """
 

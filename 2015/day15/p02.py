@@ -7,7 +7,6 @@ Ingredient = namedtuple(
     ["name", "capacity", "durability", "flavor", "texture", "calories"],
 )
 
-
 if __name__ == "__main__":
     ingredients = []
     for line in stdin:

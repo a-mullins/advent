@@ -1,8 +1,4 @@
 #!/usr/bin/env python3
-"""
-Brute force approach to a version of the Traveling Salesman Problem,
-but finding the longest route.
-"""
 import re
 from sys import stdin
 from itertools import permutations

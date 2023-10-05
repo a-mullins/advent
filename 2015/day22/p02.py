@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
+# TODO: Cleanup pass
 from collections import namedtuple
 from dataclasses import dataclass, field
 from io import TextIOBase
 from typing import List, Optional
 from copy import deepcopy
 from itertools import chain
-
-# TODO: Cleanup pass
 
 
 @dataclass

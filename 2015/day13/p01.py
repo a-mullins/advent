@@ -28,7 +28,6 @@ def table_hapiness(order: list, relations: dict):
 def parse_relations(lines):
     # eg: {'Alice': {'Bob':54, 'Carol':-79},
     #      'Bob': {'Alice': 83, 'Carol': -7}}
-
     relations = {}
     for line in lines:
         parts = line.split()
