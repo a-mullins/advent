@@ -17,7 +17,7 @@ while(true) {
     let looking_for = 0;
     let g = run(text, {"a": i}, DEBUG);
     //console.log(`trying i = ${i}`);
-    
+
     let still_scanning = true;
     let matches = 0;
     let so_far = [];

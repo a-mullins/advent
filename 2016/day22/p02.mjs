@@ -50,7 +50,7 @@ grid.toString = () => {
             } else {
                 repr.push(" ");
             }
-            
+
             if(grid[row][col].goal)  {
                 repr.push("G");
             } else if(grid[row][col].used === 0) {
@@ -60,7 +60,7 @@ grid.toString = () => {
             } else {
                 repr.push(".");
             }
-            
+
             if(row === 0 && col === 0) {
                 repr.push(")");
             } else {
