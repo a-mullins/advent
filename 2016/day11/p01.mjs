@@ -44,7 +44,7 @@ class State {
         // short circuit as much as possible...
         if(this.elevator_on !== other.elevator_on) {return false;}
 
-        // for sets A & B: A==B ⟺ A⊆B && B⊆B
+        // for sets A & B: A==B ⟺ A⊆B && B⊆A
         for(let floor=0; floor<4; floor++) {
             let set0 = this.floors[floor];
             let set1 = other.floors[floor];
@@ -63,9 +63,10 @@ class State {
 
     equiv(other) {
         // states are equivalent if they are
-        // 1. valid (we will skip this check)
+        // 1. valid (we will skip this check, we only generate valid ones)
         // 2. elevators are on the same floor
         // 3. have the same number of generators and chips on each floor
+        //    (the types of gen & chip don't matter as long as the floor is valid)
         if(this.elevator_on !== other.elevator_on) {return false;}
 
         // this method of counting iteratively is uglier than, say, converting
@@ -216,7 +217,7 @@ class State {
 // Given an array, return all 1- and 2-combos of the elements of the array.
 // ex: [a, b, c] -> [[a], [b], [c], [ab], [ac], [bc]]
 function combinations(xs) {
-    const combos = xs.map(elem => [elem]);
+    const combos = xs.map(elem => [elem]); // TODO combos = {...xs}; ?
     for(let i = 0; i < xs.length; i++) {
         for(let j = i+1; j < xs.length; j++) {
             combos.push([xs[i], xs[j]]);
@@ -288,8 +289,6 @@ function search(root) {
     pruned = 0;
 
     const explored = [];
-    // TODO: instead of a priority queue, build a graph whos weights correspond
-    //       to A* f(n).
     const frontier = new Pqueue();
     frontier.push(root, 0);
 
