@@ -50,7 +50,7 @@ function* run(text, registers, DEBUG) {
         if(!(0 <= ip && ip < text.length)) {
             break;
         }
-        
+
         let instr = text[ip];
         if(DEBUG) {
             console.log(`ip = ${ip}; instr = ${instr.join(" ")};\n`
@@ -180,7 +180,7 @@ function* run(text, registers, DEBUG) {
                 ? r[instr[1]]
                 : Number(instr[1]);
             break;
-                        
+
         default:
             fs.writeSync(2, "ERR: Unrecognized opcode. Quitting.\n");
             process.exit(1);
