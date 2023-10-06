@@ -2,7 +2,27 @@
 "use strict";
 import fs from "node:fs";
 import crypto from "node:crypto";
-import { buildTree, TreeNode } from "../util.mjs";
+import { TreeNode } from "../util.mjs";
+
+
+// root :: TreeNode
+// goalPred :: function(TreeNode) -> Boolean
+// makeChildren :: function(TreeNode) -> _
+function* buildTree(root, goalPred, makeChildren) {
+    let stack = [root];
+    while(stack.length > 0) {
+        let cur = stack.pop();
+        if(goalPred(cur)) {
+            yield cur;
+        } else {
+            makeChildren(cur);
+            for(const child of cur.children) {
+                stack.push(child);
+            }
+        }
+    }
+}
+
 
 const seed = "bwnlcvfs";
 //const seed = fs.readFileSync(0, "ascii").trim();
@@ -11,7 +31,7 @@ const root = new TreeNode({label: seed, coord: {x: 0, y: 0}});
 
 // room :: {label: "", coord: {x: int, y: int}}
 function makeNextRooms(room) {
-    makeNextRooms.open = makeNextRooms.open || "bcdef"; // fewer mallocs?
+    makeNextRooms.open = makeNextRooms.open || "bcdef";
 
     let hash = crypto.createHash("md5").update(room.label).digest("hex");
     const nextRooms = [];
@@ -56,4 +76,6 @@ function makeChildren(node) {
 const paths = Array.from(
     buildTree(root, isGoalNode, makeChildren),
     node => node.data.label);
-console.log(paths.reduce((acc, cur) => Math.max(cur.length, acc), 0) - seed.length);
+console.log(
+    paths.reduce((acc, cur) => Math.max(cur.length, acc), 0) - seed.length
+);
