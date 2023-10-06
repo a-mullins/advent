@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-// TODO multiprocess/threading candidate?
 "use strict";
 import fs from "node:fs";
 

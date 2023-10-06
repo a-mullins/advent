@@ -5,7 +5,6 @@ import fs from "node:fs";
 
 const codes = fs.readFileSync(0, "ascii").split("\n")
     .map(line => line.split("")).filter(line => line.length > 0);
-// TODO: Document next line.
 let counts = Array.from({length: codes[0].length}, () => new Map());
 let max_message = "";
 let min_message = "";

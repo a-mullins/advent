@@ -1,6 +1,4 @@
 #!/usr/bin/env node
-// TODO: eliminate global vars.
-// TODO: move helper functs to ../util.mjs
 "use strict";
 import fs from "node:fs";
 import { Pqueue } from "../util.mjs";

@@ -6,7 +6,6 @@ import { fileURLToPath } from "url";
 import { Pqueue, TreeNode } from "../util.mjs";
 
 
-
 class State {
     static ords = {"first": 0, "second": 1, "third": 2, "fourth": 3};
     static elements = {
@@ -217,7 +216,7 @@ class State {
 // Given an array, return all 1- and 2-combos of the elements of the array.
 // ex: [a, b, c] -> [[a], [b], [c], [ab], [ac], [bc]]
 function combinations(xs) {
-    const combos = xs.map(elem => [elem]); // TODO combos = {...xs}; ?
+    const combos = xs.map(elem => [elem]);
     for(let i = 0; i < xs.length; i++) {
         for(let j = i+1; j < xs.length; j++) {
             combos.push([xs[i], xs[j]]);
@@ -227,7 +226,6 @@ function combinations(xs) {
 }
 
 
-// TODO: move into class State as a method.
 // Return a list of every valid next game state that can be reached from the one
 // provided.
 //
@@ -281,7 +279,6 @@ function weight(state) {
 
 
 // A*.
-// TODO: cleanup & move to util.js, utilize hooks, &c.
 var explored_nodes;
 var pruned;
 function search(root) {
