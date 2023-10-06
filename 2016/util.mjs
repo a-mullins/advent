@@ -2,133 +2,6 @@
 "use strict";
 
 
-class TreeNode {
-    data;
-    children = [];
-    parent = null;
-    #depth;
-
-    constructor(data=null) {
-        this.data = data;
-    }
-
-    toString() {
-        let s = `Node ${this.data}`;
-        if(this.children.length > 0) {
-            s += " => ";
-            s += this.children.map(child => `Node ${child.data}`).join(", ");
-        }
-        return s;
-    }
-
-    addChild(node) {
-        node.parent = this;
-        this.children.push(node);
-        return node;
-    }
-
-    depth() {
-        if(!this.#depth) {
-            this.#depth = this.parent
-                           ? this.parent.depth() + 1
-                           : 0;
-        }
-        return this.#depth;
-    }
-}
-
-
-function bfs(root, predicate, postPredHook) {
-    let q = [root];
-    let explored = [];
-    while(q.length > 0) {
-        let cur = q.pop();
-        explored.push(cur);
-
-        if(predicate(cur)) {
-            return cur;
-        }
-
-        if(typeof postPredHook === "function") {
-            postPredHook(cur);
-        }
-
-        for(const child of cur.children) {
-            // TODO: [].includes compares with === and object references are
-            // equal only if they point to the exact same object. TreeNode.eq()
-            // or similar should probably be used instead for comparison.
-            if(!explored.includes(child)) {
-                q.unshift(child);
-            }
-        }
-    }
-    return null;
-}
-
-
-function dfs(root, predicate) {
-    let stack = [root];
-    let explored = [];
-
-    while(stack.length > 0) {
-        let cur = stack.pop();
-
-        if(predicate(cur)) {
-            return cur;
-        }
-        // TODO: [].includes compares with === and object references are equal
-        // only if they point to the exact same object. TreeNode.eq() or
-        // similar should probably be used instead for comparison.
-        if(!explored.includes(cur)) {
-            explored.push(cur);
-            for(const child of cur.children) {
-                stack.push(child);
-            }
-        }
-    }
-    return null;
-}
-
-
-// TODO: implement as binary heap.
-class Pqueue {
-    // Quick & dirt pqueue. Not effecient.
-    array = [];
-    dirty = true;
-
-    push(elem, priority) {
-        if(typeof priority !== "number") {
-            throw new TypeError("expected a number for priority.");
-        }
-
-        this.dirty = true;
-        this.array.push({data: elem, priority: priority});
-        return this.array.length;
-    }
-
-    // lower numerical scores have higher priority and get popped first.
-    pop() {
-        if(this.dirty) {
-            this.array.sort((a, b) => b.priority - a.priority);
-            this.dirty = false;
-        }
-        return this.array.pop().data;
-    }
-
-    empty() {
-        return this.array.length === 0;
-    }
-
-    length() {
-        return this.array.length;
-    }
-
-    includes(elem) {
-        return this.array.includes(elem);
-    }
-}
-
-
 class Deque {
     a;
     size = 0;
@@ -201,4 +74,109 @@ class Deque {
 }
 
 
-export { TreeNode, Pqueue, Deque, bfs, dfs};
+class Pqueue {
+    // This solution is faster than a js-native heap for the 2017 AoC problems.
+    // I checked.
+    array = [];
+    dirty = true;
+
+    push(elem, priority) {
+        if(typeof priority !== "number") {
+            throw new TypeError("expected a number for priority.");
+        }
+
+        this.dirty = true;
+        this.array.push({data: elem, priority: priority});
+        return this.array.length;
+    }
+
+    // lower numerical scores have higher priority and get popped first.
+    pop() {
+        if(this.dirty) {
+            this.array.sort((a, b) => b.priority - a.priority);
+            this.dirty = false;
+        }
+        return this.array.pop().data;
+    }
+
+    empty() {
+        return this.array.length === 0;
+    }
+
+    length() {
+        return this.array.length;
+    }
+
+    includes(elem) {
+        return this.array.includes(elem);
+    }
+}
+
+
+class TreeNode {
+    data;
+    children = [];
+    parent = null;
+    #depth;
+
+    constructor(data=null) {
+        this.data = data;
+    }
+
+    toString() {
+        let s = `Node ${this.data}`;
+        if(this.children.length > 0) {
+            s += " => ";
+            s += this.children.map(child => `Node ${child.data}`).join(", ");
+        }
+        return s;
+    }
+
+    addChild(node) {
+        node.parent = this;
+        this.children.push(node);
+        return node;
+    }
+
+    depth() {
+        if(!this.#depth) {
+            this.#depth = this.parent
+                           ? this.parent.depth() + 1
+                           : 0;
+        }
+        return this.#depth;
+    }
+}
+
+
+function bfs(root, predicate, postPredHook) {
+    let q = [root];
+    let explored = [];
+    while(q.length > 0) {
+        let cur = q.pop();
+        explored.push(cur);
+
+        if(predicate(cur)) {
+            return cur;
+        }
+
+        if(typeof postPredHook === "function") {
+            postPredHook(cur);
+        }
+
+        for(const child of cur.children) {
+            // TODO: [].includes compares with === and object references are
+            // equal only if they point to the exact same object. TreeNode.eq()
+            // or similar should probably be used instead for comparison.
+            //
+            // Maybe we should take a function like Array.find().
+            if(!explored.includes(child)) {
+                q.unshift(child);
+            }
+        }
+    }
+    return null;
+}
+
+
+export { Deque, Pqueue, TreeNode, bfs};
