@@ -1,17 +1,14 @@
 #!/usr/bin/env node
 // Solution inspired by /u/aceshades, here:
 //     https://old.reddit.com/r/adventofcode/comments/5j4lp1/2016_day_19_solutions/dbdf9mn/
-//
-// Required implementing a Uint32Array based Deque, see ../util.js. Normal js
-// Arrays were incredibly slow.
+// Quite clever & elegant.
 "use strict";
 import fs from "node:fs";
-import { Deque } from "../util.mjs";
 
 
 let numElves = Number(fs.readFileSync(0, "ascii").trim());
-let left = new Deque(numElves);
-let right = new Deque(numElves);
+let left = [];
+let right = [];
 let split = Math.floor(numElves / 2) + 1;
 
 for(let i = 1; i < split; i++) {
@@ -21,8 +18,8 @@ for(let i = split; i <= numElves; i++) {
     right.unshift(i);
 }
 
-while(!(left.isEmpty() || right.isEmpty())) {
-    if(left.length() > right.length()) {
+while(left.length > 0 && right.length > 0) {
+    if(left.length > right.length) {
         left.pop();
     } else {
         right.pop();
@@ -32,4 +29,4 @@ while(!(left.isEmpty() || right.isEmpty())) {
     left.push(right.pop());
 }
 
-console.log(left.pop());
+console.log(left[0]);
