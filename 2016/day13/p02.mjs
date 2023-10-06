@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 "use strict";
 import { Pqueue, TreeNode } from "../util.mjs";
-// TODO: rewrite to avoid TreeNode.
 
 
 function isPointOpen(p) {

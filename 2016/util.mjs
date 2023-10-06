@@ -165,11 +165,6 @@ function bfs(root, predicate, postPredHook) {
         }
 
         for(const child of cur.children) {
-            // TODO: [].includes compares with === and object references are
-            // equal only if they point to the exact same object. TreeNode.eq()
-            // or similar should probably be used instead for comparison.
-            //
-            // Maybe we should take a function like Array.find().
             if(!explored.includes(child)) {
                 q.unshift(child);
             }
