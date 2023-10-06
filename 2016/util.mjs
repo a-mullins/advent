@@ -90,27 +90,6 @@ function dfs(root, predicate) {
 }
 
 
-// root :: TreeNode
-// goalPred :: function(TreeNode) -> Boolean
-// makeChildren :: function(TreeNode) -> _
-function* buildTree(root, goalPred, makeChildren) {
-    let stack = [root];
-
-    while(stack.length > 0) {
-        let cur = stack.pop();
-
-        if(goalPred(cur)) {
-            yield cur;
-        } else {
-            makeChildren(cur);
-            for(const child of cur.children) {
-                stack.push(child);
-            }
-        }
-    }
-}
-
-
 // TODO: implement as binary heap.
 class Pqueue {
     // Quick & dirt pqueue. Not effecient.
@@ -222,4 +201,4 @@ class Deque {
 }
 
 
-export { TreeNode, Pqueue, Deque, bfs, dfs, buildTree };
+export { TreeNode, Pqueue, Deque, bfs, dfs};
