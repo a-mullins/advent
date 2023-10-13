@@ -5,10 +5,6 @@
 #include <string.h>
 
 int main(void) {
-    /* const int diff_size = 4096; */
-    /* int diffs[diff_size]; */
-    /* memset(&diffs, -1, diff_size * sizeof (int)); */
-
     int sum = 0;
     // for each line of file
     while(true) {
