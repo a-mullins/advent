@@ -4,8 +4,6 @@
 #include <string.h>
 
 #define MAX_NODES 1605
-#define MAX_LABEL_LEN 7
-#define MAX_CHILDREN 7
 #define DELIMS " \t\r\n()->,"
 
 char *children[MAX_NODES+1] = {NULL};
