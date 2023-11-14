@@ -3,73 +3,47 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define MAX_NODES 1605
 #define DELIMS " \t\r\n()->,"
+#define FIELD_LEN 8
+#define MAX_LINES 1606
 
-char *children[MAX_NODES+1] = {NULL};
-char *nodes[MAX_NODES+1] = {NULL};
-
-bool includes(char *list[], char *s);
-int len(char *list[]);
-void push(char *list[], char *s);
-void clear(char *list[]);
+bool includes(char list[][FIELD_LEN], char *s);
 
 int main(void) {
-  size_t linecap = 80;
-  char *line = malloc(sizeof(char) * linecap);
-  while(getline(&line, &linecap, stdin) != -1) {
-    char *label = strtok(line, DELIMS);
-    push(nodes, label);
-    char *weight = strtok(NULL, DELIMS);
-    char *child = NULL;
-    while((child = strtok(NULL, DELIMS)) != NULL) {
-      push(children, child);
+    char labels[MAX_LINES][FIELD_LEN]; //= {'\0'};
+    char children[MAX_LINES][FIELD_LEN]; //= {'\0'};
+    int label_i = 0;
+    int child_i = 0;
+    size_t line_cap = 80;
+    char *line = malloc(sizeof(char) * line_cap);
+    while(getline(&line, &line_cap, stdin) != -1) {
+        char *tok = strtok(line, DELIMS);
+        strncpy(labels[label_i], tok, FIELD_LEN);
+        // skip weight
+        strtok(NULL, DELIMS);
+        while((tok = strtok(NULL, DELIMS)) != NULL) {
+            strncpy(children[child_i++], tok, FIELD_LEN);
+        }
+        label_i++;
     }
-  }
-  free(line);
-  
-  for(int i=0; i<len(nodes); i++) {
-    if(!includes(children, nodes[i])) {
-      printf("%s\n", nodes[i]);
-      break;
+    free(line);
+
+    for(int i=0; i<MAX_LINES && labels[i] != NULL; i++) {
+        if(!includes(children, labels[i])) {
+            printf("%s\n", labels[i]);
+            break;
+        }
     }
-  }
 
-  clear(nodes);
-  clear(children);
-  return 0;
+    return 0;
 }
 
-bool includes(char *list[], char *s) {
-  if(s == NULL) { return true; }
-  for(int i=0; list[i] != NULL; i++) {
-    if(strcmp(list[i], s) == 0) {
-      return true;
+bool includes(char list[][FIELD_LEN], char *s) {
+    if(s == NULL) { return true; }
+    for(int i=0; i < MAX_LINES && list[i] != NULL; i++) {
+        if(strcmp(list[i], s) == 0) {
+            return true;
+        }
     }
-  }
-  return false;
-}
-
-int len(char* list[]) {
-  int i = 0;
-  for(/* nop */; list[i] != NULL; i++);
-  return i;
-}
-
-void push(char *list[], char *s) {
-  if(!includes(list, s)) {
-    char *buf = malloc(strlen(s)+1);
-    strcpy(buf, s);
-    list[len(list)] = buf;
-  }
-  return;
-}
-
-void clear(char *list[]) {
-  int l = len(list);
-  for(int i=0; i<l; i++) {
-    free(list[i]);
-    list[i] = NULL;
-  }
-  return;
+    return false;
 }
