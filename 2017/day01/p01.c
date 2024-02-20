@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-int solve_captcha(short *digits, size_t len);
+int solve_captcha(int *digits, size_t len);
 
 int main(void) {
     size_t buf_size = 0;
@@ -10,20 +10,24 @@ int main(void) {
     getline(&buf, &buf_size, stdin); // implicit malloc()
     buf[strcspn(buf, "\r\n")] = '\0'; // trim
 
+    // int *digits could be declared on the stack with a VLA alloca()
+    // but that will make for a large stack frame.
     size_t digits_size = strlen(buf);
-    short *digits = calloc(digits_size, sizeof (short));
-    for(int i=0; i<digits_size; i++) { digits[i] = (short)buf[i] - 0x30; }
+    int *digits = calloc(digits_size, sizeof (int));
+    for(size_t i=0; i<digits_size; i++) {
+        digits[i] = (int)buf[i] - 0x30;
+    }
 
     printf("%d\n", solve_captcha(digits, digits_size));
 
     free(buf);
     free(digits);
-    return EXIT_SUCCESS;
+    return 0;
 }
 
-int solve_captcha(short *digits, size_t len) {
-    short cur = 0;
-    short next = 0;
+int solve_captcha(int *digits, size_t len) {
+    int cur = 0;
+    int next = 0;
     int acc = 0;
     for(size_t i = 0; i<len; i++) {
         cur = digits[i];
