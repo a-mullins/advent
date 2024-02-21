@@ -40,6 +40,7 @@ int main(void) {
     done:
         /* nop */
     }
+    free(words);
     free(line);
 
     printf("%d\n", valid_count);

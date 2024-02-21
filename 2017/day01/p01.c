@@ -20,8 +20,8 @@ int main(void) {
 
     printf("%d\n", solve_captcha(digits, digits_size));
 
-    free(line);
     free(digits);
+    free(line);
     return 0;
 }
 
