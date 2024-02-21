@@ -1,25 +1,26 @@
-#include <stdio.h>  // getline, &c
-#include <stdlib.h> // atoi, free
+#include <stdio.h>
+#include <stdlib.h>
 
-#define MAX_JUMPS 2048
+#define MAX_OFFSETS 2048
 
 int main(void) {
-    int jumps[MAX_JUMPS] = { 0 };
-    int jumps_len = 0;
+    int *offsets = calloc(MAX_OFFSETS, sizeof (int));
+    int offsets_len = 0;
 
-    char *buf = NULL;
-    size_t buf_size = 0;
-    while(getline(&buf, &buf_size, stdin) != -1 && jumps_len < MAX_JUMPS) {
-        jumps[jumps_len++] = atoi(buf);
+    char *line = NULL;
+    size_t len = 0;
+    while(getline(&line, &len, stdin) != -1 && offsets_len < MAX_OFFSETS) {
+        offsets[offsets_len++] = atoi(line);
     }
-    free(buf);
+    free(line);
 
     int ip = 0; // instruction pointer
     int steps = 0;
-    while(0 <= ip && ip < jumps_len) {
-        ip += jumps[ip]++;
+    while(0 <= ip && ip < offsets_len) {
+        ip += offsets[ip]++;
         steps++;
     }
+    free(offsets);
 
     printf("steps: %d\n", steps);
 }
