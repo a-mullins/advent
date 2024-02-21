@@ -5,11 +5,11 @@
 #include <string.h>
 
 int main(void) {
-    size_t buf_size = 0;
-    char *buf = NULL;
-    getline(&buf, &buf_size, stdin); // implicit malloc.
-    int input = atoi(buf);
-    free(buf);
+    size_t len = 0;
+    char *line = NULL;
+    getline(&line, &len, stdin); // implicit malloc.
+    int input = atoi(line);
+    free(line);
 
     int rows = (int)ceil(sqrt(input));
     int cols = rows;

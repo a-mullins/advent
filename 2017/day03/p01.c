@@ -33,11 +33,11 @@ int dist(int target) {
 }
 
 int main(void) {
-    size_t buf_size = 0;
-    char *buf = NULL;
-    getline(&buf, &buf_size, stdin); // implicit malloc.
-    int i = atoi(buf);
-    free(buf);                       // explicit free.
+    size_t len = 0;
+    char *line = NULL;
+    getline(&line, &len, stdin); // implicit malloc.
+    int i = atoi(line);
+    free(line);
 
     printf("%d\n", dist(i));
     return 0;

@@ -7,13 +7,13 @@ int main(void) {
     int sum = 0;
 
     char delims[] = " \r\n\t";
-    size_t buf_size = 0;
-    char *buf = NULL;
-    while(getline(&buf, &buf_size, stdin) > 0) {
+    size_t len = 0;
+    char *line = NULL;
+    while(getline(&line, &len, stdin) > 0) {
         char *tok = NULL;
         int digits[512];
         int num_digits = 0;
-        tok = strtok(buf, delims);
+        tok = strtok(line, delims);
         // for each token of line
         do {
             digits[num_digits] = atoi(tok);
@@ -32,7 +32,7 @@ int main(void) {
             }
         }
     }
-    free(buf);
+    free(line);
 
     printf("%d\n", sum);
     return 0;
