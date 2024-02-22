@@ -4,46 +4,64 @@
 #include <string.h>
 
 #define DELIMS " \t\r\n()->,"
-#define FIELD_LEN 8
-#define MAX_LINES 1606
+#define MAX_LINES 2048
 
-bool includes(char list[][FIELD_LEN], char *s);
+int namecmp(const void *a, const void *b);
 
 int main(void) {
-    char labels[MAX_LINES][FIELD_LEN]; //= {'\0'};
-    char children[MAX_LINES][FIELD_LEN]; //= {'\0'};
-    int label_i = 0;
-    int child_i = 0;
-    size_t line_cap = 80;
-    char *line = malloc(sizeof(char) * line_cap);
-    while(getline(&line, &line_cap, stdin) != -1) {
+    char **names = calloc(MAX_LINES, sizeof(char *));
+    memset(names, 0, MAX_LINES * sizeof(char *));
+    int names_len = 0;
+
+    char **children = calloc(MAX_LINES, sizeof(char *));
+    memset(children, 0, MAX_LINES * sizeof(char *));
+    int children_len = 0;
+
+    size_t len = 80;
+    char *line = calloc(len, sizeof(char));
+    while(getline(&line, &len, stdin) > 0) {
         char *tok = strtok(line, DELIMS);
-        strncpy(labels[label_i], tok, FIELD_LEN);
-        // skip weight
+        // program name
+        names[names_len] = calloc(strlen(tok) + 1, sizeof(char));
+        strcpy(names[names_len], tok);
+        // discard first field, which is weight
         strtok(NULL, DELIMS);
+
+        // collect names of children.
+        // We don't need to worry about repeated strings, because
+        // a child can only have one parent.
+        // ie, no child will show up in two different lines.
         while((tok = strtok(NULL, DELIMS)) != NULL) {
-            strncpy(children[child_i++], tok, FIELD_LEN);
+            children[children_len] = calloc(strlen(tok) + 1, sizeof(char));
+            strcpy(children[children_len], tok);
+            children_len++;
         }
-        label_i++;
+        names_len++;
     }
-    free(line);
+    free(line); line = NULL; len = 0;
 
-    for(int i=0; i<MAX_LINES && labels[i] != NULL; i++) {
-        if(!includes(children, labels[i])) {
-            printf("%s\n", labels[i]);
-            break;
+    // For every program, check if it is a child.
+    // If it is not a child of any node, then it must be the root.
+    qsort(children, children_len, sizeof(*children), namecmp);
+    for(int i = 0; i<MAX_LINES && names[i] != NULL; i++) {
+        char **result = bsearch(
+            &names[i], children, children_len,
+            sizeof(*children), namecmp);
+        if(result == NULL) {
+            printf("%s\n", names[i]);
         }
     }
 
+    for(int i = 0; children[i] != NULL; i++) {free(children[i]);}
+    free(children);
+    for(int i = 0; names[i] != NULL; i++) {free(names[i]);}
+    free(names);
     return 0;
 }
 
-bool includes(char list[][FIELD_LEN], char *s) {
-    if(s == NULL) { return true; }
-    for(int i=0; i < MAX_LINES && list[i] != NULL; i++) {
-        if(strcmp(list[i], s) == 0) {
-            return true;
-        }
-    }
-    return false;
+int namecmp(const void *a, const void *b) {
+    // a will be a pointer-to-pointer-to-char
+    const char *p = *(const char **)a;
+    const char *q = *(const char **)b;
+    return strcmp(p, q);
 }
