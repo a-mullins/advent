@@ -40,14 +40,15 @@ int tree_weight(int i);
 // doing link-chasing.
 //
 // 1. Parse input.
-//    a. build a map of names to indicies: name[name_i].
-//    b. build a map of weights to indicies: weight[name_i].
+//    - build a map of names to indicies: name[name_i].
+//    - build a map of weights to indicies: weight[name_i].
 //
 // 2. Parse input again.
-//    c. mark child nodes in the adjacency matrix:
-//       tree[from][to] = true;
+//    - mark child nodes in the adjacency matrix:
+//      tree[from][to] = true;
 //
-// 3. Find root node: scan by col, empty col means no parents.
+// 3. Find root node.
+//    Scan by col, empty col means no parents.
 //    That col corresponds to the root node of the tree.
 static char name[MAX_LINES][FIELD_WIDTH];
 static int weight[MAX_LINES];
@@ -58,7 +59,7 @@ int main(void) {
     size_t len = 80;
     char *line = calloc(len, sizeof(char));
 
-    // first pass.
+    // First pass.
     while(getline(&line, &len, stdin) > 0) {
         // name.
         strncpy(name[names_len++], strtok(line, DELIMS), FIELD_WIDTH-1);
@@ -66,18 +67,18 @@ int main(void) {
 
     if(fseek(stdin, 0L, SEEK_SET) != 0) {
         fprintf(stderr,
-                "seek failed. please connet stdin to a regular file.\n");
+                "Seek failed. Please connect stdin to a regular file.\n");
         exit(1);
     }
 
     qsort(&name, names_len, FIELD_WIDTH, namecmp);
 
-    // second pass.
+    // Second pass.
     while(getline(&line, &len, stdin) > 0) {
         char *tok = NULL;
         ssize_t parent_i = -1;
 
-        // program name.
+        // program name
         tok = strtok(line, DELIMS);
         parent_i = name2idx(tok);
 
@@ -85,6 +86,7 @@ int main(void) {
         tok = strtok(NULL, DELIMS);
         weight[parent_i] = atoi(tok);
 
+        // children
         ssize_t child_i = -1;
         while((tok = strtok(NULL, DELIMS)) != NULL) {
             child_i = name2idx(tok);
@@ -93,16 +95,19 @@ int main(void) {
     }
     free(line); line = NULL; len = 0;
 
+    // debug
     for(int i = 0; i<names_len; i++) {
         printf("%4d: %8s (%5d)\n", i, name[i], weight[i]);
     }
 
+    // debug
     char *needle = "kcimi";
     printf("%s is at idx %lu\n", needle, name2idx(needle));
 
-    // in the adjacency-matrix representation of a tree, if a col is
-    // all false, then that col represents a node that has no
-    // in-links, ie, no parents.
+    // In the adjacency-matrix representation of a tree, if a col is
+    // all false, then that col corresponds to a node that has no
+    // in-links, ie, no parents. Such a node must be the root of the
+    // tree.
     int root_idx = -1;
     for(int col = 0; col<MAX_LINES; col++) {
         bool rootp = true;
@@ -140,22 +145,22 @@ ssize_t name2idx(char *needle) {
     return (ssize_t)((offset - (void *)name) / FIELD_WIDTH);
 }
 
-// Since there is only one mismatched node, there will only ever be
-// one branch that we need to follow, unlike DFS/BFS/A*, etc, so an
-// iterative approach will work just as well/be just as easy to reason
-// about as the recursive one. Also, as an aside, this problem
-// probably is unlikely to benefit from parrallelization.
+// Since there is only one mismatched node, there will always be just
+// one branch to follow, unlike DFS/BFS/A*, etc. An iterative approach
+// will work just as well/be just as easy to reason about as the
+// recursive one. Also, this problem is unlikely to benefit from
+// parrallelization.
 //
-// 1. Is everything on this node even?
-//    a. If so, then it is the one whose weight needs to be
-//       adjusted. Calculate & return value.
-// 2. Examine branches of node of this node. Explore whichever node is
-//     mismatched.
+// 1. Are all of the weights of this node's children the same?
+//    - If yes, then this node is the one whose weight needs to be
+//      adjusted. Calculate the difference between its tree weight and
+//      the target weight, then return the value.
+//    - If no, examine branches of node of this node. Explore
+//      whichever node is mismatched.
 //
-// for child of children(cur):
-//     if children(child) are even:
-//        return difference of this child and any other child.
 int tree_weight(int root) {
+    static int target = -1; // static vars are init'd only once, ever.
+
     int len = 0;
     int child[MAX_CHILDREN];
     for(int to = 0; to < MAX_LINES; to++) {
