@@ -52,6 +52,7 @@ int tree_weight(int i);
 //    That col corresponds to the root node of the tree.
 static char name[MAX_LINES][FIELD_WIDTH];
 static int weight[MAX_LINES];
+static int total_weight[MAX_LINES];
 static int names_len = 0;
 static bool tree[MAX_LINES][MAX_LINES] = {false};
 
@@ -126,6 +127,9 @@ int main(void) {
 
     // find unbalanced node.
     //printf("tree weight is %d\n", tree_weight(name2idx("pabgfh")));
+    printf("sub-tree weight of ebsxx is %d\n", tree_weight(name2idx("ebsxx")));
+    printf("sub-tree weight of unzzng is %d\n", tree_weight(name2idx("unzzng")));
+    printf("sub-tree weight of zzwtuu is %d\n", tree_weight(name2idx("zzwtuu")));
     printf("tree weight is %d\n", tree_weight(root_idx));
 
     return 0;
@@ -145,6 +149,27 @@ ssize_t name2idx(char *needle) {
     return (ssize_t)((offset - (void *)name) / FIELD_WIDTH);
 }
 
+int tree_weight(int root) {
+    if(total_weight[root] > 0) {
+        return total_weight[root];
+    }
+
+    int child_len = 0;
+    int child[MAX_CHILDREN];
+    for(int to = 0; to < MAX_LINES; to++) {
+        if(tree[root][to]) {
+            child[child_len++] = to;
+        }
+    }
+
+    total_weight[root] = weight[root];
+    for(int i = 0; i < child_len; i++) {
+        total_weight[root] += tree_weight(child[i]);
+    }
+
+    return total_weight[root];
+}
+
 // Since there is only one mismatched node, there will always be just
 // one branch to follow, unlike DFS/BFS/A*, etc. An iterative approach
 // will work just as well/be just as easy to reason about as the
@@ -158,41 +183,41 @@ ssize_t name2idx(char *needle) {
 //    - If no, examine branches of node of this node. Explore
 //      whichever node is mismatched.
 //
-int tree_weight(int root) {
-    static int target = -1; // static vars are init'd only once, ever.
+// int find_unbalt(int root) {
+//     static int target = -1; // static vars are init'd only once, ever.
 
-    int len = 0;
-    int child[MAX_CHILDREN];
-    for(int to = 0; to < MAX_LINES; to++) {
-        if(tree[root][to]) {
-            child[len++] = to;
-        }
-    }
+//     int len = 0;
+//     int child[MAX_CHILDREN];
+//     for(int to = 0; to < MAX_LINES; to++) {
+//         if(tree[root][to]) {
+//             child[len++] = to;
+//         }
+//     }
 
-    // 1. if this node is balanced, stop.
-    // 2. if this node is unbalanced, ...
+//     // 1. if this node is balanced, stop.
+//     // 2. if this node is unbalanced, ...
 
-    if(len > 0) {
-        int cur = tree_weight(child[0]);
-        for(int i=1; i<len; i++) {
-            if(cur != tree_weight(child[i])) {
-                printf("program %s's (id#%d) disc is unbalanced.\n",
-                       name[root],
-                       root);
-            }
-        }
-    }
+//     if(len > 0) {
+//         int cur = tree_weight(child[0]);
+//         for(int i=1; i<len; i++) {
+//             if(cur != tree_weight(child[i])) {
+//                 printf("program %s's (id#%d) disc is unbalanced.\n",
+//                        name[root],
+//                        root);
+//             }
+//         }
+//     }
 
-    // if(len > 0) {
-    //     printf("node %4d (%s) has children:\n", root, name[root]);
-    //     for(int i=0; i<len; i++) {
-    //         printf("\t%4d (%s)\n", child[i], name[child[i]]);
-    //     }
-    // } else {
-    //     printf("node %4d (%s) is a leaf\n", root, name[root]);
-    // }
+//     // if(len > 0) {
+//     //     printf("node %4d (%s) has children:\n", root, name[root]);
+//     //     for(int i=0; i<len; i++) {
+//     //         printf("\t%4d (%s)\n", child[i], name[child[i]]);
+//     //     }
+//     // } else {
+//     //     printf("node %4d (%s) is a leaf\n", root, name[root]);
+//     // }
 
-    // printf("tree_weight(%d) -> %d\n", root, sum);
+//     // printf("tree_weight(%d) -> %d\n", root, sum);
 
-    return sum;
-}
+//     return sum;
+// }
