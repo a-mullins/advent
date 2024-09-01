@@ -2,6 +2,22 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+
+int dist(int target);
+
+
+int main(void) {
+    size_t len = 0;
+    char *line = NULL;
+    getline(&line, &len, stdin); // implicit malloc.
+    int i = atoi(line);
+    free(line);
+
+    printf("%d\n", dist(i));
+    return 0;
+}
+
+
 int dist(int target) {
     //          …  …  square root of the bottom-right corner
     // …  7  8  9 10      of target's 'ring'. eg:
@@ -30,15 +46,4 @@ int dist(int target) {
     }
 
     return abs(x) + abs(y);
-}
-
-int main(void) {
-    size_t len = 0;
-    char *line = NULL;
-    getline(&line, &len, stdin); // implicit malloc.
-    int i = atoi(line);
-    free(line);
-
-    printf("%d\n", dist(i));
-    return 0;
 }

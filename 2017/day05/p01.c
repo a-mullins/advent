@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+
 #define MAX_OFFSETS 2048
+
 
 int main(void) {
     int *offsets = calloc(MAX_OFFSETS, sizeof (int));

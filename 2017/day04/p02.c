@@ -3,13 +3,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+
 #define WORD_LIMIT 32
 
-int charcmp(const void *p, const void *q) {
-    const char a = *(const char *)p;
-    const char b = *(const char *)q;
-    return (a > b) - (a < b);
-}
+
+int charcmp(const void *p, const void *q);
+
 
 int main(void) {
     char *delims = " \t\r\n";
@@ -45,4 +44,11 @@ int main(void) {
 
     printf("%d\n", valid_count);
     return 0;
+}
+
+
+int charcmp(const void *p, const void *q) {
+    const char a = *(const char *)p;
+    const char b = *(const char *)q;
+    return (a > b) - (a < b);
 }

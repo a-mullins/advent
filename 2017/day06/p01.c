@@ -3,9 +3,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+
 #define HIST_SIZE 4096
 #define BANKS 16
 #define DELIMS " \t\r\n"
+
 
 int main(void) {
     int hist[HIST_SIZE][BANKS] = {0};

@@ -11,7 +11,7 @@ int main(void) {
     char *line = NULL;
     while(getline(&line, &len, stdin) > 0) {
         char *tok = NULL;
-        int digits[512];
+        int digits[32];
         int num_digits = 0;
         tok = strtok(line, delims);
         // for each token of line
@@ -19,7 +19,7 @@ int main(void) {
             digits[num_digits] = atoi(tok);
             num_digits++;
             tok = strtok(NULL, delims);
-        } while(tok != NULL);
+        } while(tok != NULL && num_digits < 32);
 
         // note: we do not have to check for size in
         // sum += i / j because if i % j == 0, then i>=j.
