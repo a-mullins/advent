@@ -1,13 +1,16 @@
+// TODO cleanup pass
 #include <limits.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+
 #define DELIMS " \t\r\n()->,"
 #define MAX_LINES 2048
 #define FIELD_WIDTH 16
 #define MAX_CHILDREN 8
+
 
 typedef struct prog {
     char *name;
@@ -16,10 +19,12 @@ typedef struct prog {
     int weight;
 } prog;
 
+
 int namecmp(const void *a, const void *b);
 ssize_t name2idx(char *needle);
 int tree_weight(int i);
 void find_unbal(int root);
+
 
 // When processing the list of programs, a program might make a
 // forward-reference by listing a child that hasn't yet appeared.
@@ -56,6 +61,7 @@ static char name[MAX_LINES][FIELD_WIDTH];
 static int weight[MAX_LINES];
 static int names_len = 0;
 static bool tree[MAX_LINES][MAX_LINES] = {false};
+
 
 int main(void) {
     size_t len = 80;
@@ -98,15 +104,6 @@ int main(void) {
     }
     free(line); line = NULL; len = 0;
 
-    // debug
-    // for(int i = 0; i<names_len; i++) {
-    //     printf("%4d: %8s (%5d)\n", i, name[i], weight[i]);
-    // }
-
-    // debug
-    // char *needle = "kcimi";
-    // printf("%s is at idx %lu\n", needle, name2idx(needle));
-
     // In the adjacency-matrix representation of a tree, if a col is
     // all false, then that col corresponds to a node that has no
     // in-links, ie, no parents. Such a node must be the root of the
@@ -118,7 +115,7 @@ int main(void) {
     //
     // I wonder which is faster?
     // Of course, all of this is only possible with the pre-knowledge that
-    // our input does represent a valid tree.
+    // our input actually represents a valid tree.
     int root_idx = -1;
     for(int col = 0; col<MAX_LINES; col++) {
         bool rootp = true;
@@ -133,14 +130,8 @@ int main(void) {
             break;
         }
     }
-    printf("root is at idx %d: %s\n", root_idx, name[root_idx]);
-
-    // find unbalanced node.
-    //printf("tree weight is %d\n", tree_weight(name2idx("pabgfh")));
-    printf("sub-tree weight of ebsxx is %d\n", tree_weight(name2idx("ebsxx")));
-    printf("sub-tree weight of unzzng is %d\n", tree_weight(name2idx("unzzng")));
-    printf("sub-tree weight of zzwtuu is %d\n", tree_weight(name2idx("zzwtuu")));
-    printf("tree weight is %d\n", tree_weight(root_idx));
+    printf("root is at idx %d \"%s\"\n", root_idx, name[root_idx]);
+    printf("total tree weight is %d\n", tree_weight(root_idx));
 
     find_unbal(root_idx);
 
@@ -265,9 +256,9 @@ void find_unbal(int root) {
         target_w = max;
     }
 
-    printf("    %d child sub-trees have min-weight %d\n", min_c, min);
-    printf("    %d child sub-trees have max-weight %d\n", max_c, max);
-    printf("    next sub-tree to check is %d\n", next_i);
+    //printf("    %d child sub-trees have min-weight %d\n", min_c, min);
+    //printf("    %d child sub-trees have max-weight %d\n", max_c, max);
+    //printf("    next sub-tree to check is %d\n", next_i);
     //printf("tree_weight(#%d) -> %d\n", target_i, sum);
 
     // examine child node's children:
@@ -283,10 +274,10 @@ void find_unbal(int root) {
 
         int max = INT_MIN;
         int min = INT_MAX;
-        printf("      node %d \"%s\" has children:\n", next_i, name[next_i]);
+        // printf("      node %d \"%s\" has children:\n", next_i, name[next_i]);
         for(int i = 0; i<len; i++) {
-            printf("        %4d \"%7s\" (%5d)\n", child[i], name[child[i]],
-                   tree_weight(child[i]));
+            // printf("        %4d \"%7s\" (%5d)\n", child[i], name[child[i]],
+            //        tree_weight(child[i]));
 
             if(tree_weight(child[i]) < min) {
                 min = tree_weight(child[i]);
@@ -299,11 +290,11 @@ void find_unbal(int root) {
     }
 
     if(next_unbal_p) {
-        printf("visiting %d, children unbalanced\n", next_i);
+        // printf("visiting %d, children unbalanced\n", next_i);
         find_unbal(next_i);
     } else {
-        printf("target node's children are balanced, need to modify weight by "
-               "%d units\n", target_w - tree_weight(next_i));
+        // printf("target node's children are balanced, need to modify weight by "
+        //        "%d units\n", target_w - tree_weight(next_i));
         printf("node %d \"%s\" weighs %d, but should weigh %d\n",
                next_i, name[next_i], weight[next_i],
                weight[next_i] + (target_w - tree_weight(next_i))

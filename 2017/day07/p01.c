@@ -1,12 +1,16 @@
+// TODO cleanup pass
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+
 #define DELIMS " \t\r\n()->,"
 #define MAX_LINES 2048
 
+
 int namecmp(const void *a, const void *b);
+
 
 int main(void) {
     char **names = calloc(MAX_LINES, sizeof(char *));
@@ -59,8 +63,10 @@ int main(void) {
     return 0;
 }
 
+
 int namecmp(const void *a, const void *b) {
-    // a will be a pointer-to-pointer-to-char
+    // `a` and `b` will be a pointer-to-pointer-to-char, aka
+    // a pointer to a string.
     const char *p = *(const char **)a;
     const char *q = *(const char **)b;
     return strcmp(p, q);

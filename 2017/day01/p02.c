@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-int solve_captcha(int *digits, size_t len);
+int solve_captcha(int *digits, int len);
 
 int main(void) {
     size_t len = 0;
@@ -16,18 +16,18 @@ int main(void) {
         digits[i] = (int)line[i] - 0x30;
     }
 
-    printf("%d\n", solve_captcha(digits, digits_size));
+    printf("%d\n", solve_captcha(digits, (int)digits_size));
 
     free(digits);
     free(line);
     return 0;
 }
 
-int solve_captcha(int *digits, size_t len) {
+int solve_captcha(int *digits, int len) {
     int cur = 0;
     int next = 0;
     int acc = 0;
-    for(size_t i = 0; i<len; i++) {
+    for(int i = 0; i<len; i++) {
         cur = digits[i];
         next = digits[(i+len/2) % len];
         if(cur == next) {
