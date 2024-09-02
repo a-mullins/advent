@@ -29,26 +29,25 @@ void find_unbal(int root);
 // When processing the list of programs, a program might make a
 // forward-reference by listing a child that hasn't yet appeared.
 //
-// It's possible to build up the tree in a single pass by following
-// these forward references, creating the child nodes, and then
-// ensuring we don't add those same nodes a second time when they are
-// encountered again later in the file.
+// It's possible to build up the tree in a single pass by following these
+// forward references, creating the child nodes, and then ensuring we don't
+// add those same nodes a second time when they are encountered again later in
+// the file.
 //
-// However, the easier solution is to process the list twice, once to
-// collect the names and weights of the programs, and a second time to
-// record the children.
+// However, the easier solution is to process the list twice, once to collect
+// the names and weights of the programs, and a second time to record the
+// children.
 //
 // Although it's not space-effecient for sparse trees, we will use an
-// adjacency matrix. It's easy to implement, we can find the root node
-// pretty simply by finding a blank col, and... I've never actually
-// used one before that I can recall, so why not? It seems to me a
-// very "C" solution, in that we'll be tracking our data in multiple
-// plain arrays, instead of building up complicated datastructs and
-// doing link-chasing.
+// adjacency matrix. It's easy to implement, we can find the root node easily
+// by finding a blank col, and I've never actually implemented one before that
+// I can recall, so why not? It also seems like a very "C" solution, in that
+// we'll be tracking our data in multiple plain arrays instead of building up
+// complicated datastructs and doing link-chasing.
 //
 // 1. Parse input.
-//    - build a map of names to indicies: name[name_i].
-//    - build a map of weights to indicies: weight[name_i].
+//    - build a map of indicies to names: name[name_i].
+//    - build a map of indicies to weights: weight[name_i].
 //
 // 2. Parse input again.
 //    - mark child nodes in the adjacency matrix:
