@@ -53,7 +53,7 @@ of squares of odds.
 eg: 1^2 = 1, 3^2 = 9, 5^2 = 25....
 
 So if we have an index `i`, we can find which odd-square is above it by
-`f(i) = if ceil(sqrt(i))` then `ceil(sqrt(i))`; else `ceil(sqrt(i))+1`.
+`f(i) = if ceil(sqrt(i)) then ceil(sqrt(i)); else ceil(sqrt(i))+1`.
 eg:
 ```
   i : 22 17 15 10 8 3 1 ...
@@ -67,7 +67,7 @@ also note that:
 ```
 
 So if we know the odd-square above `i`, we can find that odd square's
-coordinates by rearranging `j = 2k+i ⇒ k ⟺ (j-1)/2.`
+coordinates by rearranging `j = 2k+i  ⟺  k = (j-1)/2.`
 
 Then we can count backwards, turning at square border, which is
 square units away from the last turn.
