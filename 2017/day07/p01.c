@@ -28,7 +28,7 @@ int main(void) {
         // program name
         names[names_len] = calloc(strlen(tok) + 1, sizeof(char));
         strcpy(names[names_len], tok);
-        // discard first field, which is weight
+        // discard next field, which is weight
         strtok(NULL, DELIMS);
 
         // collect names of children.
