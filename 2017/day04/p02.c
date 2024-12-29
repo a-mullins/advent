@@ -4,32 +4,38 @@
 #include <stdlib.h>
 
 
-#define WORD_LIMIT 32
+int
+charcmp(const void *p, const void *q)
+{
+    const char a = *(const char *)p;
+    const char b = *(const char *)q;
+    return (a > b) - (a < b);
+}
 
 
-int charcmp(const void *p, const void *q);
-
-
-int main(void) {
-    char *delims = " \t\r\n";
+int
+main(void)
+{
+    const size_t WORD_LIMIT = 32;
+    const char *delims = " \t\r\n";
     int valid_count = 0;
 
     size_t len = 0;
     char *line = NULL;
     char **words = calloc(WORD_LIMIT, sizeof (char *));
-    while(getline(&line, &len, stdin) > 0) {
+    while (getline(&line, &len, stdin) > 0) {
         memset(words, 0, WORD_LIMIT * sizeof (char *));
-        int i = 0;
+        size_t i = 0;
         char *tok = strtok(line, delims);
         do {
             words[i++] = tok;
             tok = strtok(NULL, delims);
-        } while(tok !=NULL && i<WORD_LIMIT);
+        } while (tok != NULL && i<WORD_LIMIT);
 
-        for(int i = 0; i<WORD_LIMIT && words[i] != NULL; i++) {
-            qsort(words[i], strlen(words[i]), sizeof (*words[i]), charcmp);
-            for(int j = 0; j < i; j++) {
-                if(!strcmp(words[i], words[j])) {
+        for (size_t i = 0; i<WORD_LIMIT && words[i] != NULL; i++) {
+            qsort(words[i], strlen(words[i]), sizeof *words[0], charcmp);
+            for (size_t j = 0; j < i; j++) {
+                if (!strcmp(words[i], words[j])) {
                     goto done;
                 }
             }
@@ -44,11 +50,4 @@ int main(void) {
 
     printf("%d\n", valid_count);
     return 0;
-}
-
-
-int charcmp(const void *p, const void *q) {
-    const char a = *(const char *)p;
-    const char b = *(const char *)q;
-    return (a > b) - (a < b);
 }

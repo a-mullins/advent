@@ -1,0 +1,1 @@
+TODO convert sys.stdin.read() to input() where possible. One less input.

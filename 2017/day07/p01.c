@@ -5,14 +5,23 @@
 #include <string.h>
 
 
-#define DELIMS " \t\r\n()->,"
-#define MAX_LINES 2048
+int
+namecmp(const void *a, const void *b)
+{
+    // `a` and `b` will be a pointer-to-pointer-to-char, aka
+    // a pointer to a string.
+    const char *p = *(const char **)a;
+    const char *q = *(const char **)b;
+    return strcmp(p, q);
+}
 
 
-int namecmp(const void *a, const void *b);
+int
+main(void)
+{
+    const char *DELIMS = " \t\r\n()->,";
+    const size_t MAX_LINES = 2048;
 
-
-int main(void) {
     char **names = calloc(MAX_LINES, sizeof(char *));
     memset(names, 0, MAX_LINES * sizeof(char *));
     int names_len = 0;
@@ -23,7 +32,7 @@ int main(void) {
 
     size_t len = 80;
     char *line = calloc(len, sizeof(char));
-    while(getline(&line, &len, stdin) > 0) {
+    while (getline(&line, &len, stdin) > 0) {
         char *tok = strtok(line, DELIMS);
         // program name
         names[names_len] = calloc(strlen(tok) + 1, sizeof(char));
@@ -35,7 +44,7 @@ int main(void) {
         // We don't need to worry about repeated strings, because
         // a child can only have one parent.
         // ie, no child will show up in two different lines.
-        while((tok = strtok(NULL, DELIMS)) != NULL) {
+        while ((tok = strtok(NULL, DELIMS)) != NULL) {
             children[children_len] = calloc(strlen(tok) + 1, sizeof(char));
             strcpy(children[children_len], tok);
             children_len++;
@@ -47,27 +56,18 @@ int main(void) {
     // For every program, check if it is a child.
     // If it is not a child of any node, then it must be the root.
     qsort(children, children_len, sizeof(*children), namecmp);
-    for(int i = 0; i<MAX_LINES && names[i] != NULL; i++) {
+    for (size_t i = 0; i<MAX_LINES && names[i] != NULL; i++) {
         char **result = bsearch(
             &names[i], children, children_len,
             sizeof(*children), namecmp);
-        if(result == NULL) {
+        if (result == NULL) {
             printf("%s\n", names[i]);
         }
     }
 
-    for(int i = 0; children[i] != NULL; i++) {free(children[i]);}
+    for (int i = 0; children[i] != NULL; i++) {free(children[i]);}
     free(children);
-    for(int i = 0; names[i] != NULL; i++) {free(names[i]);}
+    for (int i = 0; names[i] != NULL; i++) {free(names[i]);}
     free(names);
     return 0;
-}
-
-
-int namecmp(const void *a, const void *b) {
-    // `a` and `b` will be a pointer-to-pointer-to-char, aka
-    // a pointer to a string.
-    const char *p = *(const char **)a;
-    const char *q = *(const char **)b;
-    return strcmp(p, q);
 }
