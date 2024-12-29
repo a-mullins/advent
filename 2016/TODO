@@ -1,0 +1,41 @@
+all:
+        TODO code style review. snake case or camel case?
+             js methods seem to go for camel, but I'm used to snake from python.
+
+        TODO in that same vein, review brace placement, etc. Maybe use PEP 7.
+
+        TODO A*/traverser: should pruned nodes go in explored? that way we don't
+             revisit them. or make another buffer and check both.
+util.mjs:
+        TODO rework bfs() (that's breadth-first) based on notes in comments.
+             think about if it can be used as a best-first search.
+day02:
+        TODO p01 nested if()'s conditionals can be collapsesd
+        TODO p02 if()'s conditionals can be merged, no tmp vars needed
+day03:
+        TODO p01 a - b is not transitive.
+        TODO can probably use a .trim().split(/\s+/) to avoid hardcoding where
+             to slice the input.
+day09:
+        TODO p02 looks like it can be made into a parrallel version easily.
+             investigate.
+day11:
+        TODO move helper functions into ../util.mjs (combinations)
+        TODO move functions like next_states & weight into State.
+        TODO day24's pairs() might be replacable by combinations()?
+        TODO search() is a_star, with f(n) = weight(state) + node.depth.
+                 can we use a generic a_star or best-first from util.mjs?
+        TODO move search's globals into a return object?
+                 (prune count, visit count, etc)
+day13:
+        TODO rework to use a dynamically expanding matrix & simple a_star
+             instead of using TreeNode, etc.
+day22:
+        TODO example text gives names as `node x1-y0`, then later as
+             `node y0-x1`. confusing. I should email about it.
+
+        TODO rework with a proper a*. figure out why the hell it's so slow
+             when the sol'n is pretty straightforward.
+day24:
+        TODO refactor to elim global vars.
+        TODO move helper functs to ../util.mjs (pairs, permute, taxi_d, &c)

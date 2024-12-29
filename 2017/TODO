@@ -1,0 +1,7 @@
+TODO review formatting, apply PEP 7 where possible.
+TODO review size types, etc.
+TODO implement and use a dynarray.
+TODO have `make` descend into subdirs
+TODO is there way a to verify all #includes are needed?
+TODO favor singular over plural names for array
+TODO refactoring C in emacs

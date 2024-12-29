@@ -1,27 +1,30 @@
-#include <limits.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <limits.h> // INT_MIN, INT_MAX
+#include <stddef.h> // NULL
+#include <stdio.h>  // getline(), printf(), stdin
+#include <stdlib.h> // atoi(), free()
+#include <string.h> // strtok()
 
-int main(void) {
+
+int
+main(void)
+{
+    const char DELIMS[] = " \r\n\t";
     int sum = 0;
 
-    char delims[] = " \r\n\t";
     size_t len = 0;
     char *line = NULL;
-    while(getline(&line, &len, stdin) > 0) {
+    while (getline(&line, &len, stdin) > 0) {
         char *tok = NULL;
         int max = INT_MIN;
         int min = INT_MAX;
         // for each token of line
-        tok = strtok(line, delims);
+        tok = strtok(line, DELIMS);
         do {
             int cur = atoi(tok);
-            if(cur > max) { max = cur; }
-            if(cur < min) { min = cur; }
-            tok = strtok(NULL, delims);
-        } while(tok != NULL);
+            if (cur > max) {max = cur;}
+            if (cur < min) {min = cur;}
+            tok = strtok(NULL, DELIMS);
+        } while (tok != NULL);
 
         sum += max - min;
     }

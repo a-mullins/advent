@@ -1,32 +1,39 @@
-#include <stddef.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <stddef.h> // NULL
+#include <stdio.h>  // getline(), printf(), stdin
+#include <stdlib.h> // atoi(), free()
+#include <string.h> // strotk()
 
-int main(void) {
+
+int
+main(void)
+{
+    const char DELIMS[] = " \r\n\t";
+    const char MAX_DIGITS = 32;
     int sum = 0;
 
-    char delims[] = " \r\n\t";
     size_t len = 0;
     char *line = NULL;
-    while(getline(&line, &len, stdin) > 0) {
+    // for each line of input
+    while (getline(&line, &len, stdin) > 0) {
         char *tok = NULL;
-        int digits[32];
-        int num_digits = 0;
-        tok = strtok(line, delims);
-        // for each token of line
-        do {
-            digits[num_digits] = atoi(tok);
-            num_digits++;
-            tok = strtok(NULL, delims);
-        } while(tok != NULL && num_digits < 32);
+        int digits[MAX_DIGITS];
+        int len = 0;
 
-        // note: we do not have to check for size in
+        // for each token of line
+        tok = strtok(line, DELIMS);
+        do {
+            digits[len++] = atoi(tok);
+            tok = strtok(NULL, DELIMS);
+        } while (tok != NULL && len < MAX_DIGITS);
+
+        // "if j divides i evenly" translates to
+        // if (digits[i] % digits[j] == 0)
+        // also note that we do not have to check if j > i in
         // sum += i / j because if i % j == 0, then i>=j.
-        for(int i = 0; i<num_digits; i++) {
-            for(int j = 0; j<num_digits; j++) {
-                if(i == j) { continue; }
-                if(digits[i] % digits[j] == 0) {
+        for (int i = 0; i<len; i++) {
+            for (int j = 0; j<len; j++) {
+                if (i == j) {continue;}
+                if (digits[i] % digits[j] == 0) {
                     sum += digits[i] / digits[j];
                 }
             }
