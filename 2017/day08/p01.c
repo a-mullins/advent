@@ -1,4 +1,3 @@
-// TODO remove debug stuff
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -76,24 +75,15 @@ strtoinstr(char *s, instr *i, darray *registers)
 }
 
 
-char *
-dump_regs(char **s, darray *registers) {
-    char buf[512] = {0};
-    size_t end = 0;
-
-    for(size_t i = 0; i < registers->len; i++) {
-        reg *r = (reg *)darray_get(registers, i);
-        end += snprintf(buf+end,
-                        512 - end,
-                        "%3s: %5d, ",
-                        r->name, r->val);
+int
+max_reg(darray *regs)
+{
+    int max = ((reg *)darray_get(regs, 0))->val;
+    for (size_t i = 1; i < regs->len; i++) {
+        int other = ((reg *)darray_get(regs, i))->val;
+        if (other > max) {max = other;}
     }
-
-    buf[end - 2] = '\0';
-    *s = calloc(strlen(buf)+1, sizeof (char));
-    strcpy(*s, buf);
-
-    return *s;
+    return max;
 }
 
 
@@ -121,22 +111,14 @@ main(void)
 
     // So we can use darray_bsearch later.
     darray_qsort(&regs, regcmp);
-
     rewind(stdin);
-    int linum = 0;
-    char *foo = NULL;
-    printf("                                      ");
-    puts(dump_regs(&foo, &regs));
-    free(foo);
+    int all_time_high = 0;
     while (getline(&line, &len, stdin) >= 0) {
         instr i = {0};
         strtoinstr(line, &i, &regs);
 
         reg *cond_lhs = (reg *)darray_bsearch(&regs, i.cond.reg, regcmp);
         bool succ = false;
-        printf("%04d: %3s %s %5d if %3s %2s %5d",
-               ++linum, i.target->name, i.inc ? "inc" : "dec", i.amt,
-               cond_lhs->name, oper_s[i.cond.oper], i.cond.val);
         switch (i.cond.oper) {
         case GT:
             succ = cond_lhs->val > i.cond.val;
@@ -164,19 +146,12 @@ main(void)
                 i.target->val -= i.amt;
             }
         }
-        printf(" | ");
-        puts(dump_regs(&foo, &regs));
-        free(foo);
+        int cur_max = max_reg(&regs);
+        if (cur_max > all_time_high) {all_time_high = cur_max;}
     }
     free(line); line = NULL; len = 0;
 
-    int max = ((reg *)darray_get(&regs, 0))->val;
-    for(size_t i = 1; i < regs.len; i++) {
-        int other = ((reg *)darray_get(&regs, i))->val;
-        if(other > max) { max = other; }
-    }
-
-    printf("\nmax: %d\n", max);
+    printf("all time high: %d, max at end: %d\n", all_time_high, max_reg(&regs));
 
     // Cleanup.
     darray_free(&regs);
