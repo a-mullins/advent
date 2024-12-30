@@ -1,6 +1,5 @@
 // A simple dynamic array. Also known as a `vector` in the C++ world.
 #pragma once
-#include <stdbool.h>
 #include <stddef.h>
 
 typedef struct darray {
@@ -27,3 +26,6 @@ darray_clear(darray *d);
 
 void
 darray_free(darray *d);
+
+ssize_t
+darray_in(darray *d, void *elem);
