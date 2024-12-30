@@ -56,3 +56,14 @@ darray_free(darray *d) {
     free(d->buf);
     d->buf = NULL;
 }
+
+ssize_t
+darray_in(darray *d, void *elem)
+{
+    for (size_t i = 0; i<d->len; i++) {
+        if (memcmp(darray_get(d, i), elem, d->elem_size) == 0) {
+            return i;
+        }
+    }
+    return -1;
+}
