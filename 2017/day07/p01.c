@@ -1,73 +1,65 @@
-// TODO cleanup pass
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "../darray.h"
 
 
 int
 namecmp(const void *a, const void *b)
 {
-    // `a` and `b` will be a pointer-to-pointer-to-char, aka
-    // a pointer to a string.
-    const char *p = *(const char **)a;
-    const char *q = *(const char **)b;
-    return strcmp(p, q);
+    return strcmp((const char *)a, (const char*)b);
 }
 
 
 int
 main(void)
 {
-    const char *DELIMS = " \t\r\n()->,";
-    const size_t MAX_LINES = 2048;
+    static const char *DELIMS = " \t\r\n()->,";
+    static const size_t NAME_CAP = 16;
+    if(fseek(stdin, 0, SEEK_SET) != 0) {
+        fprintf(stderr, "ERR\n"); exit(1);
+    }
 
-    char **names = calloc(MAX_LINES, sizeof(char *));
-    memset(names, 0, MAX_LINES * sizeof(char *));
-    int names_len = 0;
+    darray children;
+    darray_init(&children, NAME_CAP * sizeof (char));
 
-    char **children = calloc(MAX_LINES, sizeof(char *));
-    memset(children, 0, MAX_LINES * sizeof(char *));
-    int children_len = 0;
-
-    size_t len = 80;
-    char *line = calloc(len, sizeof(char));
+    // Gather names of all programs which are children.
+    char *line = NULL;
+    size_t len = 0;
     while (getline(&line, &len, stdin) > 0) {
-        char *tok = strtok(line, DELIMS);
-        // program name
-        names[names_len] = calloc(strlen(tok) + 1, sizeof(char));
-        strcpy(names[names_len], tok);
-        // discard next field, which is weight
+        char *tok;
+
+        // First field is name, second is weight. Discard them.
+        strtok(line, DELIMS);
         strtok(NULL, DELIMS);
 
-        // collect names of children.
-        // We don't need to worry about repeated strings, because
-        // a child can only have one parent.
+        // Now collect names of children.
+        // We don't need to worry about repeated strings because
+        // a child can only have one parent;
         // ie, no child will show up in two different lines.
         while ((tok = strtok(NULL, DELIMS)) != NULL) {
-            children[children_len] = calloc(strlen(tok) + 1, sizeof(char));
-            strcpy(children[children_len], tok);
-            children_len++;
+            darray_push(&children, tok);
         }
-        names_len++;
     }
     free(line); line = NULL; len = 0;
 
-    // For every program, check if it is a child.
-    // If it is not a child of any node, then it must be the root.
-    qsort(children, children_len, sizeof(*children), namecmp);
-    for (size_t i = 0; i<MAX_LINES && names[i] != NULL; i++) {
-        char **result = bsearch(
-            &names[i], children, children_len,
-            sizeof(*children), namecmp);
-        if (result == NULL) {
-            printf("%s\n", names[i]);
-        }
-    }
+    // Sort so we can use bsearch() later.
+    darray_qsort(&children, namecmp);
 
-    for (int i = 0; children[i] != NULL; i++) {free(children[i]);}
-    free(children);
-    for (int i = 0; names[i] != NULL; i++) {free(names[i]);}
-    free(names);
+    // For every program name, check if it is a child.
+    rewind(stdin);
+    while (getline(&line, &len, stdin) > 0) {
+        char *name = strtok(line, DELIMS);
+        char *result = (char *)darray_bsearch(&children, name, namecmp);
+        // If the name is If it is not a child of any node, then it must be the root.
+        if (result == NULL) {
+            printf("%s\n", name);
+        }
+
+    }
+    free(line); line = NULL; len = 0;
+
+    darray_free(&children);
     return 0;
 }
