@@ -1,5 +1,7 @@
 // A simple dynamic array. Also known as a `vector` in the C++ world.
 #pragma once
+#include <stdbool.h>
+#include <stddef.h>
 
 typedef struct darray {
     size_t cap;
