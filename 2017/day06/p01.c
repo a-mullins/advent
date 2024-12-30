@@ -13,43 +13,36 @@ typedef struct memory {
 } memory;
 
 
-void
-get_input(darray *history)
+bool
+strtomem(char *s, memory *m)
 {
-    static const char *DELIMS = " \t\r\n";
-
-    char *line = NULL;
+    size_t cap = ARRAY_LEN(m->blocks);
     size_t len = 0;
-    if (getline(&line, &len, stdin) <= 0) {
-        fprintf(stderr, "ERR");
-        exit(1);
-    }
-
-    memory m = {0};
-    size_t block_cap = ARRAY_LEN(m.blocks);
-    size_t block_len = 0;
-    char *tok = strtok(line, DELIMS);
+    char *tok = strtok(s, " \t\r\n");
     do
     {
-        m.blocks[block_len++] = atoi(tok);
-    } while ((tok = strtok(NULL, DELIMS)) != NULL
-             && block_len < block_cap);
+        m->blocks[len++] = atoi(tok);
+    } while ((tok = strtok(NULL, " \t\r\n")) != NULL
+             && len < cap);
 
-    darray_push(history, &m);
-    free(line);
-
-    // samurai error handling: return successful, or don't return at all.
-    if(block_len != block_cap) {fprintf(stderr, "ERR\n"); exit(1);}
+    if(len != cap) {return false;}
+    else           {return true;}
 }
 
 
 int
 main(void)
 {
+    int ret_code = 0;
+    char *line = NULL;
+    size_t len = 0;
+    if (getline(&line, &len, stdin) <= 0) {goto err0;}
+
     darray history = {0};
     darray_init(&history, sizeof (memory));
+    darray_push(&history, &(memory){0});
 
-    get_input(&history);
+    if (!strtomem(line, darray_get(&history, 0))) {goto err1;}
 
     // Generate states until we find a repeat (or run out of buffer).
     while (1) {
@@ -75,23 +68,13 @@ main(void)
 
         // check if we have seen this state before
         // ie, if (m in history);
-        bool match;
-        for (size_t i = 0; i < history.len; i++) {
-            match = true;
-            memory *old_m = (memory *)darray_get(&history, i);
-            for (size_t j = 0; j < ARRAY_LEN(m.blocks); j++) {
-                if (old_m->blocks[j] != m.blocks[j]) {
-                    match = false;
-                    break;
-                }
-            }
-            if (match) {
-                printf("old: %ld, new: %ld, diff: %ld\n",
-                       i,
-                       history.len,
-                       history.len-i);
-                goto exit;
-            }
+        ssize_t n = darray_in(&history, &m);
+        if (n >= 0) {
+            printf("old: %ld, new: %ld, diff: %ld\n",
+                   n,
+                   history.len,
+                   history.len-n);
+            goto exit;
         }
 
         // This memory state doesn't match a previous one.
@@ -100,6 +83,9 @@ main(void)
     }
 
 exit:
+err1:
     darray_free(&history);
-    return 0;
+err0:
+    free(line);
+    return ret_code;
 }
