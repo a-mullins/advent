@@ -60,6 +60,6 @@ main(void)
     }
     free(line); line = NULL; len = 0;
 
-    darray_free(&children);
+    darray_free(&children, NULL);
     return 0;
 }
