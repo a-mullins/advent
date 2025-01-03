@@ -42,14 +42,21 @@ darray_push(darray *d, void *elem)
 }
 
 
+// Completely free the array.
+//
+// If function-pointer `destruct` is not null, it will be called once
+// with each element of the array. This is useful for free()ing
+// pointers to dynamically allocated memory, for example, if the
+// darray holds (char *)s to strings.
+//
+// If you wish to use *d again, it will need to be reinitialized.
 void
-darray_clear(darray *d) {
-    d->len = 0;
-}
-
-
-void
-darray_free(darray *d) {
+darray_free(darray *d, void (*destruct)(void *elem)) {
+    if(destruct != NULL) {
+        for(size_t i = 0; i<d->len; i++) {
+            (*destruct)(darray_get(d, i));
+        }
+    }
     d->cap = 0;
     d->len = 0;
     d->elem_size = 0;
