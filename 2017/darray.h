@@ -42,7 +42,4 @@ darray_qsort(darray *d, int (*compar)(const void *a, const void *b));
 
 // DELETE
 void
-darray_clear(darray *d);
-
-void
-darray_free(darray *d);
+darray_free(darray *d, void (*destruct)(void *elem));
