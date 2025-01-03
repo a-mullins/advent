@@ -19,7 +19,7 @@ char oper_s[6][3] = {">", "<", ">=", "<=", "==", "!="};
 
 
 typedef struct cond {
-    char reg[NAME_CAP];
+    reg *reg;
     oper oper;
     int val;
 } cond;
@@ -60,7 +60,7 @@ strtoinstr(char *s, instr *i, darray *registers)
     /* discard */
 
     tok = strtok(NULL, " ");
-    strncpy(i->cond.reg, tok, NAME_CAP-1);
+    i->cond.reg = darray_bsearch(registers, tok, regcmp);
 
     tok = strtok(NULL, " ");
     if(!strcmp(tok, ">"))  {i->cond.oper = GT;}
@@ -117,29 +117,29 @@ main(void)
         instr i = {0};
         strtoinstr(line, &i, &regs);
 
-        reg *cond_lhs = (reg *)darray_bsearch(&regs, i.cond.reg, regcmp);
-        bool succ = false;
+        reg *cond_lhs = i.cond.reg;
+        bool test = false;
         switch (i.cond.oper) {
         case GT:
-            succ = cond_lhs->val > i.cond.val;
+            test = cond_lhs->val > i.cond.val;
             break;
         case LT:
-            succ = cond_lhs->val < i.cond.val;
+            test = cond_lhs->val < i.cond.val;
             break;
         case GE:
-            succ = cond_lhs->val >= i.cond.val;
+            test = cond_lhs->val >= i.cond.val;
             break;
         case LE:
-            succ = cond_lhs->val <= i.cond.val;
+            test = cond_lhs->val <= i.cond.val;
             break;
         case EQ:
-            succ = cond_lhs->val == i.cond.val;
+            test = cond_lhs->val == i.cond.val;
             break;
         case NE:
-            succ = cond_lhs->val != i.cond.val;
+            test = cond_lhs->val != i.cond.val;
             break;
         }
-        if (succ) {
+        if (test) {
             if (i.inc) {
                 i.target->val += i.amt;
             } else {
