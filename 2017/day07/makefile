@@ -1,14 +1,16 @@
-# -std=gnu11 instead of c11 because of readline()
-CFLAGS = -std=gnu11 -Wall -Wextra -Werror
+.PHONY: all
+all: p01 p02
 
-default: p01 p02
+p01.o: p01.c
+p01: LDFLAGS = -L../lib/ -Wl,-rpath=../lib
+p01: LDLIBS  = -ldarray
+p01: p01.o
+	$(CC) $(LDFLAGS) $(LDLIBS) -o p01 p01.o
 
-p01: p01.c
-	gcc $(CFLAGS) -o p01 p01.c
 
 p02: p02.c
-	gcc $(CFLAGS) -o p02 p02.c
 
+.PHONY: clean
 clean:
 	-rm -f p01
 	-rm -f p02

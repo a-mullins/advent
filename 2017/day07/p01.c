@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../darray.h"
+#include "../lib/darray.h"
 
 
 int
