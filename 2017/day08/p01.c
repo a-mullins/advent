@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../darray.h"
+#include "../lib/darray.h"
 
 
 #define NAME_CAP 12
@@ -154,6 +154,6 @@ main(void)
     printf("all time high: %d, max at end: %d\n", all_time_high, max_reg(&regs));
 
     // Cleanup.
-    darray_free(&regs);
+    darray_free(&regs, NULL);
     return 0;
 }

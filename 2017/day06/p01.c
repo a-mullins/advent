@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "darray.h"
+#include "../lib/darray.h"
 
 
 #define ARRAY_LEN(X) sizeof X / sizeof X[0]
@@ -84,7 +84,7 @@ main(void)
 
 exit:
 err1:
-    darray_free(&history);
+    darray_free(&history, NULL);
 err0:
     free(line);
     return ret_code;
