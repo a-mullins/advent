@@ -3,6 +3,16 @@
 #include <stddef.h>
 
 
+// NOTE letting outside code access buf directly can potentially
+// cause. For instance, code might be tempted to save a pointer to a
+// part of buf for quick reference or to implement a tree. But the buf
+// might change underneath, eg, because of a sorting operation. Then
+// the pointer becomes invalid, pointing to an unexpected member.
+//
+// Still, allowing direct access to buf can be expedient.
+//
+// Perhaps it can be changed by implementing getters/setters and
+// providing wrappers for qsort/bsearch/etc.
 typedef struct darray {
     size_t cap;
     size_t len;
