@@ -1,142 +1,136 @@
 // TODO cleanup pass
 #include <limits.h>
 #include <stdbool.h>
+#include <signal.h> // raise
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "../lib/darray.h"
+#include "../lib/stack.h"
 
 
-#define DELIMS " \t\r\n()->,"
-#define MAX_LINES 2048
-#define FIELD_WIDTH 16
-#define MAX_CHILDREN 8
+#define DELIMS   " \t\r\n()->,"
+#define LINE_CAP 128
+#define NAME_CAP 16
 
 
-typedef struct prog {
-    char *name;
-    char **children_names;
-    struct prog **children;
-    int weight;
-} prog;
+typedef struct tree {
+    char name[16];
+    unsigned int node_weight;
+    unsigned int tree_weight;
+    darray children;
+} tree;
 
 
+typedef tree * treeptr;
+
+
+STACK(treeptr)
+
+
+int nameinline(const void *a, const void *b);
+int linecmp(const void *a, const void *b);
 int namecmp(const void *a, const void *b);
-ssize_t name2idx(char *needle);
-int tree_weight(int i);
-void find_unbal(int root);
-
-
-// When processing the list of programs, a program might make a
-// forward-reference by listing a child that hasn't yet appeared.
-//
-// It's possible to build up the tree in a single pass by following these
-// forward references, creating the child nodes, and then ensuring we don't
-// add those same nodes a second time when they are encountered again later in
-// the file.
-//
-// However, the easier solution is to process the list twice, once to collect
-// the names and weights of the programs, and a second time to record the
-// children.
-//
-// Although it's not space-effecient for sparse trees, we will use an
-// adjacency matrix. It's easy to implement, we can find the root node easily
-// by finding a blank col, and I've never actually implemented one before that
-// I can recall, so why not? It also seems like a very "C" solution, in that
-// we'll be tracking our data in multiple plain arrays instead of building up
-// complicated datastructs and doing link-chasing.
-//
-// 1. Parse input.
-//    - build a map of indicies to names: name[name_i].
-//    - build a map of indicies to weights: weight[name_i].
-//
-// 2. Parse input again.
-//    - mark child nodes in the adjacency matrix:
-//      tree[from][to] = true;
-//
-// 3. Find root node.
-//    Scan by col, empty col means no parents.
-//    That col corresponds to the root node of the tree.
-static char name[MAX_LINES][FIELD_WIDTH];
-static int weight[MAX_LINES];
-static int names_len = 0;
-static bool tree[MAX_LINES][MAX_LINES] = {false};
-
+void find_root(darray *lines, char *root_name);
+void darray_char_p_destr(void *elem);
+void tree_init(tree *t, const char *name);
+size_t tree_len_children(tree *parent);
+void tree_add_child(tree *parent, tree *child);
+tree *tree_get_child(tree *parent, size_t i);
+bool tree_post_order(tree *t, bool (*visit)(tree *));
+bool tree_print_node(tree *t);
+bool set_tree_weight(tree *t);
+bool set_print_node(tree *t);
+bool tree_setweight_checkkids(tree *t);
 
 int
 main(void)
 {
-    size_t len = 80;
-    char *line = calloc(len, sizeof(char));
+    darray lines = {0};
+    darray_init(&lines, LINE_CAP * sizeof (char));
 
-    // First pass, collect names.
-    while (getline(&line, &len, stdin) > 0) {
-        // name.
-        strncpy(name[names_len++], strtok(line, DELIMS), FIELD_WIDTH-1);
+    char *line = NULL;
+    char  buf[LINE_CAP] = {'\0'};
+    while (fgets(buf, LINE_CAP, stdin) != NULL) {
+        size_t len = strlen(buf);
+        line = calloc(len+1, sizeof (char));
+        strcpy(line, buf);
+        darray_push(&lines, &line);
     }
 
-    if (fseek(stdin, 0L, SEEK_SET) != 0) {
-        fprintf(stderr,
-                "Seek failed. Please connect stdin to a regular file.\n");
-        exit(1);
-    }
+    // So we can bsearch() later.
+    darray_qsort(&lines, linecmp);
 
-    // Sort names so we can use bsort on it later.
-    qsort(&name, names_len, FIELD_WIDTH, namecmp);
+    // Find root.
+    char root_name[NAME_CAP] = {0};
+    find_root(&lines, root_name);
+    printf("root: %s\n", root_name);
 
-    // Second pass.
-    while (getline(&line, &len, stdin) > 0) {
-        char *tok = NULL;
-        ssize_t parent_i = -1;
+    // Build tree.
+    tree root = {0};
+    tree_init(&root, root_name);
 
-        // program name
-        tok = strtok(line, DELIMS);
-        parent_i = name2idx(tok);
+    treeptr_stack stack = {0};
+    treeptr_stack_init(&stack);
+    treeptr_stack_push(&stack, &root);
 
-        // weight
-        tok = strtok(NULL, DELIMS);
-        weight[parent_i] = atoi(tok);
+    while (!treeptr_stack_empty(&stack)) {
+        tree *cur = treeptr_stack_pop(&stack);
+        char line[LINE_CAP];
+        char *res = *(char**)darray_bsearch(&lines, cur->name, nameinline);
+        if(res == NULL) {fprintf(stderr, "ERR");exit(1);}
+        strncpy(line, res, LINE_CAP-1);
 
-        // children
-        ssize_t child_i = -1;
-        while ((tok = strtok(NULL, DELIMS)) != NULL) {
-            child_i = name2idx(tok);
-            tree[parent_i][child_i] = true;
+        // Update current node's weight.
+        strtok(line, DELIMS);
+        cur->node_weight = (unsigned int)atoi(strtok(NULL, DELIMS));
+
+        // Update current node's children.
+        // 1. Find child names in line.
+        // 2. Create node for each child.
+        // 3. Add child to cur's children.
+        // 4. Push child to stack so that it is visited.
+        char *child_name;
+        while ((child_name = strtok(NULL, DELIMS)) != NULL) {
+            tree *child = malloc(sizeof (tree));
+            tree_init(child, child_name);
+            tree_add_child(cur, child);
+            treeptr_stack_push(&stack, child);
         }
     }
-    free(line); line = NULL; len = 0;
 
-    // In the adjacency-matrix representation of a tree, if a col is
-    // all false, then that col corresponds to a node that has no
-    // in-links, ie, no parents. Such a node must be the root of the
-    // tree.
-    //
-    // Another way of finding root would be to see which names appear
-    // in only one line of text. All of the other should appear twice,
-    // once as their own entry, and again as the child of another.
-    //
-    // I wonder which is faster?
-    // Of course, all of this is only possible with the pre-knowledge that
-    // our input actually represents a valid tree.
-    int root_idx = -1;
-    for (int col = 0; col<MAX_LINES; col++) {
-        bool rootp = true;
-        for (int row = 0; row<MAX_LINES; row++) {
-            if (tree[row][col] == true) {
-                rootp = false;
-                break;
-            }
-        }
-        if (rootp) {
-            root_idx = col;
-            break;
-        }
-    }
-    printf("root is at idx %d \"%s\"\n", root_idx, name[root_idx]);
-    printf("total tree weight is %d\n", tree_weight(root_idx));
+    // Traverse tree.
+    // treeptr_stack_push(&stack, &root);
+    // while (!treeptr_stack_empty(&stack)) {
+    //     tree *cur = treeptr_stack_pop(&stack);
+    //     printf("%s (%d)\n", cur->name, cur->node_weight);
 
-    find_unbal(root_idx);
+    //     for (size_t i = cur->children.len; i != 0; /*nop*/) {
+    //         treeptr_stack_push(&stack, tree_get_child(cur, --i));
+    //     }
+    // }
+
+    //tree_print_node(&root);
+    tree_post_order(&root, tree_setweight_checkkids);
 
     return 0;
+}
+
+
+int
+nameinline(const void *a, const void *b)
+{
+    char line[LINE_CAP] = {0};
+    strncpy(line, *(char**)b, LINE_CAP);
+    line[strcspn(line, " ")] = '\0';
+    return strcmp((const char *)a, line);
+}
+
+
+int
+linecmp(const void *a, const void *b)
+{
+    return strcmp(*(const char **)a, *(const char **)b);
 }
 
 
@@ -148,166 +142,187 @@ namecmp(const void *a, const void *b)
 }
 
 
-ssize_t
-name2idx(char *needle)
-{
-    void *offset = bsearch(needle, name, names_len, FIELD_WIDTH, namecmp);
-    if (offset == NULL) {
-        return (ssize_t)-1;
-    }
-
-    return (ssize_t)((offset - (void *)name) / FIELD_WIDTH);
-}
-
-
-// return the total weight of the sub-tree with root `root`
-int
-tree_weight(int root)
-{
-    static int total_weight[MAX_LINES];
-
-    if (total_weight[root] > 0) {
-        return total_weight[root];
-    }
-
-    int child_len = 0;
-    int child[MAX_CHILDREN];
-    for (int to = 0; to < MAX_LINES; to++) {
-        if (tree[root][to]) {
-            child[child_len++] = to;
-        }
-    }
-
-    total_weight[root] = weight[root];
-    for (int i = 0; i < child_len; i++) {
-        total_weight[root] += tree_weight(child[i]);
-    }
-
-    return total_weight[root];
-}
-
-
-// Since there is only one mismatched node, there will always be just
-// one branch to follow so a simple iterative and greedy approach will
-// work just as well as a complicated one like (D|B)FS/A*, etc. Also,
-// this problem won't benefit from multiprocessing.
-//
-// 1. Calculate the target weight. The target weight is the weight
-//    that the majority of this node's children share. Store.
-// 2. Find the mismatched node. Label this one `target`.
-// 3. Examine target's children.
-//    a. If target's children are matched, then target is the node
-//       that needs adjusting. Return the difference between its
-//       weight and the majority.
-//    b. Else, visit target and repeat from step 1.
 void
-find_unbal(int root)
+find_root(darray *lines, char *root_name)
 {
-    int target_w = -1;   // target weight
-    int target_i = root;
+    darray children;
+    darray_init(&children, NAME_CAP * sizeof (char));
 
-    // find children of target.
-    int len = 0;
-    int child[MAX_CHILDREN];
-    for (int to = 0; to < MAX_LINES; to++) {
-        if (tree[target_i][to]) {
-            child[len++] = to;
+    // Gather names of all programs which are children.
+    for (size_t i = 0; i<lines->len; i++) {
+        char line[128] = {0};
+        strncpy(line, *(char**)darray_get(lines, i), 128);
+
+        char *tok;
+
+        // First field is name, second is weight. Discard them.
+        strtok(line, DELIMS);
+        strtok(NULL, DELIMS);
+
+        // Collect names of nodes that are children.
+        // We don't need to worry about repeated strings because
+        // a child can only have one parent;
+        // ie, no child will show up in two different lines.
+        while ((tok = strtok(NULL, DELIMS)) != NULL) {
+            darray_push(&children, tok);
         }
     }
 
-    if (len > 0) {
-        printf("  node %d \"%s\" has children:\n", target_i, name[target_i]);
-    } else {
-        printf("  node %d \"%s\" is a leaf.\n", target_i, name[target_i]);
-    }
+    // Sort so we can use bsearch().
+    darray_qsort(&children, namecmp);
 
-    // find the minimum and maximum weights of the child sub-trees.
-    int max = INT_MIN;
-    int min = INT_MAX;
-    for (int i = 0; i<len; i++) {
-        printf("    %4d \"%7s\" (%5d)\n", child[i], name[child[i]],
-               tree_weight(child[i]));
+    // For every program name, check if it is a child.
+    for (size_t i = 0; i<lines->len; i++) {
+        char name[NAME_CAP] = {0};
+        strncpy(name, *(char**)darray_get(lines, i), 16);
+        strtok(name, DELIMS);
 
-        if (tree_weight(child[i]) < min) {
-            min = tree_weight(child[i]);
-        }
-        if (tree_weight(child[i]) > max) {
-            max = tree_weight(child[i]);
+        char *result = (char *)darray_bsearch(&children, name, namecmp);
+        // If the name doesn't appear, then it's not the child of any
+        // node. So it must be the root.
+        if (result == NULL) {
+            snprintf(root_name, NAME_CAP, "%s", name);
         }
     }
 
-    if (len == 0 || max == min) {
-        fprintf(stderr, "!!! Something has gone wrong, aborting!\n");
-        exit(1);
-    }
-
-    int min_c = 0;
-    int max_c = 0;
-    int min_i = -1;
-    int max_i = -1;
-    for (int i = 0; i<len; i++) {
-        if (tree_weight(child[i]) == min) {
-            min_i = child[i];
-            min_c++;
-        }
-        if (tree_weight(child[i]) == max) {
-            max_i = child[i];
-            max_c++;
-        }
-    }
-    int next_i;
-    if (max_c < min_c) {
-        next_i = max_i;
-        target_w = min;
-    }
-    else {
-        next_i = min_i;
-        target_w = max;
-    }
-
-    //printf("    %d child sub-trees have min-weight %d\n", min_c, min);
-    //printf("    %d child sub-trees have max-weight %d\n", max_c, max);
-    //printf("    next sub-tree to check is %d\n", next_i);
-    //printf("tree_weight(#%d) -> %d\n", target_i, sum);
-
-    // examine child node's children:
-    bool next_unbal_p = true;
-    {
-        int len = 0;
-        int child[MAX_CHILDREN];
-        for (int to = 0; to < MAX_LINES; to++) {
-            if (tree[next_i][to]) {
-                child[len++] = to;
-            }
-        }
-
-        int max = INT_MIN;
-        int min = INT_MAX;
-        // printf("      node %d \"%s\" has children:\n", next_i, name[next_i]);
-        for (int i = 0; i<len; i++) {
-            // printf("        %4d \"%7s\" (%5d)\n", child[i], name[child[i]],
-            //        tree_weight(child[i]));
-
-            if (tree_weight(child[i]) < min) {
-                min = tree_weight(child[i]);
-            }
-            if (tree_weight(child[i]) > max) {
-                max = tree_weight(child[i]);
-            }
-        }
-        if (max == min) {next_unbal_p = false;}
-    }
-
-    if (next_unbal_p) {
-        // printf("visiting %d, children unbalanced\n", next_i);
-        find_unbal(next_i);
-    } else {
-        // printf("target node's children are balanced, need to modify weight by "
-        //        "%d units\n", target_w - tree_weight(next_i));
-        printf("node %d \"%s\" weighs %d, but should weigh %d\n",
-               next_i, name[next_i], weight[next_i],
-               weight[next_i] + (target_w - tree_weight(next_i))
-            );
-    }
+    darray_free(&children, NULL);
     return;
 }
+
+
+// -=[ TREE STUFF ]=-----------------------------------------------------------
+void
+tree_init(tree *t, const char *name)
+{
+    strncpy(t->name, name, NAME_CAP);
+    t->node_weight = 0;
+    t->tree_weight = 0;
+    darray_init(&t->children, sizeof (tree *));
+}
+
+
+size_t
+tree_len_children(tree *parent)
+{
+    return parent->children.len;
+}
+
+
+void
+tree_add_child(tree *parent, tree *child)
+{
+    darray_push(&parent->children, &child);
+}
+
+
+tree *
+tree_get_child(tree *parent, size_t i)
+{
+    return *(tree**)darray_get(&parent->children, i);
+}
+
+bool
+tree_post_order(tree *t, bool (*visit)(tree *))
+{
+    for (size_t i = 0; i < t->children.len; i++) {
+        bool cont = tree_post_order(tree_get_child(t, i), visit);
+        if(!cont) { return false; }
+    }
+
+    return (*visit)(t);
+}
+
+bool
+tree_print_node(tree *t)
+{
+    printf(
+        "node \"%s\" (node: %d, tree: %d)",
+        t->name,
+        t->node_weight,
+        t->tree_weight);
+    if(t->children.len > 0) {
+        puts(":");
+        for (size_t i = 0; i < t->children.len; i++) {
+            tree *c = tree_get_child(t, i);
+            printf("\t%s (node: %d, tree: %d)\n",
+                   c->name,
+                   c->node_weight,
+                   c->tree_weight);
+        }
+    } else {
+        puts("");
+    }
+    fflush(stdin);
+    return true;
+}
+
+bool
+tree_set_weight(tree *t)
+{
+    // if(!strcmp(t->name, "hblcbb")) {
+    //     raise(SIGTRAP);
+    // }
+    t->tree_weight = t->node_weight;
+    for (size_t i = 0; i < t->children.len; i++)
+        t->tree_weight += tree_get_child(t, i)->tree_weight;
+
+    return true;
+}
+
+// void tree_set_print(tree *t)
+// {
+//     tree_set_weight(t);
+//     tree_print_node(t);
+// }
+
+bool
+tree_setweight_checkkids(tree *t)
+{
+    tree_set_weight(t);
+    //tree_print_node(t);
+    if(t->children.len > 0) {
+        int max = INT_MIN;
+        int min = INT_MAX;
+        for (size_t i = 0; i < t->children.len; i++) {
+            int cur = tree_get_child(t, i)->tree_weight;
+            max = cur>max ? cur : max;
+            min = cur<min ? cur : min;
+        }
+        if (max != min) {
+            puts(  "!! inbalance in branches detected!");
+            size_t max_i = 0, min_i = 0, inbal_i = 0;
+            int max_c = 0, min_c = 0;
+            for (size_t i = 0; i < t->children.len; i++) {
+                if (tree_get_child(t, i)->tree_weight == min) {
+                    min_i = i;
+                    min_c++;
+                }
+                if (tree_get_child(t, i)->tree_weight == max) {
+                    max_i = i;
+                    max_c++;
+                }
+            }
+            if (max_c > min_c) {
+                // one branch weighs less than the others
+                tree *unbal = tree_get_child(t, min_i);
+                printf("%s should weigh %d",
+                       unbal->name,
+                       unbal->node_weight + (max - min));
+            } else {
+                // one branch weighs more than the others
+                tree *unbal = tree_get_child(t, max_i);
+                printf("%s should weigh %d\n",
+                       unbal->name,
+                       unbal->node_weight - (max - min));
+            }
+            // printf("!! %s should weigh %d",
+            //        tree_get_child(t, i)
+            //        tree_get_child(t, i)->node_weight + (max - min)
+            //     );
+            // printf("!! %d needed to correct\n", max - min);
+            return false;
+        }
+    }
+    return true;
+}
+// -=[ END TREE STUFF ]=-------------------------------------------------------
