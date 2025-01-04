@@ -1,13 +1,10 @@
 .PHONY: all
 all: libdarray.so
 
-darray.o: CFLAGS += -fpic
-darray.o: darray.c
-
-libdarray.so: darray.o
-	$(CC) -shared -o libdarray.so darray.o
+libdarray.so: CFLAGS += -fpic
+libdarray.so: darray.c
+	$(CC) $(CFLAGS) -shared -o libdarray.so darray.c
 
 .PHONY: clean
 clean:
-	-rm -f darray.o
 	-rm -f libdarray.so
