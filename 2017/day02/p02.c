@@ -1,28 +1,27 @@
-#include <stddef.h> // NULL
-#include <stdio.h>  // getline(), printf(), stdin
-#include <stdlib.h> // atoi(), free()
-#include <string.h> // strotk()
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+
+#define DELIMS " \r\n\t"
+#define MAX_DIGITS 32
 
 
 int
 main(void)
 {
-    const char DELIMS[] = " \r\n\t";
-    const char MAX_DIGITS = 32;
     int sum = 0;
 
-    size_t len = 0;
-    char *line = NULL;
-    // for each line of input
-    while (getline(&line, &len, stdin) > 0) {
+    char line[512];
+    while (fgets(line, 512, stdin)) {
         char *tok = NULL;
-        int digits[MAX_DIGITS];
-        int len = 0;
+        short digits[MAX_DIGITS];
+        short len = 0;
 
         // for each token of line
         tok = strtok(line, DELIMS);
         do {
-            digits[len++] = atoi(tok);
+            digits[len++] = (short)atoi(tok);
             tok = strtok(NULL, DELIMS);
         } while (tok != NULL && len < MAX_DIGITS);
 
@@ -39,7 +38,6 @@ main(void)
             }
         }
     }
-    free(line);
 
     printf("%d\n", sum);
     return 0;

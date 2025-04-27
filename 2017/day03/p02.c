@@ -2,26 +2,25 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h> // memset()
+
+
+#define ARR_LEN 768
+
+
+static int arr[ARR_LEN][ARR_LEN] = {0};
 
 
 int
 main(void)
 {
-    size_t len = 0;
-    char *line = NULL;
-    getline(&line, &len, stdin); // implicit malloc.
+    char line[128];
+    fgets(line, 128, stdin);
     int input = atoi(line);
-    free(line);
 
     int rows = (int)ceil(sqrt(input));
     int cols = rows;
     int row = rows / 2;
     int col = cols / 2;
-    // TODO avoid VLAs
-    int arr[rows][cols];
-    // TODO use calloc instead, it zeroes memory.
-    memset(&arr, 0, sizeof(int) * rows * cols);
     arr[row][col] = 1;
 
     enum directions {RIGHT, UP, LEFT, DOWN, LEN};

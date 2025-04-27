@@ -1,41 +1,39 @@
-#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 
+#define DELIMS " \t\r\n"
+#define WORDS_MAX 32
+
+
 int
 main(void)
 {
-    const size_t WORD_LIMIT = 32;
-    const char *delims = " \t\r\n";
     int valid_count = 0;
 
-    size_t len = 0;
-    char *line = NULL;
-    char **words = calloc(WORD_LIMIT, sizeof (char *));
-    while (getline(&line, &len, stdin) > 0){
+    char *words[WORDS_MAX] = {0};
+    char line[128];
+    while (fgets(line, 128, stdin)){
         // Read in line, split into char *words[]. We aren't
         // allocating new memory here, we are just storing indicies
         // into `line`.
-        memset(words, 0, WORD_LIMIT * sizeof (char *));
-        size_t i = 0;
-        char *tok = strtok(line, delims);
+        short words_len = 0;
+        char *tok = strtok(line, DELIMS);
         do {
-            words[i++] = tok;
-            tok = strtok(NULL, delims);
-        } while (tok !=NULL && i<WORD_LIMIT);
+            words[words_len++] = tok;
+            tok = strtok(NULL, DELIMS);
+        } while (tok !=NULL && words_len<WORDS_MAX);
 
         // Check every token against every other token in the string.
         //
-        // if every token is unique, execution falls out of the for-loop
+        // If every token is unique, execution falls out of the for-loop
         //   and valid_count is incremented.
-        // if there are two matching tokens, then we "break" by goto.
-        //   C does not have multi-level breaks.
-        // Another option might be to sort `words` and check consecutive words
-        //   to see if they match.
-        for (size_t i = 0; i<WORD_LIMIT && words[i] != NULL; i++) {
-            for (size_t j = 0; j < i; j++) {
+        // If there are two matching tokens, then we break out with goto.
+        // Faster might be sorting then checking for adjacents, which would be
+        //   O(n log n + n) vs O(n^2 - n)... I think.
+        for (short i = 1; i < words_len; i++) {
+            for (short j = 0; j < i; j++) {
                 if (!strcmp(words[i], words[j])) {
                     goto next;
                 }
@@ -46,8 +44,6 @@ main(void)
     next:
         /* nop */;
     }
-    free(words);
-    free(line);
 
     printf("%d\n", valid_count);
     return 0;

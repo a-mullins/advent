@@ -1,19 +1,19 @@
-#include <limits.h> // INT_MIN, INT_MAX
-#include <stddef.h> // NULL
-#include <stdio.h>  // getline(), printf(), stdin
-#include <stdlib.h> // atoi(), free()
-#include <string.h> // strtok()
+#include <limits.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+
+#define DELIMS " \r\n\t"
 
 
 int
 main(void)
 {
-    const char DELIMS[] = " \r\n\t";
     int sum = 0;
 
-    size_t len = 0;
-    char *line = NULL;
-    while (getline(&line, &len, stdin) > 0) {
+    char line[512];
+    while (fgets(line, 512, stdin)) {
         char *tok = NULL;
         int max = INT_MIN;
         int min = INT_MAX;
@@ -28,8 +28,8 @@ main(void)
 
         sum += max - min;
     }
-    free(line);
 
     printf("%d\n", sum);
+
     return 0;
 }

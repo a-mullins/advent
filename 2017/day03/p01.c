@@ -49,11 +49,9 @@ dist(int target)
 int
 main(void)
 {
-    size_t len = 0;
-    char *line = NULL;
-    getline(&line, &len, stdin); // implicit malloc.
+    char line[128];
+    fgets(line, 128, stdin);
     int i = atoi(line);
-    free(line);
 
     printf("%d\n", dist(i));
     return 0;
