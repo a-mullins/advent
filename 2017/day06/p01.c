@@ -35,7 +35,7 @@ main(void)
 
         // Find largest block's index and size.
         int blocks = m.banks[0];
-        int max_i = 0;
+        size_t max_i = 0;
         for(size_t i = 1; i < BANKS_MAX; i++) {
             if (m.banks[i] > blocks) {
                 blocks = m.banks[i];
@@ -84,11 +84,11 @@ exit:
 void
 strtomem(char *s, memory *m)
 {
-    short i = 0;
+    size_t i = 0;
     char *tok = strtok(s, " \t\r\n");
     do
     {
-        m->banks[i++] = atoi(tok);
+        m->banks[i++] = (short)atoi(tok);
     } while ((tok = strtok(NULL, " \t\r\n")) != NULL
              && i < BANKS_MAX);
 }
