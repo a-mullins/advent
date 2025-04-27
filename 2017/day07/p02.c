@@ -1,7 +1,6 @@
 // TODO cleanup pass
 #include <limits.h>
 #include <stdbool.h>
-#include <signal.h> // raise
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
