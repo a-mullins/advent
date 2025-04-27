@@ -52,7 +52,7 @@ main(void)
     while (getline(&line, &len, stdin) > 0) {
         char *name = strtok(line, DELIMS);
         char *result = (char *)darray_bsearch(&children, name, namecmp);
-        // If the name is If it is not a child of any node, then it must be the root.
+        // If it is not a child of any node, then it must be the root.
         if (result == NULL) {
             printf("%s\n", name);
         }
