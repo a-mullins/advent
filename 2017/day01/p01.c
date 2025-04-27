@@ -1,6 +1,31 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
+
+
+#define LEN 4096
+static char line[LEN];
+static short digits[LEN];
+
+
+int
+solve_captcha(short *digits, size_t len);
+
+
+int
+main(void)
+{
+    fgets(line, LEN, stdin);
+    line[strcspn(line, "\r\n")] = '\0'; // trim
+
+    size_t digits_size = strlen(line);
+    for (size_t i=0; i<digits_size; i++) {
+        digits[i] = (short)line[i] - 0x30;
+    }
+
+    printf("%d\n", solve_captcha(digits, digits_size));
+
+    return 0;
+}
 
 
 int
@@ -17,28 +42,4 @@ solve_captcha(short *digits, size_t len)
         }
     }
     return acc;
-}
-
-
-int
-main(void)
-{
-    size_t len = 0;
-    char *line = NULL;
-    getline(&line, &len, stdin); // implicit malloc()
-    line[strcspn(line, "\r\n")] = '\0'; // trim
-
-    // int *digits could be declared on the stack with a VLA alloca()
-    // but that will make for a large stack frame.
-    size_t digits_size = strlen(line);
-    short *digits = calloc(digits_size, sizeof (int));
-    for (size_t i=0; i<digits_size; i++) {
-        digits[i] = (int)line[i] - 0x30;
-    }
-
-    printf("%d\n", solve_captcha(digits, digits_size));
-
-    free(digits);
-    free(line);
-    return 0;
 }
