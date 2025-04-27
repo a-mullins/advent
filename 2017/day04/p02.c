@@ -37,7 +37,7 @@ main(void)
         valid_count++;
 
     done:
-        /* nop */
+        /* nop */;
     }
 
     printf("%d\n", valid_count);
