@@ -1,91 +1,94 @@
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../lib/darray.h"
 
 
-#define ARRAY_LEN(X) sizeof X / sizeof X[0]
+#define BANKS_MAX 16
 
 
-typedef struct memory {
-    int blocks[16];
+typedef struct {
+    short banks[BANKS_MAX];
 } memory;
 
 
-bool
-strtomem(char *s, memory *m)
-{
-    size_t cap = ARRAY_LEN(m->blocks);
-    size_t len = 0;
-    char *tok = strtok(s, " \t\r\n");
-    do
-    {
-        m->blocks[len++] = atoi(tok);
-    } while ((tok = strtok(NULL, " \t\r\n")) != NULL
-             && len < cap);
-
-    if(len != cap) {return false;}
-    else           {return true;}
-}
+void
+strtomem(char *s, memory *m);
 
 
 int
 main(void)
 {
-    int ret_code = 0;
-    char *line = NULL;
-    size_t len = 0;
-    if (getline(&line, &len, stdin) <= 0) {goto err0;}
+    char line[64];
+    fgets(line, 64, stdin);
 
-    darray history = {0};
-    darray_init(&history, sizeof (memory));
-    darray_push(&history, &(memory){0});
+    size_t history_cap = 256;
+    size_t history_len = 0;
+    memory *history = calloc(history_cap, sizeof (memory));
 
-    if (!strtomem(line, darray_get(&history, 0))) {goto err1;}
+    strtomem(line, &history[0]);
+    history_len++;
 
     // Generate states until we find a repeat (or run out of buffer).
     while (1) {
         memory m = {0};
-        memcpy(m.blocks, darray_last(&history), sizeof m.blocks);
+        memcpy(&m, &history[history_len-1], sizeof (memory));
 
         // Find largest block's index and size.
-        int blocks = m.blocks[0];
+        int blocks = m.banks[0];
         int max_i = 0;
-        for(size_t i = 1; i < ARRAY_LEN(m.blocks); i++) {
-            if (m.blocks[i] > blocks) {
-                blocks = m.blocks[i];
+        for(size_t i = 1; i < BANKS_MAX; i++) {
+            if (m.banks[i] > blocks) {
+                blocks = m.banks[i];
                 max_i = i;
             }
         }
 
         // Set its size and redistribute it to the others.
-        m.blocks[max_i] = 0;
+        m.banks[max_i] = 0;
         for (size_t i = max_i; blocks > 0; blocks--) {
-            i = (i+1) % (ARRAY_LEN(m.blocks));
-            m.blocks[i]++;
+            i = (i+1) % BANKS_MAX;
+            m.banks[i]++;
         }
 
         // check if we have seen this state before
         // ie, if (m in history);
-        ssize_t n = darray_in(&history, &m);
-        if (n >= 0) {
-            printf("old: %ld, new: %ld, diff: %ld\n",
-                   n,
-                   history.len,
-                   history.len-n);
-            goto exit;
+        for(size_t i = 0; i < history_len; i++) {
+            if (!memcmp(&m, &history[i], sizeof (memory))) {
+                printf("old: %ld, new: %ld, diff: %ld\n",
+                       i,
+                       history_len,
+                       history_len-i);
+                goto exit;
+            }
         }
 
         // This memory state doesn't match a previous one.
-        // Push it on to the stack and try again.
-        darray_push(&history, &m);
+        // Push it on the stack and try again.
+        if (history_len == history_cap) {
+            history_cap <<= 1;
+            // fprintf(stderr,
+            //         "> history deepens.\n  (%d elem, %d bytes)\n",
+            //         history_cap, history_cap * sizeof (memory));
+            // NB realloc could fail and return NULL,
+            //    but we choose to ignore error handling.
+            history = realloc(history, history_cap * sizeof (memory));
+        }
+        memcpy(&history[history_len++], &m, sizeof (memory));
     }
 
 exit:
-err1:
-    darray_free(&history, NULL);
-err0:
-    free(line);
-    return ret_code;
+    return 0;
+}
+
+
+void
+strtomem(char *s, memory *m)
+{
+    short i = 0;
+    char *tok = strtok(s, " \t\r\n");
+    do
+    {
+        m->banks[i++] = atoi(tok);
+    } while ((tok = strtok(NULL, " \t\r\n")) != NULL
+             && i < BANKS_MAX);
 }
