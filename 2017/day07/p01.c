@@ -1,33 +1,27 @@
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../lib/darray.h"
+
+
+#define DELIMS " \t\r\n()->,"
+#define CHILDREN_MAX 2048
+#define NAME_MAX 8
+
+
+static char children[CHILDREN_MAX][NAME_MAX] = {0};
 
 
 int
-namecmp(const void *a, const void *b)
-{
-    return strcmp((const char *)a, (const char*)b);
-}
+namecmp(const void *a, const void *b);
 
 
 int
 main(void)
 {
-    static const char *DELIMS = " \t\r\n()->,";
-    static const size_t NAME_CAP = 16;
-    if(fseek(stdin, 0, SEEK_SET) != 0) {
-        fprintf(stderr, "ERR\n"); exit(1);
-    }
-
-    darray children;
-    darray_init(&children, NAME_CAP * sizeof (char));
-
     // Gather names of all programs which are children.
-    char *line = NULL;
-    size_t len = 0;
-    while (getline(&line, &len, stdin) > 0) {
+    size_t children_len = 0;
+    char line[128];
+    while (fgets(line, 128, stdin)) {
         char *tok;
 
         // First field is name, second is weight. Discard them.
@@ -39,27 +33,35 @@ main(void)
         // a child can only have one parent;
         // ie, no child will show up in two different lines.
         while ((tok = strtok(NULL, DELIMS)) != NULL) {
-            darray_push(&children, tok);
+            strcpy(&children[children_len++][0], tok);
         }
     }
-    free(line); line = NULL; len = 0;
 
     // Sort so we can use bsearch() later.
-    darray_qsort(&children, namecmp);
+    qsort(children, children_len, NAME_MAX * sizeof (char), namecmp);
 
     // For every program name, check if it is a child.
     rewind(stdin);
-    while (getline(&line, &len, stdin) > 0) {
-        char *name = strtok(line, DELIMS);
-        char *result = (char *)darray_bsearch(&children, name, namecmp);
+    while (fgets(line, 128, stdin)) {
+        line[strcspn(line, " ")] = '\0';
+        char *result = (char *)bsearch(line,
+                                       children,
+                                       children_len,
+                                       NAME_MAX * sizeof (char),
+                                       namecmp);
         // If it is not a child of any node, then it must be the root.
         if (result == NULL) {
-            printf("%s\n", name);
+            puts(line);
         }
-
     }
-    free(line); line = NULL; len = 0;
 
-    darray_free(&children, NULL);
+    // darray_free(&children, NULL);
     return 0;
+}
+
+
+int
+namecmp(const void *a, const void *b)
+{
+    return strcmp((const char *)a, (const char*)b);
 }
