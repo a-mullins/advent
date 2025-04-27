@@ -1,9 +1,14 @@
 # 2017: C #
 
 ## General C Notes ##
-In these solutions, errors from alloc()s are not checked for failure, neither
-are the implicit allocs of getline. This is bad practice in production, but
-acceptable here.
+For clarity and simplicity, static allocations are preferred over dynamic for
+data structs where practical. Data structures less than about a kilobyte are
+frame-allocated, otherwise they are statically allocated. Day 6 is the first
+day where dynamically allocated memory is used at all.
+
+In these solutions errors from {c,m,re}alloc() are not checked for
+failure. This is bad practice in production code, but omitted here for
+clarity.
 
 Is there a way to get the compiler to warn about unknown-param funct
 declarations? In other words, it should flag `void foo();` but not `void
