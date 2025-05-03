@@ -1,6 +1,7 @@
 // A simple dynamic array. Also known as a `vector` in the C++ world.
 #pragma once
 #include <stddef.h>
+#include <sys/types.h>
 
 
 // NOTE letting outside code access buf directly can potentially
@@ -13,43 +14,38 @@
 //
 // Perhaps it can be changed by implementing getters/setters and
 // providing wrappers for qsort/bsearch/etc.
-typedef struct darray {
-    size_t cap;
-    size_t len;
-    size_t elem_size;
-    void *buf;
-} darray;
+struct darray;
 
 
 // CREATE
 void
-darray_init(darray *d, size_t elem_size);
+darray_init(struct darray *d, size_t elem_size);
 
 
 // READ / QUERY
 void *
-darray_get(darray *d, size_t n);
+darray_get(struct darray *d, size_t n);
 
 void *
-darray_last(darray *d);
+darray_last(struct darray *d);
 
 ssize_t
-darray_in(darray *d, void *elem);
+darray_in(struct darray *d, void *elem);
 
 void *
-darray_bsearch(darray *d,
+darray_bsearch(struct darray *d,
                const void *key,
                int (*compar)(const void *a, const void *b));
 
 
 // UPDATE
 void
-darray_push(darray *d, void *elem);
+darray_push(struct darray *d, void *elem);
 
 void
-darray_qsort(darray *d, int (*compar)(const void *a, const void *b));
+darray_qsort(struct darray *d, int (*compar)(const void *a, const void *b));
 
 
 // DELETE
 void
-darray_free(darray *d, void (*destruct)(void *elem));
+darray_free(struct darray *d, void (*destruct)(void *elem));

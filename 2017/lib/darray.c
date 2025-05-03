@@ -6,8 +6,16 @@
 #define MIN_CAP 16
 
 
+struct darray {
+    size_t cap;
+    size_t len;
+    size_t elem_size;
+    void *buf;
+};
+
+
 void
-darray_init(darray *d, size_t elem_size)
+darray_init(struct darray *d, size_t elem_size)
 {
     d->cap = MIN_CAP;
     d->len = 0;
@@ -17,20 +25,20 @@ darray_init(darray *d, size_t elem_size)
 
 
 void *
-darray_get(darray *d, size_t n)
+darray_get(struct darray *d, size_t n)
 {
     return d->buf + d->elem_size * n;
 }
 
 void *
-darray_last(darray *d)
+darray_last(struct darray *d)
 {
     // unsafe if d->len == 0;
     return d->buf + d->elem_size * (d->len - 1);
 }
 
 void
-darray_push(darray *d, void *elem)
+darray_push(struct darray *d, void *elem)
 {
     if(d->len+1 >= d->cap) {
         d->cap <<= 1;
@@ -51,7 +59,7 @@ darray_push(darray *d, void *elem)
 //
 // If you wish to use *d again, it will need to be reinitialized.
 void
-darray_free(darray *d, void (*destruct)(void *elem)) {
+darray_free(struct darray *d, void (*destruct)(void *elem)) {
     if(destruct != NULL) {
         for(size_t i = 0; i<d->len; i++) {
             (*destruct)(darray_get(d, i));
@@ -66,14 +74,14 @@ darray_free(darray *d, void (*destruct)(void *elem)) {
 
 
 void
-darray_qsort(darray *d, int (*compar)(const void *a, const void *b))
+darray_qsort(struct darray *d, int (*compar)(const void *a, const void *b))
 {
     qsort(d->buf, d->len, d->elem_size, compar);
 }
 
 
 ssize_t
-darray_in(darray *d, void *elem)
+darray_in(struct darray *d, void *elem)
 {
     for (size_t i = 0; i<d->len; i++) {
         if (memcmp(darray_get(d, i), elem, d->elem_size) == 0) {
@@ -85,7 +93,7 @@ darray_in(darray *d, void *elem)
 
 
 void *
-darray_bsearch(darray *d,
+darray_bsearch(struct darray *d,
                const void *key,
                int (*compar)(const void *a, const void *b))
 {
