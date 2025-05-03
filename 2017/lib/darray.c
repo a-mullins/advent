@@ -25,10 +25,11 @@ darray_init(struct darray *d, size_t elem_size)
 
 
 void *
-darray_get(struct darray *d, size_t n)
+darray_get(struct darray *d, size_t i)
 {
-    return d->buf + d->elem_size * n;
+    return d->buf + d->elem_size * i;
 }
+
 
 void *
 darray_last(struct darray *d)
@@ -36,6 +37,7 @@ darray_last(struct darray *d)
     // unsafe if d->len == 0;
     return d->buf + d->elem_size * (d->len - 1);
 }
+
 
 void
 darray_push(struct darray *d, void *elem)
@@ -47,6 +49,21 @@ darray_push(struct darray *d, void *elem)
     }
     memcpy(d->buf + d->len * d->elem_size, elem, d->elem_size);
     d->len++;
+}
+
+
+void
+darray_del(struct darray *d, size_t i)
+{
+    if (i >= d->len) { return; }
+    if (i == d->len -1) {
+        memset(d->buf + i * d->elem_size, 0, d->elem_size);
+        d->len--;
+    } else {
+
+    }
+
+    return;
 }
 
 

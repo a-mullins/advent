@@ -24,7 +24,7 @@ darray_init(struct darray *d, size_t elem_size);
 
 // READ / QUERY
 void *
-darray_get(struct darray *d, size_t n);
+darray_get(struct darray *d, size_t i);
 
 void *
 darray_last(struct darray *d);
@@ -41,6 +41,9 @@ darray_bsearch(struct darray *d,
 // UPDATE
 void
 darray_push(struct darray *d, void *elem);
+
+void
+darray_del(struct darray *d, size_t i);
 
 void
 darray_qsort(struct darray *d, int (*compar)(const void *a, const void *b));
