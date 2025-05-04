@@ -14,7 +14,12 @@
 //
 // Perhaps it can be changed by implementing getters/setters and
 // providing wrappers for qsort/bsearch/etc.
-struct darray;
+struct darray {
+    size_t cap;
+    size_t len;
+    size_t elem_size;
+    void *buf;
+};
 
 
 // CREATE

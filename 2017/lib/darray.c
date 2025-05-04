@@ -3,15 +3,7 @@
 #include "darray.h"
 
 
-#define MIN_CAP 16
-
-
-struct darray {
-    size_t cap;
-    size_t len;
-    size_t elem_size;
-    void *buf;
-};
+#define MIN_CAP 4
 
 
 void
@@ -20,7 +12,7 @@ darray_init(struct darray *d, size_t elem_size)
     d->cap = MIN_CAP;
     d->len = 0;
     d->elem_size = elem_size;
-    d->buf = calloc(MIN_CAP, elem_size);
+    d->buf = malloc(MIN_CAP * elem_size);
 }
 
 
@@ -56,12 +48,19 @@ void
 darray_del(struct darray *d, size_t i)
 {
     if (i >= d->len) { return; }
-    if (i == d->len -1) {
-        memset(d->buf + i * d->elem_size, 0, d->elem_size);
-        d->len--;
-    } else {
 
+    if (i == d->len - 1) {
+        memset(d->buf + i * d->elem_size, 0, d->elem_size);
+    } else {
+        memmove(d->buf + i     * d->elem_size,
+                d->buf + (i+1) * d->elem_size,
+                (d->len - (i+1)) * d->elem_size);
+        // memset(d->buf + (d->len - 1) * d->elem_size,
+        //        -1,
+        //        (d->cap - d->len) * d->elem_size);
     }
+
+    d->len--;
 
     return;
 }
