@@ -45,6 +45,16 @@ darray_push(struct darray *d, void *elem)
 
 
 void
+darray_replace(struct darray *d, size_t i, void *new_elem)
+{
+    if (i < d->len - 1) {
+        memcpy(d->buf + i * d->elem_size, new_elem, d->elem_size);
+    }
+    return;
+}
+
+
+void
 darray_del(struct darray *d, size_t i)
 {
     if (i >= d->len) { return; }
@@ -55,9 +65,6 @@ darray_del(struct darray *d, size_t i)
         memmove(d->buf + i     * d->elem_size,
                 d->buf + (i+1) * d->elem_size,
                 (d->len - (i+1)) * d->elem_size);
-        // memset(d->buf + (d->len - 1) * d->elem_size,
-        //        -1,
-        //        (d->cap - d->len) * d->elem_size);
     }
 
     d->len--;

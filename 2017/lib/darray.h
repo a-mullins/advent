@@ -48,12 +48,15 @@ void
 darray_push(struct darray *d, void *elem);
 
 void
-darray_del(struct darray *d, size_t i);
+darray_replace(struct darray *d, size_t i, void *new_elem);
 
 void
 darray_qsort(struct darray *d, int (*compar)(const void *a, const void *b));
 
 
 // DELETE
+void
+darray_del(struct darray *d, size_t i);
+
 void
 darray_free(struct darray *d, void (*destruct)(void *elem));
