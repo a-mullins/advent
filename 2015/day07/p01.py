@@ -7,15 +7,16 @@ from sys import stdin
 class Node:
     """A node in a graph.
 
-    For this puzzle it can be thought of as a gate and its output
+    For this puzzle a node can represent a gate and its output
     line. Note that some gates are actually just constants or
-    pass-thrus (ie buffers in digital logic).
+    pass-thrus (ex buffers/roms in digital logic).
 
     Every node has a label, an operator, and between 0, 1, or 2
-    children. Nodes also have a value which is derived from its children
-    and its operator, although it begins as None until it is
-    calculated (the value is memoized and stored to avoid preforming
-    the same calculations over and over).
+    children. The children represent gate inputs. Nodes derive their
+    value by applying their operator to the values of their
+    children. The value is initialized to None before calculation.
+    The value is memoized and stored to avoid preforming the same
+    calculations over and over.
 
     Example:
     Parsing the line 'x AND y -> d' would create a Node
