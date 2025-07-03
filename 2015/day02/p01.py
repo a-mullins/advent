@@ -9,4 +9,4 @@ def paper(dims):
 
 
 packages = [line.strip().split("x") for line in stdin.readlines()]
-print(sum([paper([int(x) for x in package]) for package in packages]))
+print(sum(paper([int(x) for x in package]) for package in packages))
