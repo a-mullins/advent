@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
-# I feel like there is an analytical solution to this particular
-# problem, but I will just simulate it.
+# Copyright (c) 2025 Adam Mullins
+#
+# Advent of Code 2015, Day 14, Part 1
+#   https://adventofcode.com/2015/day/14
+#
+# TODO is there an analytical sol'n to this one?
 from sys import stdin
 
 

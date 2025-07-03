@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
+# Copyright (c) 2025 Adam Mullins
+#
+# Advent of Code 2015, Day 19, Part 2
+#   https://adventofcode.com/2015/day/19#part2
+#
 # Uses a greedy approach that just tries a single 'branch' of
 # replacement options, blindly following whichever replacement creates
 # the shortest string.
-
-# Occasionally throws exceptions when it follows a dead end and runs out
-# of options.
+#
+# Occasionally throws exceptions when it follows a dead end and runs
+# out of options. :-/
 import re
 from sys import stdin
 
@@ -36,8 +41,8 @@ if __name__ == "__main__":
 
     num_steps = 0
     graph_tips = [medicine_molecule]
-    # TODO: a more robust algorithm that can backtrack and try different
-    #       branches when it runs out of options.
+    # TODO a more robust algorithm that can backtrack and try
+    #      different branches when it runs out of options.
     while "e" not in graph_tips:
         options = visit_node(graph_tips[0], replacements)
         options = list(options)

@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+# Copyright (c) 2025 Adam Mullins
+#
+# Advent of Code 2015, Day 16, Part 1
+#   https://adventofcode.com/2015/day/16
 from sys import stdin
 
 target_sue = {
