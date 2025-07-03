@@ -1,3 +1,7 @@
+// Copyright (c) 2025 Adam Mullins
+//
+// Solution for Advent of Code 2017, Day 04, Part 1
+//   https://adventofcode.com/2017/day/4
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

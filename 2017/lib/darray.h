@@ -1,3 +1,4 @@
+// Copyright (c) 2025 Adam Mullins
 // A simple dynamic array. Also known as a `vector` in the C++ world.
 #pragma once
 #include <stddef.h>

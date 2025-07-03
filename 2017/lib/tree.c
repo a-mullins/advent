@@ -1,3 +1,4 @@
+#pragma once
 // n-ary tree
 #include "darray.h"
 

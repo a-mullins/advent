@@ -1,3 +1,4 @@
+// Copyright (c) 2025 Adam Mullins
 #include <stdlib.h>
 #include <string.h>
 #include "darray.h"
