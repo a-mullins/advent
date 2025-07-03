@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// Copyright (c) 2025 Adam Mullins
 "use strict";
 
 

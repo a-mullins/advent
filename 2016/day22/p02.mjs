@@ -1,9 +1,15 @@
 #!/usr/bin/env node
+// Copyright (c) 2025 Adam Mullins
+//
+// Solution for Advent of Code 2016, Day 22, Part 2
+//   https://adventofcode.com/2016/day/22#part2
+//
+// The "trick" is to print out the grid and solve it by hand.  Move
+// the empty grid step by step. Note that there are some "walls", but
+// they can be easily identified because they are the nodes that have
+// more than 100 TB of data.
 "use strict";
 import fs from "node:fs";
-// The "trick" is to print out the grid and solve it by hand.  Move the empty
-// grid step by step. Note that there are some "walls", but they can be easily
-// identified because they are the nodes that have more than 100 TB of data.
 
 
 let grid = [];

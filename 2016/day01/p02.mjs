@@ -1,4 +1,8 @@
 #!/usr/bin/env node
+// Copyright (c) 2025 Adam Mullins
+//
+// Solution for Advent of Code 2016, Day 01, Part 2
+//   https://adventofcode.com/2016/day/1#part2
 "use strict";
 import fs from "node:fs";
 
