@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # Copyright (c) 2025 Adam Mullins
 #
-# Advent of Code 2015, Day 23, Part 1
+# Solution for Advent of Code 2015, Day 23, Part 1
 #   https://adventofcode.com/2015/day/23
 from collections import namedtuple
 from sys import stdin

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # Copyright (c) 2025 Adam Mullins
 #
-# Advent of Code 2015, Day 09, Part 1
+# Solution for Advent of Code 2015, Day 09, Part 1
 #   https://adventofcode.com/2015/day/9
 # Brute force approach to a version of the Traveling Salesman Problem.
 import re

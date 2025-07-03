@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # Copyright (c) 2025 Adam Mullins
 #
-# Advent of Code 2015, Day 19, Part 2
+# Solution for Advent of Code 2015, Day 19, Part 2
 #   https://adventofcode.com/2015/day/19#part2
 #
 # Uses a greedy approach that just tries a single 'branch' of

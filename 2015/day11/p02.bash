@@ -1,5 +1,5 @@
 #!/usr/bin/bash
-# Advent of Code 2015, Day 11, Part 2
+# Solution for Advent of Code 2015, Day 11, Part 2
 #   https://adventofcode.com/2015/day/11#part2
 
 # read INPUT
