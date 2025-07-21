@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+# Copyright (c) 2025 Adam Mullins
+#
+# Solution for Advent of Code 2015, Day 21, Part 1
+#   https://adventofcode.com/2015/day/21
 from collections import namedtuple
 from itertools import product
 from sys import stdin

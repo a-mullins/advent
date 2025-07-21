@@ -1,7 +1,11 @@
 #!/usr/bin/env node
-// Solution inspired by /u/aceshades, here:
-//     https://old.reddit.com/r/adventofcode/comments/5j4lp1/2016_day_19_solutions/dbdf9mn/
-// Quite clever & elegant.
+// Copyright (c) 2025 Adam Mullins
+//
+// Solution for Advent of Code 2016, Day 19, Part 2
+//   https://adventofcode.com/2016/day/19#part2
+//
+// Inspired by /u/aceshades, here:
+//   https://old.reddit.com/r/adventofcode/comments/5j4lp1/2016_day_19_solutions/dbdf9mn/
 "use strict";
 import fs from "node:fs";
 

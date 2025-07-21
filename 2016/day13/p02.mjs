@@ -1,4 +1,8 @@
 #!/usr/bin/env node
+// Copyright (c) 2025 Adam Mullins
+//
+// Solution for Advent of Code 2016, Day 13, Part 2
+//   https://adventofcode.com/2016/day/13#part2
 "use strict";
 import { Pqueue, TreeNode } from "../util.mjs";
 

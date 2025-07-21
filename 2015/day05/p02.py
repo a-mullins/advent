@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+# Copyright (c) 2025 Adam Mullins
+#
+# Solution for Advent of Code 2015, Day 05, Part 2
+#   https://adventofcode.com/2015/day/5#part2
 from sys import stdin
 import re
 

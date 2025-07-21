@@ -1,3 +1,7 @@
+// Copyright (c) 2025 Adam Mullins
+//
+// Solution for Advent of Code 2017, Day 07, Part 2
+//   https://adventofcode.com/2017/day/7#part2
 // TODO cleanup pass
 #include <limits.h>
 #include <stdbool.h>

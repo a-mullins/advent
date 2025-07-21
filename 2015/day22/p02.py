@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-# TODO: Cleanup pass
+# Copyright (c) 2025 Adam Mullins
+#
+# Solution for Advent of Code 2015, Day 22, Part 2
+#   https://adventofcode.com/2015/day/22#part2
+# TODO Cleanup pass
 from collections import namedtuple
 from dataclasses import dataclass, field
 from io import TextIOBase
@@ -177,7 +181,7 @@ all_spells = (MagicMissile, Drain, Shield, Poison, Recharge)
 
 @dataclass
 class Creature:
-    # TODO: remove _output field, or find more elegant solution.
+    # TODO remove _output field, or find more elegant solution.
     name: str = "MISSINGNO."
     hp: int = 50
     armor: int = 0
@@ -240,8 +244,8 @@ class Creature:
         spell.on_cast(caster=self, target=target, output=self._output)
 
 
-# TODO: could used namedlist from PyPI?
-#       namedtuple immutablility causes some inelegance.
+# TODO could used namedlist from PyPI?
+#      namedtuple immutablility causes some inelegance.
 GameState = namedtuple("GameState", "turn pc boss")
 
 
@@ -264,7 +268,8 @@ if __name__ == "__main__":
     # built, but the list of leaf nodes to explore is tracked in the
     # list `to_visit`.
     #
-    # TODO: is there a better name for this kind of techinque?
+    # TODO is there a better name for this kind of techinque?
+    #      3 July 25 minimax?
 
     # initial game state
     to_visit = [
