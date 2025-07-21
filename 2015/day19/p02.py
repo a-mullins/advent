@@ -8,8 +8,10 @@
 # replacement options, blindly following whichever replacement creates
 # the shortest string.
 #
-# Occasionally throws exceptions when it follows a dead end and runs
-# out of options. :-/
+# Sometimes throws exceptions when it follows a dead end and runs
+# out of options.
+#
+# TODO fix that
 import re
 from sys import stdin
 

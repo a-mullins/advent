@@ -3,6 +3,8 @@
 #
 # Solution for Advent of Code 2015, Day 14, Part 2
 #   https://adventofcode.com/2015/day/14#part2
+#
+# TODO is there an analytical sol'n to this one?
 from sys import stdin
 
 
