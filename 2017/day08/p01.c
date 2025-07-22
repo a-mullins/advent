@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-// To find array size:
+// To find the number of registers, and thus the array size:
 //   cut -d' ' -f1,5 <input | tr ' ' '\n' | sort | uniq | wc -l
 #define REGS_CAP 32
 #define NAME_MAX 12
@@ -125,6 +125,7 @@ regcmp(const void *a, const void *b)
 void
 strtoinstr(char *s, instr *i, reg *registers, size_t len)
 {
+    // TODO sscanf() instead of strtok()?
     reg r = {0};
     char *tok = strtok(s, " ");
     strcpy(r.name, tok);
