@@ -4,4 +4,4 @@
 # One-Line Solution for Advent of Code 2015, Day 01, Part 2
 #   https://adventofcode.com/2015/day/1#part2
 # flake8: noqa
-from collections import deque;from itertools import accumulate, count, takewhile;print(deque(takewhile(lambda x: x[0] > -2, accumulate(zip((1 if c == '(' else -1 for c in input()), count(start=1)), lambda tot, next: (tot[0] + next[0], next[1]))), maxlen=1)[0][1])
+from itertools import accumulate, takewhile;print(list(takewhile(lambda x: x[1] > -2, accumulate(enumerate((1 if c == "(" else -1 for c in input()), start=1), lambda tot, next: (next[0], tot[1] + next[1]))))[-1][0])
