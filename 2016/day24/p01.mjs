@@ -8,6 +8,7 @@ import fs from "node:fs";
 import { Pqueue } from "../util.mjs";
 
 
+// TODO examine permute()
 function permute(array) {
     const result = [];
     

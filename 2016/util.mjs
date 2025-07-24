@@ -92,6 +92,14 @@ class Pqueue {
     }
 
     // lower numerical scores have higher priority and get popped first.
+    // TODO sorting is O(n log n), but using simple search to find
+    //      the highest priority item is O(n).
+    //      Depending on the size n, sorting may be better if
+    //      reads greatly outweigh writes, but we should still consider
+    //      switching to simple search.
+    //      another option would be maintaining a sorted list as an
+    //      invariant and using a bsearch, but that might also cost more
+    //      if insertions are frequent.
     pop() {
         if(this.dirty) {
             this.array.sort((a, b) => b.priority - a.priority);
