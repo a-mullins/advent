@@ -11,7 +11,7 @@ import { Pqueue } from "../util.mjs";
 // TODO examine permute()
 function permute(array) {
     const result = [];
-    
+
     function _permute(arr, m = []) {
         if(arr.length === 0) {
             result.push(m);
@@ -25,7 +25,7 @@ function permute(array) {
     };
 
     _permute(array);
-    
+
     return result;
 }
 
@@ -71,7 +71,7 @@ function reconstruct_path(came_from, current) {
 
 
 // A*.
-// 
+//
 // Inspired by: en.wikipedia.org/wiki/A*_search_algorithm
 // Notes:
 //     n is the next node on the path.
@@ -85,7 +85,7 @@ function a_star(start, goal, h) {
     // start :: int        (node id#)
     //  goal :: int        (node id#)
     //     h :: int -> int
-    
+
     const frontier = new Pqueue();
     frontier.push(start, 0);
 
