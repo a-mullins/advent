@@ -12,8 +12,8 @@ def ribbon_len(dims):
     return 2*x + 2*y + x*y*z  # fmt:skip
 
 
-lengths = []
+total_len = 0
 for line in stdin:
-    lengths.append(ribbon_len([int(x) for x in line.split("x")]))
+    total_len += ribbon_len([int(x) for x in line.split("x")])
 
-print(sum(lengths))
+print(total_len)
