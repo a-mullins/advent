@@ -12,4 +12,4 @@ possible for the sake of readability and brevity. Let that also be a warning
 against using snippets from here in production without modification.
 
 Possible future languages:
-Ada, APL, C++, Haksell, Kotlin, Lisp, Perl, Prolog, Smalltalk, Swift
+Ada, APL, Awk, C++, Haksell, Kotlin, Lisp, ~~Perl~~, Prolog, Smalltalk, Swift
