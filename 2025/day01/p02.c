@@ -19,7 +19,7 @@ main(void)
     while (fgets(line, LEN, stdin)) {
         sscanf(&line[0], "%c%d", &dir, &dist);
         // Brute. Force.
-        for (; dist > 0; dist--) {
+        for (/* nop */; dist > 0; dist--) {
             if (dir == 'L')
                 pos == 0 ? pos = 99 : pos--;
             if (dir == 'R')
