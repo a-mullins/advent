@@ -1,7 +1,7 @@
 // Copyright (c) 2025 Adam Mullins
 //
 // Solution for Advent of Code 2025, Day 01, Part 01
-// https://adventofcode.com/2025/day/1
+//   https://adventofcode.com/2025/day/1
 #include <stdio.h>
 
 
