@@ -2,8 +2,9 @@
 My personal [Advent of Code](https://adventofcode.com/) solutions, each year
 with a different language:
 - 2015: Python
-- 2016: JavaScript (node)
+- 2016: JavaScript on Node
 - 2017: C (in progress)
+- 2025: C (for now, in progress)
 
 I hope these solutions can be useful to those who are seeking hints or
 learning these languages. I have made them as straight-forward and idiomatic
