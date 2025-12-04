@@ -15,72 +15,64 @@
 // avoid.
 static_assert(ULONG_MAX > ((unsigned long)1 << 33),
               "ERR: Unsigned long is less than 33 bits on this platform.");
-typedef struct {
-    unsigned long start;
-    unsigned long end;
-} range;
 
 
-int
-rangecmp(const void *a, const void*b);
+bool is_valid_id(unsigned long);
 
 
 int
 main(void)
 {
-    enum reader_state {
-        READ_START,
-        READ_END
-    };
-    enum reader_state state = READ_START;
+    enum reader_state { READ_START, READ_END } state = READ_START;
 
-    range r[64];
-    size_t r_len = 0;
-    int n = EOF;
-    char s[64] = {0};
+    unsigned long start;
+    unsigned long end;
+    unsigned long invalid_id_sum = 0;
+    char s[16] = {'\0'};
+    int n;
     while (EOF != (n = fgetc(stdin))) {
         char c = (char)n;
         if (state == READ_START && c == '-') {
-            r[r_len].start = (unsigned long)atol(s);
+            start = (unsigned long)atol(s);
             s[0] = '\0';
             state = READ_END;
         } else if (state == READ_END && c == ',') {
-            r[r_len].end = (unsigned long)atol(s);
+            end = (unsigned long)atol(s);
+
+            for (unsigned long id = start; id <= end; id++) {
+                if (!is_valid_id(id)) {
+                    invalid_id_sum += (unsigned long)id;
+                    printf("invalid id %ld\n", id);
+                }
+            }
+
+            start = 0;
+            end = 0;
             s[0] = '\0';
             state = READ_START;
-
-            assert(r[r_len].start <= r[r_len].end);
-            r_len++;
         } else {
             strncat(s, &c, 1);
         }
     }
 
-    qsort(r, r_len, sizeof (range), rangecmp);
-    unsigned long sum_of_deltas = 0;
-    for(size_t i = 0; i < r_len; i++) {
-        unsigned long delta = r[i].end - r[i].start;
-        printf("range:%11ld -> %-11lddelta: %ld\n",
-               r[i].start, r[i].end,
-               delta);
-        sum_of_deltas += delta;
-    }
-    printf("%38s\n", ":");
-    printf("%38s %ld\n", "total vals to check:", sum_of_deltas);
-
+    printf("sum %ld\n", invalid_id_sum);
     return 0;
 }
 
 
-int
-rangecmp(const void *a, const void*b)
+bool
+is_valid_id(unsigned long id)
 {
-    range *r0 = (range *)a;
-    range *r1 = (range *)b;
+    char s[16] = {'\0'};
+    //char *s_p = &s[0];
+    sprintf(s, "%ld", id);
+    size_t len = strlen(s);
+    // single numbers are always valid, odd lengths can't have sequences
+    // repeated exactly twice.
+    if (len % 2 == 1) return true;
 
-    if (r0->start < r1->start)
-        return -1;
-    if (r0->start == r1->start)
-        return 0;
-    return 1;
+    if (!strncmp(s, s + ((len+1)/2), (len+1)/2))
+        return false;
+    
+    return true;
 }
