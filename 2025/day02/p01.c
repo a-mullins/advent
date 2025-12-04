@@ -23,30 +23,16 @@ main(void)
     unsigned long invalid_id_sum = 0;
     unsigned long start;
     unsigned long end;
-    char s[16] = {'\0'};
-    int n;
-    while (EOF != (n = getchar())) {
-        char c = (char)n;
-
-        if (c != '-' && c != ',') {
-            strncat(s, &c, 1);
-            continue;
+    char s[16];
+    while (EOF != scanf("%ld-%ld,", &start, &end)) {
+        for (unsigned long id = start; id <= end; id++) {
+            sprintf(s, "%ld", id);
+            size_t len = strlen(s);
+            if (len % 2 == 1)
+                continue;
+            if (!strncmp(s, s + ((len+1)/2), (len+1)/2))
+                invalid_id_sum += (unsigned long)id;
         }
-
-        if (c == '-')
-            start = (unsigned long)atol(s);
-        if (c == ',') {
-            end = (unsigned long)atol(s);
-            for (unsigned long id = start; id <= end; id++) {
-                sprintf(s, "%ld", id);
-                size_t len = strlen(s);
-                if (len %2 == 1)
-                    continue;
-                if (!strncmp(s, s + ((len+1)/2), (len+1)/2))
-                    invalid_id_sum += (unsigned long)id;
-            }
-        }
-        s[0] = '\0';
     }
 
     printf("%ld\n", invalid_id_sum);
