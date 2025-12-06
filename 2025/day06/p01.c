@@ -10,8 +10,6 @@ main(void)
     unsigned long ns[4][1024] = {0};
     unsigned long total = 0;
     for (size_t row = 0; NULL != fgets(line, 4096, stdin); row++) {
-        // char word[16];
-        // strncpy(word, line, 16);
         size_t col = 0;
         char *tok = strtok(line, " \n");
         for (/*nop*/; tok != NULL; tok = strtok(NULL, " \n"), col++) {
