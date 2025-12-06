@@ -125,11 +125,9 @@ regcmp(const void *a, const void *b)
 void
 strtoinstr(char *s, instr *i, reg *registers, size_t len)
 {
-    // TODO sscanf() instead of strtok()?
     reg r = {0};
     char *tok = strtok(s, " ");
     strcpy(r.name, tok);
-    //i->target = darray_bsearch(registers, tok, regcmp);
     i->target = bsearch(&r, registers, len, sizeof (reg), regcmp);
 
     tok = strtok(NULL, " ");
@@ -148,7 +146,6 @@ strtoinstr(char *s, instr *i, reg *registers, size_t len)
     tok = strtok(NULL, " ");
     strcpy(r.name, tok);
     i->cond.reg = bsearch(&r, registers, len, sizeof (reg), regcmp);
-    //darray_bsearch(registers, tok, regcmp);
 
     tok = strtok(NULL, " ");
     if(!strcmp(tok, ">"))  {i->cond.oper = GT;}
