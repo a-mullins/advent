@@ -3,56 +3,68 @@
 #include <string.h>
 
 
-#define COLS 4096
-#define ROWS 8
-
-
-void transpose(void *A, void *B, size_t size, size_t rows, size_t cols);
+unsigned long find_rmost_col(char lines[5][4096]);
+unsigned long solve_rmost_problem(char lines[5][4096], size_t *new_last);
 
 
 int
 main(void)
 {
-    char buf[ROWS][COLS] = {'\0'};
-    char buf_T[COLS][ROWS] = {'\0'};
+    unsigned long total = 0;
+    char lines[5][4096] = {'\0'};
     for (size_t row = 0;
-         row<ROWS && NULL != fgets(buf[row], COLS, stdin);
-         row++) {;}
-    transpose(buf, buf_T, sizeof (buf[0][0]), ROWS, COLS);
+         row < 5 && fgets(&lines[row][0], 4096, stdin);
+         row++)
+            lines[row][strcspn(lines[row], "\n")] = '\0';
 
-    unsigned long nums[8] = {0};
-    size_t i = 0;
-    char op = '\0';
-    unsigned long grand_total = 0;
-    for (int row = 0; row<COLS; row++) {
-        sscanf(buf_T[row], "%ld %c", &nums[i], &op);
-        if (nums[i]) i++;
-        else {
-            unsigned long sub_total = op == '*' ? 1 : 0;
-            if (op == '+')
-                for (size_t i = 0; nums[i] != 0 && i < 4; i++)
-                    sub_total += nums[i];
-            if (op == '*')
-                for (size_t i = 0; nums[i] != 0 && i < 4; i++)
-                    sub_total *= nums[i];
-            if (!sub_total) break;
-            grand_total += sub_total;
-            memset(&nums, 0, 4 * sizeof (nums[0]));
-            i = 0;
-            op = '\0';
-        }
-    }
-
-    printf("%ld\n", grand_total);
+    size_t rmost_col = find_rmost_col(lines);
+    while (rmost_col > 0)
+        total += solve_rmost_problem(lines, &rmost_col);;
+    printf("%ld\n", total);
     return 0;
 }
 
 
-void
-transpose(void *A, void *B, size_t size, size_t rows, size_t cols)
+unsigned long
+find_rmost_col(char lines[5][4096])
 {
-    for (size_t row = 0; row<rows; row++)
-        for (size_t col = 0; col<cols; col++)
-            memcpy(B + size*(rows*col + row), A + size*(row*cols + col), size);
-    return;
+    size_t rmost_col = 0;
+    for(size_t row = 0; row < 5; row++) {
+        size_t len = strlen(lines[row]);
+        rmost_col = len-1 > rmost_col ? len-1 : rmost_col;
+    }
+    return rmost_col;
+}
+
+
+unsigned long
+solve_rmost_problem(char lines[5][4096], size_t *rmost_col)
+{
+    size_t col = rmost_col ? *rmost_col : find_rmost_col(lines);
+    unsigned long nums[5] = {0};
+    char op = '\0';
+    for (size_t i = 0; !op; i++) {
+        char s[8] = {'\0'};
+        for(size_t row = 0; row < 5; row++) {
+            char c = lines[row][col];
+            if (c == '*' || c == '+')
+                op = c;
+            else
+                s[row] = c;
+        }
+        nums[i] = atol(s);
+        if (col > 0) --col;
+    }
+    if (rmost_col)
+        *rmost_col = col == 0 ? 0 : col-1;
+
+    // Choose multiplicative or additive identity.
+    unsigned long total = op == '*' ? 1 : 0;
+    if (op == '+')
+        for (size_t i = 0; nums[i] != 0 && i < 4; i++)
+            total += nums[i];
+    if (op == '*')
+        for (size_t i = 0; nums[i] != 0 && i < 4; i++)
+            total *= nums[i];
+    return total;
 }
