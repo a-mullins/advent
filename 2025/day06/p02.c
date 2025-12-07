@@ -3,8 +3,8 @@
 #include <string.h>
 
 
-unsigned long find_rmost_col(char lines[4][4096]);
-unsigned long solve_rmost_problem(char lines[4][4096], size_t *new_last);
+unsigned long find_rmost_col(char lines[5][4096]);
+unsigned long solve_rmost_problem(char lines[5][4096], size_t *new_last);
 
 
 int
@@ -26,10 +26,10 @@ main(void)
 
 
 unsigned long
-find_rmost_col(char lines[4][4096])
+find_rmost_col(char lines[5][4096])
 {
     size_t rmost_col = 0;
-    for(size_t row = 0; row < 4; row++) {
+    for(size_t row = 0; row < 5; row++) {
         size_t len = strlen(lines[row]);
         rmost_col = len-1 > rmost_col ? len-1 : rmost_col;
     }
@@ -38,10 +38,10 @@ find_rmost_col(char lines[4][4096])
 
 
 unsigned long
-solve_rmost_problem(char lines[4][4096], size_t *rmost_col)
+solve_rmost_problem(char lines[5][4096], size_t *rmost_col)
 {
     size_t col = rmost_col ? *rmost_col : find_rmost_col(lines);
-    unsigned long nums[4] = {0};
+    unsigned long nums[5] = {0};
     char op = '\0';
     for (size_t i = 0; !op; i++) {
         char s[8] = {'\0'};
