@@ -17,9 +17,6 @@ typedef struct {
 STACK(vec2);
 
 
-void print_manifold(char manifold[HEIGHT][WIDTH]);
-
-
 int
 main(void)
 {
@@ -42,24 +39,19 @@ main(void)
         vec2_stack_push(&tachyon_beams, start_pos);
     }
 
-    //print_manifold(tachyon_manifold);
-    
     while (!vec2_stack_empty(&tachyon_beams)) {
         vec2 cur = vec2_stack_pop(&tachyon_beams);
-        //printf("x: %ld, y: %ld\n", cur.x, cur.y);
 
         while (true) {
             // Visit this beam position by marking it.
             tachyon_manifold[cur.y][cur.x] = '|';
-            // print_manifold(tachyon_manifold);
-            // puts("");
 
             // Decide what to do next based on what the beam will
             // interact with next.
             char c = tachyon_manifold[cur.y+1][cur.x];
-            if (c == '.') {
+            if (c == '.')
                 cur.y++;
-            } else if (c == '^') {
+            else if (c == '^') {
                 split_count++;
                 if (cur.x-1 >= 0
                     && tachyon_manifold[cur.y+1][cur.x-1] == '.')
@@ -70,21 +62,12 @@ main(void)
                     vec2_stack_push(&tachyon_beams,
                                     (vec2){.x = cur.x+1, .y = cur.y+1});
                 break;
-            } else {
+            } else 
                 break;
-            }
         }
     }
 
     vec2_stack_free(&tachyon_beams);
     printf("%ld\n", split_count);
     return 0;
-}
-
-
-void
-print_manifold(char manifold[HEIGHT][WIDTH])
-{
-    for(size_t i = 0; manifold[i][0] != '\0'; i++)
-        puts(manifold[i]);
 }
