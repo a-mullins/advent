@@ -27,7 +27,7 @@ static size_t vertex_len = 0;
 static vec2 vertex_pos[MAX_VERTICIES] = { 0 };
 // Adjacency list represention of DAG.
 // [id][0] is lchild, [id][1] is rchild.
-static ssize_t vertex_adj[MAX_VERTICIES][2];
+static ssize_t vertex_adj[MAX_VERTICIES][2]; // = memset(...)
 // for memoization of results in a DFS.
 static ssize_t paths_to_goal[MAX_VERTICIES] = {0};
 
@@ -39,41 +39,35 @@ main(void)
 
     for (size_t row = 0;
          row<HEIGHT && NULL != fgets(tachyon_manifold[row], WIDTH, stdin);
-         row++)
-    {
+         row++) {
         for(size_t col = 0; tachyon_manifold[row][col] != '\0'; col++) {
             char c = tachyon_manifold[row][col];
             if (c == 'S' || c == '^')
-                vertex_pos[vertex_len++] =(vec2){.x = (long)col,
-                                                 .y = (long)row};
+                vertex_pos[vertex_len++] = (vec2){.x = (long)col,
+                                                  .y = (long)row};
         }
     }
 
-    // handle start to next vertex as special case
+    // Connect sources, sinks, and splitters into a DAG.
+    // Handle start to next vertex as special case (beam doesn't split).
     vec2 pos = vertex_pos[0];
-    do {
-        pos.y++;
-    } while (tachyon_manifold[pos.y][pos.x] == '.');
+    do { pos.y++; } while (tachyon_manifold[pos.y][pos.x] == '.');
     vertex_adj[0][0] = get_vertex_id_by_pos(pos);
 
-    // handle rest
-    for (size_t from = 1; from<vertex_len; from++) {
-        for(long x_offset = -1; x_offset <= 1; x_offset += 2) {
-            vec2 pos = vertex_pos[from];
-            pos.x += x_offset;
-            do {
-                pos.y++;
-            } while (tachyon_manifold[pos.y][pos.x] == '.');
-            vertex_adj[from][x_offset < 0 ? 0 : 1] = get_vertex_id_by_pos(pos);
-        }
-    }
-
-    // create special end vertex and connect beams that run off the end to it.
+    // Create an end vertex as a sink and a search goal.
     vertex_pos[vertex_len++] = (vec2){.x = 0, .y = 0};
-    for (size_t i = 1; i < vertex_len-1; i++) {
-        for (size_t j = 0; j < 2; j++) {
-            if (vertex_adj[i][j] == -1)
-                vertex_adj[i][j] = vertex_len-1;
+
+    // Handle rest (beams split, each vertex has out-degree 2).
+    for (size_t from_id = 1; from_id<vertex_len; from_id++) {
+        for(long x_offset = -1; x_offset <= 1; x_offset += 2) {
+            vec2 pos = vertex_pos[from_id];
+            pos.x += x_offset;
+            do { pos.y++; } while (tachyon_manifold[pos.y][pos.x] == '.');
+            size_t to_id = get_vertex_id_by_pos(pos);
+            // if to_id is -1 the beam has run off the end of tachyon manifold,
+            // so connect this vertex to the end vertex.
+            vertex_adj[from_id][x_offset < 0 ? 0 : 1] =
+                to_id == -1 ? vertex_len-1 : to_id;
         }
     }
 
@@ -98,21 +92,17 @@ get_num_paths_to_goal(ssize_t id, ssize_t goal)
 {
     if (id == goal)
         return 1;
-    
+
     if (paths_to_goal[id] > 0)
         return paths_to_goal[id];
 
     ssize_t left = vertex_adj[id][0];
     ssize_t right = vertex_adj[id][1];
-    // Left
-    if (left >= 0) {
+    if (left >= 0)
         paths_to_goal[id] += get_num_paths_to_goal(left, goal);
-    }
-    
-    // Right
+
     if (right >= 0)
         paths_to_goal[id] += get_num_paths_to_goal(right, goal);
 
-    // Visit
     return paths_to_goal[id];
 }
