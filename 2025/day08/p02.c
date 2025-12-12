@@ -15,14 +15,13 @@ typedef struct {uint16_t id0; uint16_t id1; float d;} threeple; // 1-ple, tuple,
 
 static vec3 box[1000] = {0};
 static size_t box_len = 0;
-threeple pair[499'500] = {0}; // Combinations(1000,2) = 499,500.
+static threeple pair[499'500] = {0}; // Combinations(1000,2) = 499,500.
 static size_t pair_len = 0;
 static uint32_t connected[32] = {0}; // 32 * (32 bit) = 1024 bits = 128 bytes.
 
 
-int threeplecmp(const void *a, const void*b);
+static int threeplecmp(const void *a, const void *b);
 inline static float dist(vec3 u, vec3 v);
-inline static ssize_t get_id_by_vec3(vec3 v);
 
 
 int
@@ -49,20 +48,20 @@ main(void)
     // For every pair of junction boxes, from closest to most distant...
     for (size_t i = 0; i<pair_len; i++) {
         // ...connect the pair...
-        ssize_t v0_id = (ssize_t)pair[i].id0;
-        ssize_t v1_id = (ssize_t)pair[i].id1;
-        SETBIT(connected, v0_id);
-        SETBIT(connected, v1_id);
+        uint16_t id0 = pair[i].id0;
+        uint16_t id1 = pair[i].id1;
+        SETBIT(connected, id0);
+        SETBIT(connected, id1);
 
         // ...determine if all boxes are connected...
         int all_connected = 1;
-        for (size_t i = 0; i < box_len; i++)
-            all_connected &= TESTBIT(connected, i) ? 1 : 0;
+        for (size_t j = 0; j < box_len; j++)
+            all_connected &= TESTBIT(connected, j) ? 1 : 0;
 
         // ...and if so, report product of the x coords
         // of the last connected pair.
         if (all_connected) {
-            printf("%d\n", box[v0_id].x * box[v1_id].x);
+            printf("%d\n", box[id0].x * box[id1].x);
             break;
         }
     }
