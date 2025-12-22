@@ -8,7 +8,8 @@ vec2 tile[512] = {0};
 unsigned int tile_len = 0;
 
 
-unsigned long long area(vec2 v0, vec2 v1);
+static unsigned long long area(vec2 v0, vec2 v1);
+
 
 int
 main(void)
@@ -26,12 +27,13 @@ main(void)
             if (i == j) continue;
             A = A > area(tile[i], tile[j]) ? A : area(tile[i], tile[j]);
         }
-    
+
     printf("%lld\n", A);
     return 0;
 }
 
 
+static
 unsigned long long
 area(vec2 v0, vec2 v1)
 {
