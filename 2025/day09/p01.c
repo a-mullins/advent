@@ -23,10 +23,8 @@ main(void)
 
     uint64_t A = 0;
     for (uint16_t i = 0; i<tile_len; i++)
-        for (uint16_t j = i; j<tile_len; j++) {
-            if (i == j) continue;
+        for (uint16_t j = i+1; j<tile_len; j++)
             A = A > area(tile[i], tile[j]) ? A : area(tile[i], tile[j]);
-        }
     
     printf("%ld\n", A);
     return 0;
