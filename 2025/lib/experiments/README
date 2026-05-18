@@ -1,0 +1,27 @@
+This directory contains two different header-only implementations of a dynamic
+array, aka array list, aka vector: `alist.h` and `darray.h`.  `darray.h` uses
+macros to define a family of functions for a given type and does the work
+inside of those functions. alist.h does not define functions and instead
+copies the functionality directly into the substitution site, like sys/queue.h
+does on the BSDs and glibc platforms. Both include as much type-checking as C
+allows and I could figure out to implement.
+
+The function-family approach used in darray.h is arguably more debuggable,
+since gdb can step through those defined functions, but it does have some
+drawbacks. For one, the supplied type name must be a single words, so 'struct
+foo' is disallowed, but typedef'd structs are permitted. Some projects
+discourage matter-of-course struct typedef'ing, because it hides the fact that
+a type is a compound type, so this is sometimes a problem.
+
+For Advent of Code, I decided not to pursue these header-only libraries.
+
+Header-only libraries bloat source files, increasing build times and they can
+be difficult to debug. These drawbacks are concerning, but perhaps not
+especially relevant for AoC solutions which are typcially a fast-compiling
+single source file anyway. My primary reason was more ephemeral. Strong
+type-checking is not really part C's nature, and trying to bolt it on is
+swimming against the current. Header-only libs are also used to avoid dealing
+with the linker, but the linker is not scary, and neither is make, at least
+not at this scale. void *s are C-nature, so I decided to embrace them. If
+strong typing is desired, then it makes more sense to simply switch to C++, or
+Rust, or any of the other systems languagues that offer that.

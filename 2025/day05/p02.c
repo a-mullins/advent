@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../lib/darray.h"
+#include "alist.h"
 
 
 struct range {
@@ -12,14 +12,14 @@ struct range {
 
 
 int rangecmp(const void *a, const void *b);
-struct darray *merge_overlaps(struct darray *ranges);
+struct alist *merge_overlaps(struct alist *ranges);
 
 
 int
 main(void)
 {
-    struct darray fresh_id_ranges;
-    darray_init(&fresh_id_ranges, sizeof (struct range));
+    struct alist *fresh_id_ranges;
+    fresh_id_ranges = alist_new(sizeof (struct range));
 
     char line[128];
     for (size_t i = 0; NULL != fgets(line, 128, stdin); i++) {
@@ -27,22 +27,22 @@ main(void)
 
         struct range r;
         sscanf(line, "%ld-%ld", &r.start, &r.end);
-        darray_push(&fresh_id_ranges, &r);
+        alist_push(fresh_id_ranges, &r);
     }
 
-    struct darray *merged = merge_overlaps(&fresh_id_ranges);
+    struct alist *merged = merge_overlaps(fresh_id_ranges);
 
     unsigned long total_ids = 0;
-    for(size_t i = 0; i<merged->len; i++) {
-        struct range *r_p = darray_get(merged, i);
+    for(size_t i = 0; i < alist_len(merged); i++) {
+        struct range *r_p = alist_get(merged, i);
         printf("range %3d: %15ld-%-15ld %14ld ids\n",
                i, r_p->start, r_p->end,
                1 + (r_p->end - r_p->start));
         total_ids += 1 + (r_p->end - r_p->start);
     }
     printf("%ld\n", total_ids);
-    darray_free(&fresh_id_ranges, NULL);
-    darray_free(merged, NULL);
+    alist_free(fresh_id_ranges, NULL);
+    alist_free(merged, NULL);
     return 0;
 }
 
@@ -59,23 +59,23 @@ rangecmp(const void *a, const void *b)
 }
 
 
-struct darray *
-merge_overlaps(struct darray *ranges)
+struct alist *
+merge_overlaps(struct alist *ranges)
 {
-    darray_qsort(ranges, rangecmp);
+    alist_qsort(ranges, rangecmp);
 
-    struct darray *merged = malloc(sizeof (struct darray));
-    darray_init(merged, sizeof(struct range));
-    darray_push(merged, darray_get(ranges, 0));
+    struct alist *merged;
+    merged = alist_new(sizeof (struct range));
+    alist_push(merged, alist_get(ranges, 0));
 
-    for (size_t i = 1; i < ranges->len; i++) {
-        struct range *last_p = darray_last(merged);
-        struct range *cur_p = darray_get(ranges, i);
+    for (size_t i = 1; i < alist_len(ranges); i++) {
+        struct range *last_p = alist_last(merged);
+        struct range *cur_p = alist_get(ranges, i);
 
         if (cur_p->start <= last_p->end)
             last_p->end = last_p->end >= cur_p->end ? last_p->end : cur_p->end;
         else
-            darray_push(merged, cur_p);
+            alist_push(merged, cur_p);
     }
     return merged;
 }

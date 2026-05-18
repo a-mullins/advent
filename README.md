@@ -8,9 +8,10 @@ with a different language:
 
 I hope these solutions can be useful to those who are seeking hints or
 learning these languages. I have made them as straight-forward and idiomatic
-as I can, and I chose to omit error handling and input sanity checking where
-possible for the sake of readability and brevity. Let that also be a warning
-against using snippets from here in production without modification.
+as I can, and I have omited error handling and input sanitizing where possible
+for the sake of readability and brevity. In other words, do not use snippets
+from this repo in production.
 
 Possible future languages:
-Ada, APL, Awk, C++, Haksell, Kotlin, Lisp, ~~Perl~~, Prolog, Smalltalk, Swift
+(m68k|x86|z80) ASM, Ada, APL, Awk, C++, Haksell, Kotlin, {Emacs,Common,Scheme}
+Lisp, ~~Perl~~, Prolog, Rust, Smalltalk, Swift
