@@ -1,96 +1,103 @@
-#define PCRE2_CODE_UNIT_WIDTH 8
-#include <pcre2.h>
+#include <ctype.h>
 #include <stdio.h>
-#include <string.h>
+#include <stdlib.h>
 
 struct machine {
-	char lights;
-	/* buttons */
-	/* joltage */
+	int lights;
+	int lights_len; /* for printing purposes */
+	int buttons[16];
+	int buttons_len;
 };
 
-
-/* void strrev(const char *, char *); */
-
+void machinetos(struct machine *, char *);
 
 int
 main(void)
 {
-	/* Set up a regex to details from an input line. */
-	int re_errno;
-	PCRE2_SIZE re_erroffset;
-	char *re_str = "\\[([.#]+)\\] *"
-		"((?:\\([0-9]+(?:,[0-9]+)*\\) *)+) *"
-		"((?:\\{[0-9]+(?:,[0-9]+)*\\} *)+)";
-	pcre2_code *re = pcre2_compile(
-		(PCRE2_SPTR)re_str,
-		PCRE2_ZERO_TERMINATED,
-		0,
-		&re_errno,
-		&re_erroffset,
-		NULL);
-	if (re == NULL) {
-		PCRE2_UCHAR buffer[256];
-		pcre2_get_error_message(re_errno, buffer, sizeof(buffer));
-		fprintf(stderr, "PCRE2 compilation failed at offset %d: %s\n",
-			(int)re_erroffset,
-			buffer);
-		return 1;
-	}
+	struct machine machines[256] = { 0 };
+	int machines_len = 0;
 	
-	char line[128];
-	int line_len;
-	pcre2_match_data *match_data;
-	
-	match_data = pcre2_match_data_create_from_pattern(re, NULL);
-	
-	while (NULL != fgets(line, sizeof (line), stdin)) {
-		int rc = pcre2_match(re, line, strlen(line),
-				     0, 0, match_data, NULL);
-		
-		if (rc > 0) {
-			puts("Match!");
-			PCRE2_UCHAR *substr_buf = NULL;
-			PCRE2_SIZE substr_len = 0;
-			for (int i = 0; i < rc; i++) {
-				int status = pcre2_substring_get_bynumber(
-					match_data,
-					i+1,
-					&substr_buf,
-					&substr_len);
-
-				if (status == 0) {
-					printf("group %d: \"%s\" (length: %d)\n",
-					       i+1, (char *)substr_buf, (int)substr_len);
-					pcre2_substring_free(substr_buf);
-					/* printf("match: %s\n", match_str_p); */
-				}
-			}
-		} else {
-			if (rc == PCRE2_ERROR_NOMATCH)
-				puts("No match.");
-			else
-				printf("Error %d\n", rc);
+	enum PARSING { NOTHING, LIGHTS, BUTTON } parsing = NOTHING;
+	char c;
+	int lights = 0;
+	int lights_shift = 0;
+	do {
+		c = getchar();
+		if (parsing == NOTHING && c == '[')
+			parsing = LIGHTS;
+		if (parsing == NOTHING && c == '(') {
+			parsing = BUTTON;
+		}
+		if (parsing == NOTHING && (c == '\n' || c == EOF)) {
+			lights = 0;
+			lights_shift = 0;
+			machines_len++;
 		}
 
-	}
+		if (parsing == LIGHTS && c == '.')
+			lights_shift++;
+		if (parsing == LIGHTS && c == '#')
+			lights = lights ^ (1 << lights_shift++);
+		if (parsing == LIGHTS && c == ']') {
+			parsing = NOTHING;
+			machines[machines_len].lights = lights;
+			machines[machines_len].lights_len = lights_shift;
+		}
 
-	pcre2_match_data_free(match_data);
-	pcre2_code_free(re);
+		/*
+		 * button digits are only 0-9 so it's not necessary to collect
+		 * multiple characters.
+		 */
+		if (parsing == BUTTON && isdigit(c)) {
+			struct machine *m = &machines[machines_len];
+			int *button_p = &m->buttons[m->buttons_len];
+			*button_p ^= 1 << atoi(&c);
+		}
+		/* if (parsing == BUTTON && c == ',') { */
+		/* 	memset(button_str, '\0', sizeof (button_str)); */
+		/* 	button_str_len = 0; */
+		/* } */
+		if (parsing == BUTTON && c == ')') {
+			machines[machines_len].buttons_len++;
+			parsing = NOTHING;
+		}
+
+	} while (c != EOF);
+
+	char line[128];
+	for (int i = 0; i < machines_len; i++) {
+		machinetos(&machines[i], &line[0]);
+		puts(line);
+	}
+	
 	return 0;
 }
 
 
-/* void */
-/* strrev(const char *s, char *r) */
-/* { */
-/*     if (strlen(s) < 2) */
-/* 	return; */
-
-/*     r = r + (strlen(s) - 1); */
-    
-/*     while (*s) */
-/* 	*r-- = *s++; */
-
-/*     return; */
-/* } */
+void
+machinetos(struct machine *m, char *s)
+{
+	/* char *s_o = s; */
+	*s++ = '[';
+	for (int i = 0; i < m->lights_len; i++)
+	{
+		*s++ = m->lights & (1 << i) ? '#' : '.';
+	}
+	*s++ = ']';
+	*s++ = ' ';
+	
+	for (int button_i = 0; button_i < m->buttons_len; button_i++)
+	{
+		*s++ = '(';
+		for (int j = 0; j < m->lights_len; j++)
+		{
+			if (m->buttons[button_i] & (1 << j)) {
+				*s++ = j + '0';
+				*s++ = ',';
+			}
+		}
+		s--;
+		*s++ = ')';
+		*s++ = ' ';
+	}
+}
