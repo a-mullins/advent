@@ -20,10 +20,13 @@ struct tree {
 };
 
 
+void parseinput(struct machine *, int *);
 void machinetos(struct machine *, char *);
 int hamming_d(int, int);
-void a_star(struct tree *start, int (*goalcmp)(struct tree *),
+void a_star(struct tree *start, int (*goalcmp)(struct machine *),
 	    int (*h)(struct machine *));
+int goalcmp(struct machine*);
+int h(struct machine *);
 
 
 int
@@ -32,6 +35,26 @@ main(void)
 	struct machine machines[256] = { 0 };
 	int machines_len = 0;
 
+	parseinput(machines, &machines_len);
+
+	char line[1024];
+	for (int i = 0; i < machines_len; i++) {
+		memset(line, (int)'\0', sizeof (line));
+		machinetos(&machines[i], &line[0]);
+		printf("%d %d %s\n",
+		       h(&machines[i]),
+		       machines[i].buttons_len,
+		       line);
+ 		/* puts(line); */
+	}
+
+	return 0;
+}
+
+
+void
+parseinput(struct machine *machines, int *machines_len)
+{
 	enum PARSING { NOTHING, TARGET, BUTTON } parsing = NOTHING;
 	char c;
 	int target = 0;
@@ -39,7 +62,7 @@ main(void)
 	while (1) {
 		c = getchar();
 		if (c == '\n' || c == EOF) {
-			machines_len++;
+			(*machines_len)++;
 			parsing = NOTHING;
 			target = 0;
 			target_shift = 0;
@@ -65,8 +88,8 @@ main(void)
 			target = target ^ (1 << target_shift++);
 		if (parsing == TARGET && c == ']') {
 			parsing = NOTHING;
-			machines[machines_len].target = target;
-			machines[machines_len].target_len = target_shift;
+			machines[*machines_len].target = target;
+			machines[*machines_len].target_len = target_shift;
 		}
 
 		/*
@@ -74,33 +97,16 @@ main(void)
 		 * multiple characters.
 		 */
 		if (parsing == BUTTON && isdigit(c)) {
-			struct machine *m = &machines[machines_len];
+			struct machine *m = &machines[*machines_len];
 			int *button_p = &m->buttons[m->buttons_len];
 			*button_p ^= 1 << atoi(&c);
 		}
-		/* if (parsing == BUTTON && c == ',') { */
-		/* 	memset(button_str, '\0', sizeof (button_str)); */
-		/* 	button_str_len = 0; */
-		/* } */
 		if (parsing == BUTTON && c == ')') {
-			machines[machines_len].buttons_len++;
+			machines[*machines_len].buttons_len++;
 			parsing = NOTHING;
 		}
 
-	};
-
-	char line[1024];
-	for (int i = 0; i < machines_len; i++) {
-		memset(line, (int)'\0', sizeof (line));
-		machinetos(&machines[i], &line[0]);
-		printf("%d %d %s\n",
-		       hamming_d(0, machines[i].target),
-		       machines[i].buttons_len,
-		       line);
- 		/* puts(line); */
-	}
-
-	return 0;
+	};	
 }
 
 
@@ -137,4 +143,27 @@ int
 hamming_d(int m, int n)
 {
 	return __builtin_popcount(m^n);
+}
+
+
+void
+a_star(struct tree *start, int (*goalcmp)(struct machine *),
+	    int (*h)(struct machine *))
+{
+	return;
+}
+
+
+
+int
+goalcmp(struct machine *m)
+{
+	return hamming_d(m->target, m->lights) == 0 ? 1 : 0;
+}
+
+
+int
+h(struct machine *m)
+{
+	return hamming_d(m->target, m->lights);
 }
