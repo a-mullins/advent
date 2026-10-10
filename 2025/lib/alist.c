@@ -8,12 +8,14 @@
 #define MIN_CAP 2
 
 
-struct alist {
-    size_t cap;
-    size_t len;
-    size_t elem_size;
-    void *buf;
-};
+/*
+ * struct alist {
+ *     size_t cap;
+ *     size_t len;
+ *     size_t elem_size;
+ *     void *buf;
+ * };
+ */
 
 
 static
@@ -92,6 +94,22 @@ alist_replace(struct alist *a, size_t i, void *new_elem)
 {
     memcpy(a->buf + i * a->elem_size, new_elem, a->elem_size);
     return;
+}
+
+
+void
+alist_swap(struct alist *a, size_t i, size_t j)
+{
+    void *tmp = malloc(a->elem_size);
+    
+    /* tmp = i; */
+    memcpy(tmp, alist_get(a, i), a->elem_size);
+    /* i = j */
+    memcpy(alist_get(a, i), alist_get(a, j), a->elem_size);
+    /* j = tmp */
+    memcpy(alist_get(a, j), tmp, a->elem_size);
+    
+    free(tmp);
 }
 
 
