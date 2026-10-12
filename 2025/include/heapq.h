@@ -1,67 +1,30 @@
-// Copyright (c) 2026 Adam Mullins
-// Simple min-heap based priority queue.
+/* Copyright (c) 2026 Adam Mullins       */
+/* Simple min-heap based priority queue. */
 #pragma once
 #include <stddef.h>
 #include <sys/types.h>
 
 
-struct heapq_entry {
-    unsigned int pri;
-    void *data;
-};
 struct heapq;
 
+/* CREATE */
+static 	void		 heapq_init(struct heapq *d, size_t elem_size);
+const struct heapq 	*heapq_new(size_t elem_size);
 
-// CREATE
-// void
-// heapq_init(struct heapq *d, size_t elem_size);
+/* READ / QUERY */
+static void		 heapq_grow(struct heapq *hq);
+size_t			 heapq_len(struct heapq *hq);
+int			 heapq_empty(struct heapq *hq);
+static const void	*heapq_get(struct heapq *hq, size_t i);
+const void		*heapq_peek(struct heapq *hq);
+static unsigned int	 heapq_pri(struct heapq *hq, size_t i);
 
-struct heapq *
-heapq_new(size_t elem_size);
+/* UPDATE */
+void			 heapq_push(struct heapq *hq,
+				    void *elem, unsigned int pri);
+static int		 heapq_swap(struct heapq *hq, size_t i, size_t j);
 
-struct heapq *
-heapq_copy(struct heapq *other);
-
-
-// READ / QUERY
-size_t
-heapq_len(struct heapq *hq);
-
-struct heapq_entry
-heapq_get(struct heapq *hq, size_t i);
-
-void *
-heapq_last(struct heapq *hq);
-
-ssize_t
-heapq_in(struct heapq *hq, void *elem);
-
-ssize_t
-heapq_bsearch(struct heapq *hq,
-               const void *key,
-               int (*compar)(const void *hq, const void *b));
-
-
-// UPDATE
-void
-heapq_push(struct heapq *hq, void *elem, unsigned int pri);
-
-void
-heapq_replace(struct heapq *hq, size_t i, void *new_elem);
-
-void
-heapq_swap(struct heapq *hq, size_t i, size_t j);
-
-void
-heapq_qsort(struct heapq *hq, int (*compar)(const void *a, const void *b));
-
-
-// DELETE
-void
-heapq_del_id(struct heapq *hq, size_t i);
-
-void
-heapq_del_val(struct heapq *hq, void *elem);
-
-void
-heapq_free(struct heapq *hq, void (*destruct)(void *elem));
+/* DELETE */
+void	 		 heapq_pop(struct heapq *hq);
+void	 		 heapq_free(struct heapq *hq,
+				    void (*destruct)(void *elem));
