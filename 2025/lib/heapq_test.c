@@ -1,40 +1,62 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
-#include "heapq.c"
+#include "heapq.h"
 
 
 int
 main(void)
 {
     srand(time(NULL));
+    struct heapq *hq;
     
-    struct heapq *hq = heapq_new(sizeof(size_t));
-    size_t i = 0;
-    for (; i < 16; i++) {
-	size_t r = (unsigned char)rand();
+    hq = heapq_new(sizeof(char));
+    for (int i = 0; i < 16; i++) {
+	char c = 'a' + (char)i;
+	size_t r = (unsigned int)rand();
+	/* size_t s = (unsigned char)rand(); */
+	heapq_push(hq, &c, r);
+    }
+    for (int i = 0; i < heapq_len(hq); i++) {
+	printf("i: %2d data: %c pri: %u\n",
+	       i,
+	       *(char *)heapq_get(hq, i).data,
+	       heapq_get(hq, i).pri);
+    }
+    heapq_free(hq, NULL);
+
+    putchar('\n');
+    hq = heapq_new(sizeof(long long));
+    for (long long i = 0; i < 16; i++) {
+	size_t r = (unsigned int)rand();
 	/* size_t s = (unsigned char)rand(); */
 	heapq_push(hq, &i, r);
     }
-    i = SIZE_MAX;
-// h.push("foo", 5);
-// h.push("bar", 3);
-// h.push("baz", 9);
-// h.push("spam", 8);
-// h.push("ni", 0);
-// h.push("sheffield", 12);
-// h.push("shrubbery", 30);
-// h.push("tiger", 15);
-// let range = n => Array.from({length: n}, (_, i) => i);
-// range(h.array.length).map(n=>h.heap_p(n));
-// console.log(h.pop());
-// console.log(h.pop());
-    for (size_t i = 0; i < heapq_len(hq); i++)
-	printf("i: %zu\tdata: %zu\tpriority: %zu\n",
+    for (int i = 0; i < heapq_len(hq); i++) {
+	printf("i: %2d data: %2lld pri %u\n",
 	       i,
-	       *(size_t *)heapq_get(hq, i),
-	       heapq_pri(hq, i));
-
+	       *(long long *)heapq_get(hq, i).data,
+	       heapq_get(hq, i).pri);
+    }
     heapq_free(hq, NULL);
+
+    putchar('\n');
+    hq = heapq_new(sizeof(char *));
+    char *strs[] = {"foo", "bar", "baz", "spam", "ni", "sheffield blades", "shrubbery", "tiger"};
+    char *s;
+    for (int i = 0; i < sizeof (strs) / sizeof (strs[0]); i++) {
+	s = malloc(strlen(strs[i]) + 1);
+	strcpy(s, strs[i]);
+	heapq_push(hq, &s, i);
+    }
+    for (int i = 0; i < heapq_len(hq); i++) {
+	printf("i: %2d pri %2u data: %s\n",
+	       i,
+	       heapq_get(hq, i).pri,
+	       *(char **)heapq_get(hq, i).data);
+    }
+    heapq_free(hq, NULL);
+    
     return 0;
 }

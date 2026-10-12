@@ -9,8 +9,8 @@ libheapq.so: heapq.c
 	$(CC) $(CFLAGS) -o libheapq.so heapq.c
 
 heapq_test: CFLAGS += -I../include -g
-heapq_test: LDFLAGS += -L. '-Wl,-rpath,$$ORIGIN' -lheapq -lalist
-heapq_test: libalist.so libheapq.so
+heapq_test: LDFLAGS += -L. '-Wl,-rpath,$$ORIGIN' -lheapq
+heapq_test: libheapq.so
 
 alist_test: CFLAGS += -I../include -g
 alist_test: LDFLAGS += -L. '-Wl,-rpath,$$ORIGIN' -lalist

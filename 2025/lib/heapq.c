@@ -1,268 +1,198 @@
-#include <stdint.h>
+// Copyright (c) 2025 Adam Mullins
+// TODO check *allocs for errors.
 #include <stdlib.h>
 #include <string.h>
-#include "alist.h"
+#include "heapq.h"
 
 
-struct heapq_entry {
-	void *data;
-	size_t pri;
-};
+#define MIN_CAP 2
 
 
 struct heapq {
-	struct alist *al;
+    size_t cap;
+    size_t len;
+    size_t elem_size;
+    void *buf;
 };
+
+
+static
+void
+heapq_init(struct heapq *hq, size_t elem_size)
+{
+    hq->cap = MIN_CAP;
+    hq->len = 0;
+    hq->elem_size = sizeof (unsigned int) + elem_size;
+    hq->buf = malloc(MIN_CAP * elem_size);
+}
 
 struct heapq *
 heapq_new(size_t elem_size)
 {
-	struct heapq *hqp = malloc(sizeof (struct heapq));
-	hqp->al = alist_new(sizeof (struct heapq_entry));
-
-	if (hqp->al == NULL) {
-		free(hqp);
-		hqp = NULL;
-	}
-
-	return hqp;
+    struct heapq *p = malloc(sizeof (struct heapq));
+    heapq_init(p, elem_size);
+    return p;
 }
 
+/* struct heapq * */
+/* heapq_copy(struct heapq *other) { */
+/*     struct heapq *hq = malloc(sizeof (struct heapq)); */
+/*     a->cap = other->cap; */
+/*     a->len = other->len; */
+/*     a->elem_size = other->elem_size; */
+/*     a->buf = calloc(a->cap, a->elem_size); */
+/*     memcpy(a->buf, other->buf, a->len * a->elem_size); */
+/*     return a; */
+/* } */
 
-void
-heapq_free(struct heapq *hq, void (*destruct)(void *elem))
+static void
+heapq_grow(struct heapq *hq)
 {
-	alist_free(hq->al, destruct);
+    hq->cap = hq->cap * 3 >> 1; // (3/2) * hq->cap
+    // FIXME if realloc fails, we loose access to hq->buf pointer
+    hq->buf = realloc(hq->buf, hq->elem_size * hq->cap);
+    return;
 }
-
 
 size_t
 heapq_len(struct heapq *hq)
 {
-        return alist_len(hq->al);
+    return hq->len;
 }
 
-
-int invar_assert(struct heapq *hq); /*TODO*/
-
-
-size_t
-heapq_pri(struct heapq *hq, size_t idx)
+struct heapq_entry
+heapq_get(struct heapq *hq, size_t i)
 {
-	if (idx >= heapq_len(hq))
-		return SIZE_MAX;
-	
-	return ((struct heapq_entry *)alist_get(hq->al, idx))->pri;
+    struct heapq_entry hqe;
+    hqe.pri = *(unsigned int *)(hq->buf + i * hq->elem_size);
+    hqe.data = (hq->buf + i * hq->elem_size) + sizeof (unsigned int);
+    return hqe;	    
 }
 
-
-size_t
-lchild_i(size_t idx)
-{
-        return 2*idx + 1;
-}
-
-size_t
-lchild_pri(struct heapq *hq, size_t idx)
-{
-	if (lchild_i(idx) >= heapq_len(hq))
-		return SIZE_MAX;
-	
-	return ((struct heapq_entry *)alist_get(hq->al, lchild_i(idx)))->pri;
-}
-
-
-size_t
-rchild_i(size_t idx)
-{
-        return 2*idx + 2;
-}
-
-
-size_t
-rchild_pri(struct heapq *hq, size_t idx)
-{
-	if (rchild_i(idx) >= heapq_len(hq))
-		return SIZE_MAX;
-	
-	return ((struct heapq_entry *)alist_get(hq->al, rchild_i(idx)))->pri;
-}
-
-
-size_t
-parent_i(size_t idx)
-{
-	/* 0 returns -1. index 0 has no parent. */
-	return (idx-1)/2;
-}
-
-
-size_t
-parent_pri(struct heapq *hq, size_t idx)
-{
-	return ((struct heapq_entry *)alist_get(hq->al, parent_i(idx)))->pri;
-}
-
-
-/* Is the vertex given by idx a lower priority than its children? */
-int
-is_vertex_ordered(struct heapq *hq, size_t idx)
-{
-	size_t parent;
-	size_t left;
-	size_t right;
-		
-	if (idx >= heapq_len(hq))
-		return 1;
-
-	parent = ((struct heapq_entry *)alist_get(hq->al, idx))->pri;
-	left = lchild_pri(hq, idx);
-	right = rchild_pri(hq, idx);
-	
-	return (parent <= left) && (parent <= right);
-}
-
-
-int
-is_heap(struct heapq *hq) {
-	int valid = 1;
-	for (size_t i = 0; i < heapq_len(hq); i++) {
-		valid &= is_vertex_ordered(hq, i);
-	}
-	return valid;
-}
-
-
-void *
-heapq_get(struct heapq *hq, size_t idx)
-{
-	if (idx < 0)
-		return NULL;
-	if (idx >= alist_len(hq->al))
-		return NULL;
-	struct heapq_entry e = *(struct heapq_entry *)alist_get(hq->al, idx);
-	return e.data;
-}
+/* void * */
+/* heapq_last(struct heapq *hq) */
+/* { */
+/*     if (a->len == 0) */
+/*         return NULL; */
+/*     else */
+/*         return a->buf + a->elem_size * (a->len - 1); */
+/* } */
 
 
 void
-_perc_up(struct heapq *hq, size_t idx)
+heapq_push(struct heapq *hq, void *elem, unsigned int pri)
 {
-        //console.log(`_perc_up(${idx})`);
-        // base case.
-        if (idx == 0) {
-		//console.log("base-case");
-		return;
-        } else {
-		// console.log(`parent_elem.priority > elem.priority: `+
-		//             `${parent_elem.pri > elem.pri}`);
-		if(parent_pri(hq, idx) > heapq_pri(hq, idx)) {
-			// if parent's priority is higher, swap parent and this
-			// console.log("parent's priority is higher than child's");
-			// console.log(this.array);
-
-			alist_swap(hq->al, idx, parent_i(idx));
-			
-			//console.log(this.array);
-			// now perc_up from new location
-			_perc_up(hq, parent_i(idx));
-		} else {
-			// this element's priority is higher than its parent's, it can
-			// stay put.
-			//console.log("parent's priority is lower than child's");
-			return;
-		}
-        }
-    }
-
-    /*
-    _sink_down(idx) {
-        //console.log(`_sink_down(${idx})`);
-        //console.log(`this.elem_at(idx): ${this.elem_at(idx)}`);
-        const elem = this.elem_at(idx) || {pri:-Number.MAX_SAFE_INTEGER};
-        const lchild_i = this.lchild_i(idx);
-        const rchild_i = this.rchild_i(idx);
-        const lchild = this.elem_at(lchild_i) || {pri:Number.MAX_SAFE_INTEGER};
-        const rchild = this.elem_at(rchild_i) || {pri:Number.MAX_SAFE_INTEGER};
-        const smallest_i = rchild.pri < lchild.pri ? rchild_i : lchild_i;
-        const smallest = this.elem_at(smallest_i);
-        //console.log(`\tparent{ ${elem.pri} } =>`);
-        //console.log("\t\t"+lchild.pri);
-        //console.log("\t\t"+rchild.pri);
-
-        // done when both children are >= this priority, or
-        // there are no children and we are a leaf.
-        if(lchild.pri >= elem.pri && rchild.pri >= elem.pri) {
-            //console.log("\tbase-case");
-            return;
-        }
-        // otherwise, swap this node with the smallest of its children & repeat.
-        //console.log("\tidx, smallest_i, smallest.pri, elem.pri");
-        //console.log(`\t${idx}, ${smallest_i}, ${smallest.pri}, ${elem.pri}`);
-        //console.log(`this.array[${idx}] = ${this.elem_at(smallest_i)};`);
-        this.array[smallest_i] = elem;
-        this.array[idx] = smallest;
-        this._sink_down(smallest_i);
-        // if(lchild.pri < elem.pri) {
-        //     //console.log("lchild.pri < elem.pri");
-        //     //console.log(`${lchild.pri} < ${elem.pri}`);
-        //     // swap lchild with this element
-        //     this.array[lchild_i] = elem;
-        //     this.array[idx] = lchild;
-        //     this._sink_down(lchild_i);
-        // } else if(rchild.pri < elem.pri) {
-        //     // swap rchild with this element
-        //     this.array[rchild_i] = elem;
-        //     this.array[idx] = rchild;
-        //     this._sink_down(rchild_i);
-        // }
-    }
-*/
-
-void
-heapq_push(struct heapq *hq, void *elem, size_t priority)
-{
-        //console.log(`push(${elem}, ${priority}`);
-        // insertion.
-        // put elem at the first avail space, then rebalance tree
-        // by percolating the element up.
-
-	struct heapq_entry entry;
-	/*
-	 * FIXME this sequence results in two back-to-back calls
-	 * to memcpy() for no good reason. :(
-	 */
-	/*
-	 * FIXME This doesn't work. heapq_entry has a void * which needs to point
-	 * to malloced memory to mean anything.
-	 */
-	memcpy(&(entry.data), elem, hq->al->elem_size);
-	entry.pri = priority;
-        //this.array.push({data: elem, pri: priority});
-	alist_push(hq->al, &entry);
-        //console.log(this.array);
-
-        //this._perc_up(this.array.length-1);
-	_perc_up(hq, alist_len(hq->al) - 1);
-        //this.invar_assert();
+    if (hq->len+1 >= hq->cap)
+        heapq_grow(hq);
+    /* Copy priority. */
+    memcpy(hq->buf + hq->len * hq->elem_size, &pri, sizeof (unsigned int));
+    /* Copy data. */
+    memcpy((hq->buf + hq->len * hq->elem_size) + sizeof (unsigned int),
+	   elem,
+	   hq->elem_size);
+    hq->len++;
 }
-/*
-    pop() {
-        //console.log(this.array);
-        if(this.empty()) { return null; }
-        // extraction.
-        // remove the root, insert last element in root spot.
-        // balance tree by sink element down.
-        const old_root = this.array[0];
-        // move last element into root.
-        this.array[0] = this.array[this.array.length-1];
-        // "delete" last element.
-        this.array.length--;
 
-        // insert sort, basically.
-        this._sink_down(0);
 
-        //this.invar_assert();
-        return old_root.data;
-    }
-*/
+/* void */
+/* heapq_replace(struct heapq *hq, size_t i, void *new_elem) */
+/* { */
+/*     memcpy(a->buf + i * a->elem_size, new_elem, a->elem_size); */
+/*     return; */
+/* } */
+
+
+/* void */
+/* heapq_swap(struct heapq *hq, size_t i, size_t j) */
+/* { */
+/*     void *tmp = malloc(a->elem_size); */
+    
+/*     /\* tmp = i; *\/ */
+/*     memcpy(tmp, heapq_get(a, i), a->elem_size); */
+/*     /\* i = j *\/ */
+/*     memcpy(heapq_get(a, i), heapq_get(a, j), a->elem_size); */
+/*     /\* j = tmp *\/ */
+/*     memcpy(heapq_get(a, j), tmp, a->elem_size); */
+    
+/*     free(tmp); */
+/* } */
+
+
+/* void */
+/* heapq_del_id(struct heapq *hq, size_t i) */
+/* { */
+/*     if (i >= a->len ) */
+/*         return; */
+/*     if (i == a->len - 1) */
+/*         memset(a->buf + i * a->elem_size, 0, a->elem_size); */
+/*     else { */
+/*         memmove(a->buf + i       * a->elem_size, */
+/*                 a->buf + (i+1)   * a->elem_size, */
+/*                 (a->len - (i+1)) * a->elem_size); */
+/*     } */
+/*     a->len--; */
+/*     return; */
+/* } */
+
+
+/* void */
+/* heapq_del_val(struct heapq *hq, void *elem) */
+/* { */
+/*     heapq_del_id(a, heapq_in(a, elem)); */
+/*     return; */
+/* } */
+
+
+// Completely free the array.
+//
+// If function-pointer `destruct` is not null, it will be called once
+// with each element of the array. This is useful for free()ing
+// pointers to dynamically allocated memory, for example, if the
+// heapq holds (char *)s to malloc'd strings.
+//
+// If you wish to use *hq again, it will need to be reinitialized.
+void
+heapq_free(struct heapq *hq, void (*destruct)(void *elem)) {
+    if(destruct != NULL)
+        for(size_t i = 0; i<hq->len; i++)
+            (*destruct)((hq->buf + i * hq->elem_size) + sizeof (unsigned int));
+    hq->cap = 0;
+    hq->len = 0;
+    hq->elem_size = 0;
+    free(hq->buf);
+    hq->buf = NULL;
+}
+
+
+/* ssize_t */
+/* heapq_in(struct heapq *hq, void *elem) */
+/* { */
+/*     for (size_t i = 0; i<a->len; i++) */
+/*         if (memcmp(heapq_get(a, i), elem, a->elem_size) == 0) */
+/*             return i; */
+/*     return -1; */
+/* } */
+
+
+/* void */
+/* heapq_qsort(struct heapq *hq, int (*compar)(const void *a, const void *b)) */
+/* { */
+/*     qsort(a->buf, a->len, a->elem_size, compar); */
+/* } */
+
+
+/* ssize_t */
+/* heapq_bsearch(struct heapq *hq, */
+/*                const void *key, */
+/*                int (*compar)(const void *a, const void *b)) */
+/* { */
+/*     void *key_p = bsearch(key, */
+/*                    a->buf, */
+/*                    a->len, */
+/*                    a->elem_size, */
+/*                    compar); */
+/*     if (key_p) */
+/*         return (ssize_t)((key_p - a->buf) / a->elem_size); */
+/*     else */
+/*         return -1; */
+/* } */
