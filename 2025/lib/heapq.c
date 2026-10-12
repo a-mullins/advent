@@ -27,14 +27,20 @@ int			 heapq_empty(struct heapq *hq);
 static const void	*heapq_get(struct heapq *hq, size_t i);
 const void		*heapq_peek(struct heapq *hq);
 static unsigned int	 heapq_pri(struct heapq *hq, size_t i);
+static int		 is_heapq(struct heapq *hq);                /* TODO */
+static int		 lchild_i(idx);                             /* TODO */
+static int		 rchild_i(idx);                             /* TODO */
+static int		 parent_i(idx);                             /* TODO */
 
 /* UPDATE */
 void			 heapq_push(struct heapq *hq,
 				    void *elem, unsigned int pri);
 static int		 heapq_swap(struct heapq *hq, size_t i, size_t j);
+static void		 perc_up(struct heapq *hq, size_t i);       /* TODO */
+static void		 sink_down(struct heapq *hq, size_t i);     /* TODO */
 
 /* DELETE */
-void			 heapq_pop(struct heapq *hq);
+void			 heapq_pop(struct heapq *hq);               /* TODO */
 void			 heapq_free(struct heapq *hq,
 				    void (*destruct)(void *elem));
 
@@ -114,6 +120,7 @@ heapq_pri(struct heapq *hq, size_t i)
 void
 heapq_push(struct heapq *hq, void *elem, unsigned int pri)
 {
+	/* TODO Heapify after appending a new element. */
 	if (hq->len+1 >= hq->cap)
 		heapq_grow(hq);
 	/* Copy priority. */
@@ -143,6 +150,89 @@ heapq_swap(struct heapq *hq, size_t i, size_t j)
 
 	free(tmp);
 	return 0;
+}
+
+
+static void
+perc_up(struct heapq *hq, size_t i)
+{
+        /* //console.log(`_perc_up(${idx})`); */
+        /* // base case. */
+        /* if(idx === 0) { */
+        /*     //console.log("base-case"); */
+        /*     return; */
+        /* } */
+        /* else { */
+        /*     // so we don't have to write `this.` everywhere... */
+        /*     const elem = this.elem_at(idx); */
+        /*     const parent_i = this.parent_i(idx); */
+        /*     const parent_elem = this.elem_at(parent_i); */
+
+        /*     // console.log(`parent_elem.priority > elem.priority: `+ */
+        /*     //             `${parent_elem.pri > elem.pri}`); */
+        /*     if(parent_elem.pri > elem.pri) { */
+        /*         // if parent's priority is higher, swap parent and this child */
+        /*         // console.log("parent's priority is higher than child's"); */
+        /*         // console.log(this.array); */
+        /*         // put this this.element in parent's index, */
+        /*         this.array[parent_i] = elem; */
+        /*         // put parent in this this.element's indx. */
+        /*         this.array[idx] = parent_elem; */
+        /*         //console.log(this.array); */
+        /*         // now perc_up from new location */
+        /*         this._perc_up(parent_i); */
+        /*     } else { */
+        /*         // this element's priority is higher than its parent's, it can */
+        /*         // stay put. */
+        /*         //console.log("parent's priority is lower than child's"); */
+        /*         return; */
+        /*     } */
+        /* } */
+}
+
+
+static void
+sink_down(struct *hq, size_t i)
+{
+        /* //console.log(`_sink_down(${idx})`); */
+        /* //console.log(`this.elem_at(idx): ${this.elem_at(idx)}`); */
+        /* const elem = this.elem_at(idx) || {pri:-Number.MAX_SAFE_INTEGER}; */
+        /* const lchild_i = this.lchild_i(idx); */
+        /* const rchild_i = this.rchild_i(idx); */
+        /* const lchild = this.elem_at(lchild_i) || {pri:Number.MAX_SAFE_INTEGER}; */
+        /* const rchild = this.elem_at(rchild_i) || {pri:Number.MAX_SAFE_INTEGER}; */
+        /* const smallest_i = rchild.pri < lchild.pri ? rchild_i : lchild_i; */
+        /* const smallest = this.elem_at(smallest_i); */
+        /* //console.log(`\tparent{ ${elem.pri} } =>`); */
+        /* //console.log("\t\t"+lchild.pri); */
+        /* //console.log("\t\t"+rchild.pri); */
+
+        /* // done when both children are >= this priority, or */
+        /* // there are no children and we are a leaf. */
+        /* if(lchild.pri >= elem.pri && rchild.pri >= elem.pri) { */
+        /*     //console.log("\tbase-case"); */
+        /*     return; */
+        /* } */
+        /* // otherwise, swap this node with the smallest of its children & repeat. */
+        /* //console.log("\tidx, smallest_i, smallest.pri, elem.pri"); */
+        /* //console.log(`\t${idx}, ${smallest_i}, ${smallest.pri}, ${elem.pri}`); */
+        /* //console.log(`this.array[${idx}] = ${this.elem_at(smallest_i)};`); */
+        /* this.array[smallest_i] = elem; */
+        /* this.array[idx] = smallest; */
+        /* this._sink_down(smallest_i); */
+        /* // if(lchild.pri < elem.pri) { */
+        /* //     //console.log("lchild.pri < elem.pri"); */
+        /* //     //console.log(`${lchild.pri} < ${elem.pri}`); */
+        /* //     // swap lchild with this element */
+        /* //     this.array[lchild_i] = elem; */
+        /* //     this.array[idx] = lchild; */
+        /* //     this._sink_down(lchild_i); */
+        /* // } else if(rchild.pri < elem.pri) { */
+        /* //     // swap rchild with this element */
+        /* //     this.array[rchild_i] = elem; */
+        /* //     this.array[idx] = rchild; */
+        /* //     this._sink_down(rchild_i); */
+        /* // } */
 }
 
 
