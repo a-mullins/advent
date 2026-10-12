@@ -107,7 +107,7 @@ static
 unsigned int
 heapq_pri(struct heapq *hq, size_t i)
 {
-	return hq->buf + i * hq->elem_size;
+	return *(unsigned int *)hq->buf + i * hq->elem_size;
 }
 
 
