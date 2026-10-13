@@ -28,6 +28,7 @@ int			 heapq_empty(struct heapq *hq);
 /* static */ void		*heapq_get(struct heapq *hq, size_t i);
 /* static */ void		*heapq_get_entry(struct heapq *hq, size_t i);
 void		*heapq_peek(struct heapq *hq);
+int		 heapq_in(struct heapq *hq, void *elem);
 /* static */ unsigned int		 heapq_pri(struct heapq *hq, size_t i);
 /* static */ int		 is_heap(struct heapq *hq);
 /* static */ size_t		 lchild_i(size_t i);
@@ -93,6 +94,7 @@ heapq_empty(struct heapq *hq)
 }
 
 
+/* TODO refactor to get_data or something */
 /* static */
 void *
 heapq_get(struct heapq *hq, size_t i)
@@ -108,6 +110,7 @@ heapq_get(struct heapq *hq, size_t i)
  * Returns a pointer to the start of the whole {priority, data} entry.
  * This is actually the same address as what heapq_pri() returns, but this name
  * communicates specific intent.
+ * TODO refactor to get_whole_record or something.
  */
 /* static */
 void *
@@ -130,6 +133,24 @@ heapq_peek(struct heapq *hq)
 }
 
 
+int
+heapq_in(struct heapq *hq, void *needle)
+{
+	void *hay;
+	for (size_t i = 0; i < heapq_len(hq); i++) {
+		void *hay = heapq_get(hq, i);
+		int res;
+		res = memcmp(hay,
+			       needle,
+			       hq->elem_size - sizeof (unsigned int));
+		if (res == 0)
+			return 1;
+	}
+	return 0;
+}
+
+
+/* TODO Refactor to heapq_get_pri */
 /* static */
 unsigned int
 heapq_pri(struct heapq *hq, size_t i)

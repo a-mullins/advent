@@ -14,6 +14,7 @@ struct heapq		*heapq_new(size_t elem_size);
 size_t			 heapq_len(struct heapq *hq);
 int			 heapq_empty(struct heapq *hq);
 void			*heapq_peek(struct heapq *hq);
+int			 heapq_in(struct heapq *hq, void *elem);
 
 /* UPDATE */
 void			 heapq_push(struct heapq *hq,
