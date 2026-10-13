@@ -1,4 +1,5 @@
 /* Copyright (c) 2026 Adam Mullins */
+#include <limits.h>
 #include <stdlib.h>
 #include <string.h>
 #include "heapq.h"
@@ -17,36 +18,37 @@ struct heapq {
 
 /* -=[ FORWARD DECL ]=----------------------------------------------------- */
 /* CREATE */
-static 	void		 heapq_init(struct heapq *d, size_t elem_size);
-const struct heapq 	*heapq_new(size_t elem_size);
+/* static */ 	void		 heapq_init(struct heapq *d, size_t elem_size);
+struct heapq 	*heapq_new(size_t elem_size);
 
 /* READ / QUERY */
-static void		 heapq_grow(struct heapq *hq);
+/* static */ void		 heapq_grow(struct heapq *hq);
 size_t			 heapq_len(struct heapq *hq);
 int			 heapq_empty(struct heapq *hq);
-static const void	*heapq_get(struct heapq *hq, size_t i);
-const void		*heapq_peek(struct heapq *hq);
-static unsigned int	 heapq_pri(struct heapq *hq, size_t i);
-static int		 is_heapq(struct heapq *hq);                /* TODO */
-static int		 lchild_i(idx);                             /* TODO */
-static int		 rchild_i(idx);                             /* TODO */
-static int		 parent_i(idx);                             /* TODO */
+/* static */ void		*heapq_get(struct heapq *hq, size_t i);
+/* static */ void		*heapq_get_entry(struct heapq *hq, size_t i);
+void		*heapq_peek(struct heapq *hq);
+/* static */ unsigned int		 heapq_pri(struct heapq *hq, size_t i);
+/* static */ int		 is_heap(struct heapq *hq);
+/* static */ size_t		 lchild_i(size_t i);
+/* static */ size_t		 rchild_i(size_t i);
+/* static */ size_t		 parent_i(size_t i);
 
 /* UPDATE */
 void			 heapq_push(struct heapq *hq,
 				    void *elem, unsigned int pri);
-static int		 heapq_swap(struct heapq *hq, size_t i, size_t j);
-static void		 perc_up(struct heapq *hq, size_t i);       /* TODO */
-static void		 sink_down(struct heapq *hq, size_t i);     /* TODO */
+/* static */ int		 heapq_swap(struct heapq *hq, size_t i, size_t j);
+/* static */ void		 perc_up(struct heapq *hq, size_t i);
+/* static */ void		 sink_down(struct heapq *hq, size_t i);
 
 /* DELETE */
-void			 heapq_pop(struct heapq *hq);               /* TODO */
+void			 heapq_pop(struct heapq *hq);
 void			 heapq_free(struct heapq *hq,
 				    void (*destruct)(void *elem));
 
 
 /* -=[ IMPLEMENTATION ]=--------------------------------------------------- */
-static
+/* static */
 void
 heapq_init(struct heapq *hq, size_t elem_size)
 {
@@ -66,7 +68,7 @@ heapq_new(size_t elem_size)
 }
 
 
-static
+/* static */
 void
 heapq_grow(struct heapq *hq)
 {
@@ -91,36 +93,101 @@ heapq_empty(struct heapq *hq)
 }
 
 
-static
-const void *
+/* static */
+void *
 heapq_get(struct heapq *hq, size_t i)
 {
-	return (hq->buf + i * hq->elem_size) + sizeof (unsigned int);
+	if (i < hq->len)
+		return (hq->buf + i * hq->elem_size) + sizeof (unsigned int);
+	else
+		return NULL;
 }
 
 
-const void *
+/*
+ * Returns a pointer to the start of the whole {priority, data} entry.
+ * This is actually the same address as what heapq_pri() returns, but this name
+ * communicates specific intent.
+ */
+/* static */
+void *
+heapq_get_entry(struct heapq *hq, size_t i)
+{
+	if (i < hq->len)
+		return (hq->buf + i * hq->elem_size);
+	else
+		return NULL;
+}
+
+
+void *
 heapq_peek(struct heapq *hq)
 {
-	if (a->len == 0)
+	if (hq->len == 0)
 		return NULL;
 	else
-		return heapq_get(hq, hq->len - 1);
+		return heapq_get(hq, 0);
 }
 
 
-static
+/* static */
 unsigned int
 heapq_pri(struct heapq *hq, size_t i)
 {
-	return *(unsigned int *)hq->buf + i * hq->elem_size;
+	if (i < hq->len)
+		return *(unsigned int *)(hq->buf + i * hq->elem_size);
+	return -1;
+}
+
+
+/* static */ int
+is_heap(struct heapq *hq)
+{
+	int is_heap = 1;
+	for(int i = 0; i < heapq_len(hq); i++) {
+		unsigned int parent_pri;
+		unsigned int lchild_pri;
+		unsigned int rchild_pri;
+
+		parent_pri = i < heapq_len(hq) ? heapq_pri(hq, i) : UINT_MAX;
+		lchild_pri = lchild_i(i) < heapq_len(hq) ?
+			heapq_pri(hq, lchild_i(i)) : UINT_MAX;
+		rchild_pri = rchild_i(i) < heapq_len(hq) ?
+			heapq_pri(hq, rchild_i(i)) : UINT_MAX;
+
+		if (parent_pri > lchild_pri || parent_pri > rchild_pri) {
+			is_heap = 0;
+			break;
+		}
+	}
+	return is_heap;
+}
+
+
+/* static */ size_t
+lchild_i(size_t i)
+{
+	return 2 * i + 1;
+}
+
+
+/* static */ size_t
+rchild_i(size_t i)
+{
+	return 2 * i + 2;
+}
+
+/* parent_i(0) returns nonsense because size_t underflows, so don't that. */
+/* static */ size_t
+parent_i(size_t i)
+{
+	return (i - 1) >> 1;
 }
 
 
 void
 heapq_push(struct heapq *hq, void *elem, unsigned int pri)
 {
-	/* TODO Heapify after appending a new element. */
 	if (hq->len+1 >= hq->cap)
 		heapq_grow(hq);
 	/* Copy priority. */
@@ -130,114 +197,104 @@ heapq_push(struct heapq *hq, void *elem, unsigned int pri)
 	       elem,
 	       hq->elem_size);
 	hq->len++;
+	/* Heapify. */
+	perc_up(hq, hq->len - 1);
 }
 
 
-static
+/* static */
 int
 heapq_swap(struct heapq *hq, size_t i, size_t j)
 {
-	void *tmp = malloc(a->elem_size);
+	void *tmp = malloc(hq->elem_size);
 	if (tmp == NULL)
 		return 1;
 
 	/* tmp = i; */
-	memcpy(tmp, heapq_get(a, i), a->elem_size);
+	memcpy(tmp, heapq_get_entry(hq, i), hq->elem_size);
 	/* i = j */
-	memcpy(heapq_get(a, i), heapq_get(a, j), a->elem_size);
+	memcpy(heapq_get_entry(hq, i), heapq_get_entry(hq, j), hq->elem_size);
 	/* j = tmp */
-	memcpy(heapq_get(a, j), tmp, a->elem_size);
+	memcpy(heapq_get_entry(hq, j), tmp, hq->elem_size);
 
 	free(tmp);
 	return 0;
 }
 
 
-static void
-perc_up(struct heapq *hq, size_t i)
+/* static */ void
+perc_up(struct heapq *hq, size_t idx)
 {
-        /* //console.log(`_perc_up(${idx})`); */
-        /* // base case. */
-        /* if(idx === 0) { */
-        /*     //console.log("base-case"); */
-        /*     return; */
-        /* } */
-        /* else { */
-        /*     // so we don't have to write `this.` everywhere... */
-        /*     const elem = this.elem_at(idx); */
-        /*     const parent_i = this.parent_i(idx); */
-        /*     const parent_elem = this.elem_at(parent_i); */
+	/* if(i == 0) */
+	/* 	return; */
+	if (!(idx > 0 && idx < hq->len))
+		return;
 
-        /*     // console.log(`parent_elem.priority > elem.priority: `+ */
-        /*     //             `${parent_elem.pri > elem.pri}`); */
-        /*     if(parent_elem.pri > elem.pri) { */
-        /*         // if parent's priority is higher, swap parent and this child */
-        /*         // console.log("parent's priority is higher than child's"); */
-        /*         // console.log(this.array); */
-        /*         // put this this.element in parent's index, */
-        /*         this.array[parent_i] = elem; */
-        /*         // put parent in this this.element's indx. */
-        /*         this.array[idx] = parent_elem; */
-        /*         //console.log(this.array); */
-        /*         // now perc_up from new location */
-        /*         this._perc_up(parent_i); */
-        /*     } else { */
-        /*         // this element's priority is higher than its parent's, it can */
-        /*         // stay put. */
-        /*         //console.log("parent's priority is lower than child's"); */
-        /*         return; */
-        /*     } */
-        /* } */
+	size_t		parent_idx   = parent_i(idx);
+	unsigned int	cur_priority = heapq_pri(hq, idx);
+	unsigned int 	parent_pri   = heapq_pri(hq, parent_idx);
+
+	if (cur_priority < parent_pri) {
+		heapq_swap(hq, idx, parent_idx);
+                perc_up(hq, parent_idx);
+	}
 }
 
 
-static void
-sink_down(struct *hq, size_t i)
+/* static */ void
+sink_down(struct heapq *hq, size_t idx)
 {
-        /* //console.log(`_sink_down(${idx})`); */
-        /* //console.log(`this.elem_at(idx): ${this.elem_at(idx)}`); */
-        /* const elem = this.elem_at(idx) || {pri:-Number.MAX_SAFE_INTEGER}; */
-        /* const lchild_i = this.lchild_i(idx); */
-        /* const rchild_i = this.rchild_i(idx); */
-        /* const lchild = this.elem_at(lchild_i) || {pri:Number.MAX_SAFE_INTEGER}; */
-        /* const rchild = this.elem_at(rchild_i) || {pri:Number.MAX_SAFE_INTEGER}; */
-        /* const smallest_i = rchild.pri < lchild.pri ? rchild_i : lchild_i; */
-        /* const smallest = this.elem_at(smallest_i); */
-        /* //console.log(`\tparent{ ${elem.pri} } =>`); */
-        /* //console.log("\t\t"+lchild.pri); */
-        /* //console.log("\t\t"+rchild.pri); */
+	/* printf("Sinking down index %zu\n", idx); */
+	/* if (!(idx >= 0 && idx < hq->len)) { */
+	/* 	printf("Out of bounds.\n"); */
+	/* 	return; */
+	/* } */
+	
+	unsigned int	current_pri = heapq_pri(hq, idx);
+        size_t		lchild_idx = lchild_i(idx);
+        size_t		rchild_idx = rchild_i(idx);
+	unsigned int	lchild_pri = lchild_i(idx) < heapq_len(hq) ?
+		heapq_pri(hq, lchild_i(idx)) : UINT_MAX;
+	unsigned int	rchild_pri = rchild_i(idx) < heapq_len(hq) ?
+		heapq_pri(hq, rchild_i(idx)) : UINT_MAX;
+        size_t		min_pri_child_idx = rchild_pri < lchild_pri ?
+		rchild_idx : lchild_idx;
 
-        /* // done when both children are >= this priority, or */
-        /* // there are no children and we are a leaf. */
-        /* if(lchild.pri >= elem.pri && rchild.pri >= elem.pri) { */
-        /*     //console.log("\tbase-case"); */
-        /*     return; */
-        /* } */
-        /* // otherwise, swap this node with the smallest of its children & repeat. */
-        /* //console.log("\tidx, smallest_i, smallest.pri, elem.pri"); */
-        /* //console.log(`\t${idx}, ${smallest_i}, ${smallest.pri}, ${elem.pri}`); */
-        /* //console.log(`this.array[${idx}] = ${this.elem_at(smallest_i)};`); */
-        /* this.array[smallest_i] = elem; */
-        /* this.array[idx] = smallest; */
-        /* this._sink_down(smallest_i); */
-        /* // if(lchild.pri < elem.pri) { */
-        /* //     //console.log("lchild.pri < elem.pri"); */
-        /* //     //console.log(`${lchild.pri} < ${elem.pri}`); */
-        /* //     // swap lchild with this element */
-        /* //     this.array[lchild_i] = elem; */
-        /* //     this.array[idx] = lchild; */
-        /* //     this._sink_down(lchild_i); */
-        /* // } else if(rchild.pri < elem.pri) { */
-        /* //     // swap rchild with this element */
-        /* //     this.array[rchild_i] = elem; */
-        /* //     this.array[idx] = rchild; */
-        /* //     this._sink_down(rchild_i); */
-        /* // } */
+	/*printf("current id %zu pri %u data %c\n\t",
+	       idx, current_pri, *(char *)heapq_get(hq, idx));
+	if (lchild_pri != UINT_MAX)
+		printf("lchild  id %zu pri %3u data %c\n\t",
+		       lchild_idx, lchild_pri, *(char *)heapq_get(hq, lchild_idx));
+	if (rchild_pri != UINT_MAX)
+		printf("rchild  id %zu pri %3u data %c\n",
+		rchild_idx, rchild_pri, *(char *)heapq_get(hq, rchild_idx));*/
+	
+        // done when both children are >= this priority, or
+        // there are no children and we are a leaf.
+        if (lchild_pri >= current_pri && rchild_pri >= current_pri)
+            return;
+
+        // otherwise, swap this node with the smallest of its children & repeat.
+	heapq_swap(hq, idx, min_pri_child_idx);
+        sink_down(hq, min_pri_child_idx);
+}
+
+
+void
+heapq_pop(struct heapq *hq) {
+	if (hq->len == 0)
+		return;
+	/* Move the last element to the first, then heapify down. */
+	memcpy(hq->buf,
+	       hq->buf + (hq->len - 1) * hq->elem_size,
+	       hq->elem_size);
+	hq->len--;
+	sink_down(hq, 0);
 }
 
 
 /*
- * Completely free the array.
+ * Completely free the queue.
  *
  * If function-pointer `destruct` is not null, it will be called once
  * with each element of the heap. This is useful for free()ing
@@ -249,7 +306,7 @@ sink_down(struct *hq, size_t i)
 void
 heapq_free(struct heapq *hq, void (*destruct)(void *elem)) {
 	if(destruct != NULL)
-		for(size_t i = 0; i<hq->len; i++) 
+		for(size_t i = 0; i<hq->len; i++)
 			(*destruct)((hq->buf + i * hq->elem_size) \
 				    + sizeof (unsigned int));
 	hq->cap = 0;

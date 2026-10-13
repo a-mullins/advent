@@ -8,12 +8,12 @@
 struct heapq;
 
 /* CREATE */
-const struct heapq 	*heapq_new(size_t elem_size);
+struct heapq		*heapq_new(size_t elem_size);
 
 /* READ / QUERY */
 size_t			 heapq_len(struct heapq *hq);
 int			 heapq_empty(struct heapq *hq);
-const void		*heapq_peek(struct heapq *hq);
+void			*heapq_peek(struct heapq *hq);
 
 /* UPDATE */
 void			 heapq_push(struct heapq *hq,
