@@ -12,14 +12,14 @@ struct machine {
 	int lights;
 	int buttons[16];
 	int buttons_len;
-	int depth;
+	int presses;
 };
 
 
 void parseinput(struct machine *, int *);
 void machinetos(struct machine *, char *);
 int hamming_d(int, int);
-void a_star(struct machine *start, int (*goalpred)(struct machine *),
+int a_star(struct machine *start, int (*goalpred)(struct machine *),
 	    int (*h)(struct machine *));
 int goal_pred(struct machine *);
 int h(struct machine *);
@@ -31,6 +31,7 @@ main(void)
 {
 	struct machine machines[256] = { 0 };
 	int machines_len = 0;
+	long long sum = 0;
 
 	parseinput(machines, &machines_len);
 
@@ -46,9 +47,12 @@ main(void)
 	/* } */
 
 	/* puts(""); */
+	printf("Checking %d machines.\n", machines_len);
 	for (int i = 0; i < machines_len; i++)
-		a_star(&machines[i], goal_pred, h);
+		sum += a_star(&machines[i], goal_pred, h);
+	/* a_star(&machines[0], goal_pred, h); */
 
+	printf("%lld\n", sum);
 	return 0;
 }
 
@@ -101,7 +105,8 @@ parseinput(struct machine *machines, int *machines_len)
 		if (parsing == BUTTON && isdigit(c)) {
 			struct machine *m = &machines[*machines_len];
 			int *button_p = &m->buttons[m->buttons_len];
-			*button_p ^= 1 << atoi(&c);
+			/* *button_p ^= 1 << atoi(&c); */
+			*button_p ^= 1 << (c - '0');
 		}
 		if (parsing == BUTTON && c == ')') {
 			machines[*machines_len].buttons_len++;
@@ -138,7 +143,7 @@ machinetos(struct machine *m, char *s)
 		*s++ = ')';
 		*s++ = ' ';
 	}
-        sprintf(s, "depth %d", m->depth);
+        sprintf(s, "button-presses %d", m->presses);
 }
 
 
@@ -149,7 +154,7 @@ hamming_d(int m, int n)
 }
 
 
-void
+int
 a_star(struct machine *start, int (*pred)(struct machine *),
 	    int (*h)(struct machine *))
 {
@@ -157,19 +162,29 @@ a_star(struct machine *start, int (*pred)(struct machine *),
 	struct alist *explored = alist_new(sizeof (int));
 	int err;
 	char buf[256];
+	int presses = 0;
+
+	/* machinetos(start, buf); */
+	/* printf("Starting state\n%s\n", buf); */
 
 	heapq_push(hq, start, 0);
+	
+	/* machinetos((struct machine *)heapq_peek(hq), buf); */
+	/* printf("After push state\n%s\n", buf); */
+
 
 	while (!heapq_empty(hq)) {
 		struct machine cur = *(struct machine *)heapq_peek(hq);
 		heapq_pop(hq);
 		alist_push(explored, &cur.lights);
 
-		machinetos(&cur, buf);
-		/* printf("Checking machine \n%s\n", buf); */
+		/* printf("\tChecking machine\n\t%s\n", buf); */
+		/* machinetos(&cur, buf); */
 
 		if (pred(&cur)) {
-			printf("found, presses %d\n", cur.depth);
+			machinetos(&cur, buf);
+			printf("\tSolution found:\n\t%s\n", buf);
+			presses = cur.presses;
 			break;
 		}
 
@@ -181,10 +196,10 @@ a_star(struct machine *start, int (*pred)(struct machine *),
 		 */
 		for (int i = 0; i < cur.buttons_len; i++) {
 			struct machine child = cur;
-			child.depth++;
+			child.presses++;
 			child.lights ^= cur.buttons[i];
 
-			machinetos(&child, buf);
+			/* machinetos(&child, buf); */
 			/* printf("\tspawned child machine \n\t%s\n", buf); */
 
 			alist_qsort(explored, intcmp);
@@ -197,16 +212,20 @@ a_star(struct machine *start, int (*pred)(struct machine *),
 				if (res == 0) {
 					/* puts("\t\tThis machine is not in the queue."); */
 					/* printf("\t\tAdding with priority %d\n", h(&child)); */
-					heapq_push(hq, &child, child.depth);
+					heapq_push(hq, &child, child.presses);
+				} else {
+					/* puts("\t\tThis light pattern is already in the queue; discarding."); */
 				}
+			} else {
+				/* puts("\t\tAlready seen this light pattern; discarding."); */
 			}
 			/* puts(""); */
 		}
 	}
 
-	alist_free(explored, NULL);
+	/* alist_free(explored, NULL); */
 	heapq_free(hq, NULL);
-	return;
+	return presses;
 }
 
 
@@ -214,7 +233,7 @@ a_star(struct machine *start, int (*pred)(struct machine *),
 int
 goal_pred(struct machine *m)
 {
-	return hamming_d(m->target, m->lights) == 0 ? 1 : 0;
+	return m->target == m->lights;
 }
 
 
